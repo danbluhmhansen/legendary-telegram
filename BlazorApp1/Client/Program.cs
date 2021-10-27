@@ -1,0 +1,38 @@
+using BlazorApp1.Client;
+
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
+WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
+
+builder.Services.AddScoped<CustomAddressAuthorizationMessageHandler>();
+
+builder.Services
+	.AddHttpClient("BlazorApp1.ServerAPI",
+		client => client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ServerUrl")))
+	.AddHttpMessageHandler<CustomAddressAuthorizationMessageHandler>();
+
+// Supply HttpClient instances that include access tokens when making requests to the server project
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorApp1.ServerAPI"));
+
+builder.Services.AddOidcAuthentication(options =>
+{
+	builder.Configuration
+		.GetSection("RemoteAuthentication")
+		.GetSection("AuthenticationPaths")
+		.Bind(options.AuthenticationPaths);
+
+	builder.Configuration
+		.GetSection("RemoteAuthentication")
+		.GetSection("ProviderOptions")
+		.Bind(options.ProviderOptions);
+});
+
+builder.Services.AddLogging();
+
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+
+await builder.Build().RunAsync().ConfigureAwait(false);
