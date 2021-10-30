@@ -1,13 +1,16 @@
+using System.Reflection;
 using BlazorApp1.Server;
 using BlazorApp1.Server.Data;
 using BlazorApp1.Server.Models;
-
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Vocabularies;
+using Microsoft.OData.ModelBuilder;
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation;
@@ -58,15 +61,15 @@ builder.Services.AddOpenIddict(openIddictBuilder =>
 	});
 });
 
+ODataConventionModelBuilder odataBuilder = new();
+odataBuilder.EntitySet<BlazorApp1.Server.Models.v1.Customer>("v1/Customers");
+odataBuilder.EntitySet<BlazorApp1.Server.Models.v2.Customer>("v2/Customers");
+IEdmModel edmModel = odataBuilder.GetEdmModel();
+
 builder.Services
 	.AddControllersWithViews()
-	.AddOData();
+	.AddOData(options => options.AddRouteComponents(edmModel));
 builder.Services.AddRazorPages();
-
-builder.Services.TryAddSingleton<ODataModelProvider>();
-builder.Services.TryAddEnumerable(
-	ServiceDescriptor.Transient<IApplicationModelProvider, ODataRoutingApplicationModelProvider>());
-builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<MatcherPolicy, ODataRoutingMatcherPolicy>());
 
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
 builder.Services.Configure<ODataOptions>(builder.Configuration.GetSection(nameof(ODataOptions)));
@@ -100,6 +103,9 @@ app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
+app.UseODataQueryRequest();
+app.UseODataBatching();
+
 app.UseRouting();
 
 app.UseAuthentication();
@@ -109,5 +115,15 @@ app.MapRazorPages();
 app.MapControllers();
 
 app.UseEndpoints(options => options.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
+
+foreach (IEdmEntityContainerElement element in edmModel.EntityContainer.Elements)
+{
+	string pattern = element.Name;
+	IEdmSchemaElement? edmSchemaElement = edmModel.SchemaElements
+		.FirstOrDefault(schemaElememt => pattern.Contains(schemaElememt.Name));
+
+	var assembly = Assembly.GetCallingAssembly();
+	var type = assembly.GetType(edmSchemaElement.FullName());
+}
 
 app.Run();

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 
 [ApiVersion("2.0")]
+[Route("v2/[controller]")]
 public class CustomersController : ControllerBase
 {
 	private readonly Customer[] customers = new Customer[]
@@ -28,9 +29,11 @@ public class CustomersController : ControllerBase
 		}
 	};
 
+	[HttpGet]
 	[EnableQuery]
 	public IActionResult Get() => Ok(this.customers);
 
+	[HttpGet("{key}")]
 	[EnableQuery]
 	public IActionResult Get(int key)
 	{
