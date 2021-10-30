@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Server",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildServer",
+            "program": "${workspaceFolder}/BlazorApp1/Server/bin/Debug/net6.0/BlazorApp1.Server.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/BlazorApp1/Server",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/BlazorApp1/Server/Views"
+            }
+        },
+        {
+            "name": "Launch Client",
+            "type": "blazorwasm",
+            "request": "launch",
+            "preLaunchTask": "buildClient",
+            "cwd": "${workspaceFolder}/BlazorApp1/Client"
+        }
+    ]
+}
