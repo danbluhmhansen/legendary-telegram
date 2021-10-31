@@ -3,7 +3,6 @@
 using System.Text.Json;
 
 using BlazorApp1.Server.Models;
-using BlazorApp1.Shared;
 
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
 	protected ApplicationDbContext() { }
 
-	public DbSet<WeatherForecast> WeatherForecasts => Set<WeatherForecast>();
+	public DbSet<Customer> Customers => Set<Customer>();
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{

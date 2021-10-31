@@ -1,16 +1,15 @@
-using System.Reflection;
-using BlazorApp1.Server;
+using AutoMapper;
+
 using BlazorApp1.Server.Data;
+using BlazorApp1.Server.Helpers;
 using BlazorApp1.Server.Models;
-using Microsoft.AspNetCore.Builder;
+
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.ModelBuilder;
+
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation;
@@ -61,9 +60,18 @@ builder.Services.AddOpenIddict(openIddictBuilder =>
 	});
 });
 
+builder.Services.AddAutoMapper((IMapperConfigurationExpression expression) =>
+{
+	expression.CreateMap<BlazorApp1.Server.Models.Customer, BlazorApp1.Server.ViewModels.v1.Customer>()
+		.ReverseMap();
+
+	expression.CreateMap<BlazorApp1.Server.Models.Customer, BlazorApp1.Server.ViewModels.v2.Customer>()
+		.ReverseMap();
+});
+
 ODataConventionModelBuilder odataBuilder = new();
-odataBuilder.EntitySet<BlazorApp1.Server.Models.v1.Customer>("v1/Customers");
-odataBuilder.EntitySet<BlazorApp1.Server.Models.v2.Customer>("v2/Customers");
+odataBuilder.EntitySet<BlazorApp1.Server.ViewModels.v1.Customer>("v1/Customers");
+odataBuilder.EntitySet<BlazorApp1.Server.ViewModels.v2.Customer>("v2/Customers");
 IEdmModel edmModel = odataBuilder.GetEdmModel();
 
 builder.Services
@@ -94,7 +102,8 @@ if (app.Environment.IsDevelopment())
 else
 {
 	app.UseExceptionHandler("/Error");
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+	// The default HSTS value is 30 days.
+	// You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
 
@@ -116,14 +125,23 @@ app.MapControllers();
 
 app.UseEndpoints(options => options.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
 
+AutoMapper.IConfigurationProvider configurationProvider = app.Services
+	.GetRequiredService<AutoMapper.IConfigurationProvider>();
+TypeMap[] typeMaps = configurationProvider.GetAllTypeMaps();
+
 foreach (IEdmEntityContainerElement element in edmModel.EntityContainer.Elements)
 {
 	string pattern = element.Name;
 	IEdmSchemaElement? edmSchemaElement = edmModel.SchemaElements
 		.FirstOrDefault(schemaElememt => pattern.Contains(schemaElememt.Name));
 
-	var assembly = Assembly.GetCallingAssembly();
-	var type = assembly.GetType(edmSchemaElement.FullName());
+	TypeMap? typeMap = typeMaps.FirstOrDefault(typeMap => typeMap.SourceType.FullName == edmSchemaElement.FullName());
+
+	if (typeMap is not null)
+	{
+		app.MapGet(pattern, (ApplicationDbContext dbContext, IMapper mapper) =>
+			mapper.ProjectTo(dbContext.Set(typeMap.DestinationType), typeMap.SourceType));
+	}
 }
 
 app.Run();
