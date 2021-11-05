@@ -139,9 +139,8 @@ foreach (IEdmEntityContainerElement element in edmModel.EntityContainer.Elements
 
 	if (typeMap is not null)
 	{
-		app.MapGet(element.Name, (ApplicationDbContext dbContext, IMapper mapper) =>
-			mapper.ProjectTo(dbContext.Set(typeMap.DestinationType), typeMap.SourceType))
-			.WithMetadata(new EnableQueryAttribute());
+		app.MapGet(element.Name, [EnableQuery] (ApplicationDbContext dbContext, IMapper mapper) =>
+			mapper.ProjectTo(dbContext.Set(typeMap.DestinationType), typeMap.SourceType));
 	}
 }
 
