@@ -86,24 +86,68 @@ namespace BlazorApp1.Server.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("BlazorApp1.Shared.WeatherForecast", b =>
+            modelBuilder.Entity("BlazorApp1.Server.Models.Customer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Summary")
+                    b.Property<string>("Email")
                         .HasColumnType("text");
 
-                    b.Property<int>("TemperatureC")
-                        .HasColumnType("integer");
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("WeatherForecasts");
+                    b.ToTable("Customers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a9744591-32c4-4477-8c76-ad2d2d50d7b5"),
+                            Email = "john@doe.com",
+                            FirstName = "John",
+                            LastName = "Doe",
+                            Name = "John Doe",
+                            PhoneNumber = "12345678"
+                        },
+                        new
+                        {
+                            Id = new Guid("845ceff5-f389-45d9-89eb-53d7cea8fb5e"),
+                            Email = "milan@magdalena.com",
+                            FirstName = "Milan",
+                            LastName = "Magdalena",
+                            Name = "Milan Magdalena",
+                            PhoneNumber = "75842857"
+                        },
+                        new
+                        {
+                            Id = new Guid("45b6fe3a-cf89-4284-9c6f-c407c430e08d"),
+                            Email = "david@hrodebert.com",
+                            FirstName = "David",
+                            LastName = "Hrodebert",
+                            Name = "David Hrodebert",
+                            PhoneNumber = "13758938"
+                        },
+                        new
+                        {
+                            Id = new Guid("da70a3b9-a1fa-4530-a076-b97f88e42fa3"),
+                            Email = "odilo@eadgar.com",
+                            FirstName = "Odilo",
+                            LastName = "Eadgar",
+                            Name = "Odilo Eadgar",
+                            PhoneNumber = "57698910"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -297,7 +341,7 @@ namespace BlazorApp1.Server.Migrations
                         {
                             Id = "59d50e89-c579-4cc4-9cd1-a8db1399fe4e",
                             ClientId = "blazor-client",
-                            ConcurrencyToken = "d2487862-d668-42d0-91fa-3de1409ca592",
+                            ConcurrencyToken = "2cdcaa9b-c5e4-4193-9018-ad9bc8fabede",
                             ConsentType = "explicit",
                             DisplayName = "Blazor client application",
                             Permissions = "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]",
@@ -310,7 +354,7 @@ namespace BlazorApp1.Server.Migrations
                         {
                             Id = "5cf57099-7162-425c-b2cd-11d7c02610d5",
                             ClientId = "swagger-client",
-                            ConcurrencyToken = "5c490c02-802a-4359-a530-e163f3845067",
+                            ConcurrencyToken = "63a288a8-3a36-4aad-ba9f-00ceb9847768",
                             ConsentType = "explicit",
                             DisplayName = "Swagger client application",
                             Permissions = "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]",
@@ -322,7 +366,7 @@ namespace BlazorApp1.Server.Migrations
                         {
                             Id = "d2557a9b-404d-42ab-89ab-7019929e96a4",
                             ClientId = "postman-client",
-                            ConcurrencyToken = "51c41992-2cc6-4229-9679-4da4d18f3ea9",
+                            ConcurrencyToken = "0fb47122-2094-4dba-9c57-7a6292442939",
                             ConsentType = "explicit",
                             DisplayName = "Postman client application",
                             Permissions = "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]",

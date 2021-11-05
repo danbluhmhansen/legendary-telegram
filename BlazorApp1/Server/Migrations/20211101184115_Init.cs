@@ -50,6 +50,22 @@ namespace BlazorApp1.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Customers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    FirstName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Customers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OpenIddictApplications",
                 columns: table => new
                 {
@@ -89,20 +105,6 @@ namespace BlazorApp1.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OpenIddictScopes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "WeatherForecasts",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TemperatureC = table.Column<int>(type: "integer", nullable: false),
-                    Summary = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WeatherForecasts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -269,13 +271,24 @@ namespace BlazorApp1.Server.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Customers",
+                columns: new[] { "Id", "Email", "FirstName", "LastName", "Name", "PhoneNumber" },
+                values: new object[,]
+                {
+                    { new Guid("45b6fe3a-cf89-4284-9c6f-c407c430e08d"), "david@hrodebert.com", "David", "Hrodebert", "David Hrodebert", "13758938" },
+                    { new Guid("845ceff5-f389-45d9-89eb-53d7cea8fb5e"), "milan@magdalena.com", "Milan", "Magdalena", "Milan Magdalena", "75842857" },
+                    { new Guid("a9744591-32c4-4477-8c76-ad2d2d50d7b5"), "john@doe.com", "John", "Doe", "John Doe", "12345678" },
+                    { new Guid("da70a3b9-a1fa-4530-a076-b97f88e42fa3"), "odilo@eadgar.com", "Odilo", "Eadgar", "Odilo Eadgar", "57698910" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "OpenIddictApplications",
                 columns: new[] { "Id", "ClientId", "ClientSecret", "ConcurrencyToken", "ConsentType", "DisplayName", "DisplayNames", "Permissions", "PostLogoutRedirectUris", "Properties", "RedirectUris", "Requirements", "Type" },
                 values: new object[,]
                 {
-                    { "59d50e89-c579-4cc4-9cd1-a8db1399fe4e", "blazor-client", null, "d2487862-d668-42d0-91fa-3de1409ca592", "explicit", "Blazor client application", null, "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]", "[\"https://localhost:7290/authentication/logout-callback\"]", null, "[\"https://localhost:7290/authentication/login-callback\"]", "[\"ft:pkce\"]", "public" },
-                    { "5cf57099-7162-425c-b2cd-11d7c02610d5", "swagger-client", null, "5c490c02-802a-4359-a530-e163f3845067", "explicit", "Swagger client application", null, "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]", null, null, "[\"https://localhost:7289/swagger/oauth2-redirect.html\"]", "[\"ft:pkce\"]", "public" },
-                    { "d2557a9b-404d-42ab-89ab-7019929e96a4", "postman-client", null, "51c41992-2cc6-4229-9679-4da4d18f3ea9", "explicit", "Postman client application", null, "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]", null, null, "[\"https://oauth.pstmn.io/v1/callback\"]", "[\"ft:pkce\"]", "public" }
+                    { "59d50e89-c579-4cc4-9cd1-a8db1399fe4e", "blazor-client", null, "2cdcaa9b-c5e4-4193-9018-ad9bc8fabede", "explicit", "Blazor client application", null, "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]", "[\"https://localhost:7290/authentication/logout-callback\"]", null, "[\"https://localhost:7290/authentication/login-callback\"]", "[\"ft:pkce\"]", "public" },
+                    { "5cf57099-7162-425c-b2cd-11d7c02610d5", "swagger-client", null, "63a288a8-3a36-4aad-ba9f-00ceb9847768", "explicit", "Swagger client application", null, "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]", null, null, "[\"https://localhost:7289/swagger/oauth2-redirect.html\"]", "[\"ft:pkce\"]", "public" },
+                    { "d2557a9b-404d-42ab-89ab-7019929e96a4", "postman-client", null, "0fb47122-2094-4dba-9c57-7a6292442939", "explicit", "Postman client application", null, "[\"ept:authorization\",\"ept:logout\",\"ept:token\",\"gt:authorization_code\",\"gt:refresh_token\",\"rst:code\",\"scp:email\",\"scp:profile\",\"scp:roles\"]", null, null, "[\"https://oauth.pstmn.io/v1/callback\"]", "[\"ft:pkce\"]", "public" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -367,13 +380,13 @@ namespace BlazorApp1.Server.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Customers");
+
+            migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictTokens");
-
-            migrationBuilder.DropTable(
-                name: "WeatherForecasts");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

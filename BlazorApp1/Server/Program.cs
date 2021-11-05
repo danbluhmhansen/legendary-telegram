@@ -6,6 +6,7 @@ using BlazorApp1.Server.Models;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
@@ -131,16 +132,16 @@ TypeMap[] typeMaps = configurationProvider.GetAllTypeMaps();
 
 foreach (IEdmEntityContainerElement element in edmModel.EntityContainer.Elements)
 {
-	string pattern = element.Name;
-	IEdmSchemaElement? edmSchemaElement = edmModel.SchemaElements
-		.FirstOrDefault(schemaElememt => pattern.Contains(schemaElememt.Name));
+	EdmEntitySet entitySet = (EdmEntitySet)element;
+	IEdmType edmType = entitySet.Type.AsElementType();
 
-	TypeMap? typeMap = typeMaps.FirstOrDefault(typeMap => typeMap.SourceType.FullName == edmSchemaElement.FullName());
+	TypeMap? typeMap = typeMaps.FirstOrDefault(typeMap => typeMap.SourceType.FullName == edmType.FullTypeName());
 
 	if (typeMap is not null)
 	{
-		app.MapGet(pattern, (ApplicationDbContext dbContext, IMapper mapper) =>
-			mapper.ProjectTo(dbContext.Set(typeMap.DestinationType), typeMap.SourceType));
+		app.MapGet(element.Name, (ApplicationDbContext dbContext, IMapper mapper) =>
+			mapper.ProjectTo(dbContext.Set(typeMap.DestinationType), typeMap.SourceType))
+			.WithMetadata(new EnableQueryAttribute());
 	}
 }
 

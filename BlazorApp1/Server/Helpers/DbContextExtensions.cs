@@ -8,7 +8,7 @@ public static class DbContextExtensions
 {
 	public static IQueryable Set(this DbContext dbContext, Type entityType)
 	{
-		MethodInfo? methodInfo = typeof(DbContext).GetMethod(nameof(DbContext.Set));
+		MethodInfo? methodInfo = typeof(DbContext).GetMethod(nameof(DbContext.Set), Array.Empty<Type>());
 
 		if (methodInfo is null)
 			throw new DbSetNotFoundException(entityType);
