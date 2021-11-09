@@ -21,7 +21,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0" />
 		<PackageReference Include="Microsoft.OpenApi.OData" Version="1.0.9" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2" />
 		<PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1" />
 		<PackageReference Include="OpenIddict.EntityFrameworkCore" Version="3.1.1" />
 		<PackageReference Include="OpenIddict.Quartz" Version="3.1.1" />
