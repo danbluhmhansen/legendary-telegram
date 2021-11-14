@@ -1,12 +1,10 @@
 using AutoMapper;
 
 using BlazorApp1.Server.Data;
-using BlazorApp1.Server.Helpers;
 using BlazorApp1.Server.Models;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
@@ -125,23 +123,5 @@ app.MapRazorPages();
 app.MapControllers();
 
 app.UseEndpoints(options => options.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
-
-AutoMapper.IConfigurationProvider configurationProvider = app.Services
-	.GetRequiredService<AutoMapper.IConfigurationProvider>();
-TypeMap[] typeMaps = configurationProvider.GetAllTypeMaps();
-
-foreach (IEdmEntityContainerElement element in edmModel.EntityContainer.Elements)
-{
-	EdmEntitySet entitySet = (EdmEntitySet)element;
-	IEdmType edmType = entitySet.Type.AsElementType();
-
-	TypeMap? typeMap = typeMaps.FirstOrDefault(typeMap => typeMap.SourceType.FullName == edmType.FullTypeName());
-
-	if (typeMap is not null)
-	{
-		app.MapGet(element.Name, [EnableQuery] (ApplicationDbContext dbContext, IMapper mapper) =>
-			mapper.ProjectTo(dbContext.Set(typeMap.DestinationType), typeMap.SourceType));
-	}
-}
 
 app.Run();
