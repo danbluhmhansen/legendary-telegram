@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/BlazorApp1/Server/BlazorApp1.Server.csproj",
+                "${workspaceFolder}/Source/Server/BlazorApp1.Server.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/BlazorApp1/Client/BlazorApp1.Client.csproj",
+                "${workspaceFolder}/Source/Client/BlazorApp1.Client.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -31,7 +31,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/BlazorApp1/Server/BlazorApp1.Server.csproj",
+                "${workspaceFolder}/Source/Server/BlazorApp1.Server.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -43,7 +43,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/BlazorApp1/Client/BlazorApp1.Client.csproj",
+                "${workspaceFolder}/Source/Client/BlazorApp1.Client.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -56,7 +56,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/BlazorApp1/Server/BlazorApp1.Server.csproj",
+                "${workspaceFolder}/Source/Server/BlazorApp1.Server.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -69,7 +69,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/BlazorApp1/Client/BlazorApp1.Client.csproj",
+                "${workspaceFolder}/Source/Client/BlazorApp1.Client.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
