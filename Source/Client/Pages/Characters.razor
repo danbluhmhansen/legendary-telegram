@@ -1,12 +1,22 @@
-@page "/characters"
+@page "/Characters"
 
 @using BlazorApp1.Shared.Models.v1
 
 <DataGrid TItem=Character
 	Data=@data
 	TotalItems=@count
-	ReadData=@OnReadData>
-	<DataGridCommandColumn TItem=Character />
-	<DataGridColumn TItem=Character Field=@nameof(Character.Id) Caption=# Sortable=false />
-	<DataGridColumn TItem=Character Field=@nameof(Character.Name) Caption=Name Editable=true />
+	ReadData=@OnReadData
+	SelectedRowChanged=@OnSelectRow
+	PageSize=10
+	ShowPager
+	Filterable
+	Responsive>
+	<DataGridColumns>
+		<DataGridCommandColumn TItem=Character />
+		<DataGridColumn TItem=Character Field=@nameof(Character.Name) Caption=Name Editable=true />
+	</DataGridColumns>
+	<EmptyTemplate>No records...</EmptyTemplate>
+	<LoadingTemplate>
+		<SpinKit Type=SpinKitType.Circle Centered />
+	</LoadingTemplate>
 </DataGrid>

@@ -66,12 +66,12 @@ builder.Services.AddAutoMapper((IMapperConfigurationExpression expression) =>
 });
 
 ODataConventionModelBuilder odataBuilder = new();
-odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Character>("v1/Characters");
+odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Character>("Characters");
 IEdmModel edmModel = odataBuilder.GetEdmModel();
 
 builder.Services
 	.AddControllersWithViews()
-	.AddOData(options => options.AddRouteComponents(edmModel));
+	.AddOData(options => options.AddRouteComponents("v1", edmModel));
 builder.Services.AddRazorPages();
 
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));

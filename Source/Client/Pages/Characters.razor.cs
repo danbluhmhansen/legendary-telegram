@@ -16,6 +16,7 @@ public partial class Characters : ComponentBase
 {
 	[Inject] private HttpClient? Client { get; init; }
 	[Inject] private IConfiguration? Configuration { get; init; }
+	[Inject] private NavigationManager? Navigation { get; init; }
 
 	private ICollection<Character>? data;
 	private int? count;
@@ -47,21 +48,34 @@ public partial class Characters : ComponentBase
 			query["$filter"] = string.Join(", ", filters);
 		if (orderBy.Any())
 			query["$orderby"] = string.Join(", ", orderBy);
-		query["$skip"] = ((args.Page - 1) * args.PageSize).ToString();
-		query["$top"] = args.PageSize.ToString();
+
+		switch (args.ReadDataMode)
+		{
+			case DataGridReadDataMode.Paging:
+				query["$skip"] = ((args.Page - 1) * args.PageSize).ToString();
+				query["$top"] = args.PageSize.ToString();
+				break;
+			case DataGridReadDataMode.Virtualize:
+				query["$skip"] = args.VirtualizeOffset.ToString();
+				query["$top"] = args.VirtualizeCount.ToString();
+				break;
+		}
+
 		query["$count"] = "true";
 
 		uriBuilder.Query = query.ToString();
 
-		IEnumerable<Character>? response = await this.Client.GetFromJsonAsync<IEnumerable<Character>>(
+		ODataResponse<Character>? response = await this.Client.GetFromJsonAsync<ODataResponse<Character>>(
 			uriBuilder.Uri, args.CancellationToken);
 
 		if (response is null)
 			return;
 
-		this.data = response.ToList();
-		// this.count = response.Count;
+		this.data = response.Value.ToList();
+		this.count = response.Count;
 
 		StateHasChanged();
 	}
+
+	private void OnSelectRow(Character args) => this.Navigation?.NavigateTo($"/Characters/{args.Id}");
 }

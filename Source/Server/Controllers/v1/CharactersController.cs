@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 [ApiVersion("1.0")]
-[Route("v1/[controller]")]
+[Route("v1/Characters")]
 public class CharactersController : ODataController
 {
 	private readonly ApplicationDbContext dbContext;
