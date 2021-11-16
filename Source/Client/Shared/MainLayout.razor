@@ -1,18 +1,26 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+<Layout Sider=true>
+	<LayoutSider>
+		<LayoutSiderContent>
+			<NavMenu />
+		</LayoutSiderContent>
+	</LayoutSider>
+	<Layout>
+		<LayoutHeader Fixed=true>
+			<Bar>
+				<BarMenu>
+					<BarStart></BarStart>
+					<BarEnd Float=Float.End>
+						<BarItem>
+							<LoginDisplay />
+						</BarItem>
+					</BarEnd>
+				</BarMenu>
+			</Bar>
+		</LayoutHeader>
+		<LayoutContent>
+			@Body
+		</LayoutContent>
+	</Layout>
+</Layout>

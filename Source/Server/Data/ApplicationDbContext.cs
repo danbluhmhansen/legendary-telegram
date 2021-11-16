@@ -4,6 +4,8 @@ using System.Text.Json;
 
 using BlazorApp1.Server.Entities;
 
+using Bogus;
+
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +24,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 	protected override void OnModelCreating(ModelBuilder builder)
 	{
 		base.OnModelCreating(builder);
+
+		Faker<Character> characterFaker = new Faker<Character>()
+			.CustomInstantiator((Faker faker) => new Character(faker.Random.Guid(), faker.Name.FullName()));
+
+		builder.Entity<Character>().HasData(characterFaker.Generate(100));
 
 		builder.Entity<OpenIddictEntityFrameworkCoreApplication>().HasData(
 			new OpenIddictEntityFrameworkCoreApplication
