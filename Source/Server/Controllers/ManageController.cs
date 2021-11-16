@@ -3,7 +3,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-using BlazorApp1.Server.Models;
+using BlazorApp1.Server.Entities;
 using BlazorApp1.Server.ViewModels.Manage;
 
 using Microsoft.AspNetCore.Authorization;

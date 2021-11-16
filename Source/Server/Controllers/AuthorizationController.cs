@@ -3,7 +3,7 @@
 using System.Security.Claims;
 
 using BlazorApp1.Server.Helpers;
-using BlazorApp1.Server.Models;
+using BlazorApp1.Server.Entities;
 using BlazorApp1.Server.ViewModels.Authorization;
 
 using Microsoft.AspNetCore;

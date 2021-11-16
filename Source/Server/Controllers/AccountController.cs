@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 
 using BlazorApp1.Server.Data;
-using BlazorApp1.Server.Models;
+using BlazorApp1.Server.Entities;
 using BlazorApp1.Server.ViewModels.Account;
 
 using Microsoft.AspNetCore.Authorization;

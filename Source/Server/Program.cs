@@ -1,7 +1,7 @@
 using AutoMapper;
 
 using BlazorApp1.Server.Data;
-using BlazorApp1.Server.Models;
+using BlazorApp1.Server.Entities;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
@@ -61,16 +61,12 @@ builder.Services.AddOpenIddict(openIddictBuilder =>
 
 builder.Services.AddAutoMapper((IMapperConfigurationExpression expression) =>
 {
-	expression.CreateMap<BlazorApp1.Server.Models.Customer, BlazorApp1.Server.ViewModels.v1.Customer>()
-		.ReverseMap();
-
-	expression.CreateMap<BlazorApp1.Server.Models.Customer, BlazorApp1.Server.ViewModels.v2.Customer>()
+	expression.CreateMap<BlazorApp1.Server.Entities.Character, BlazorApp1.Shared.Models.v1.Character>()
 		.ReverseMap();
 });
 
 ODataConventionModelBuilder odataBuilder = new();
-odataBuilder.EntitySet<BlazorApp1.Server.ViewModels.v1.Customer>("v1/Customers");
-odataBuilder.EntitySet<BlazorApp1.Server.ViewModels.v2.Customer>("v2/Customers");
+odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Character>("v1/Characters");
 IEdmModel edmModel = odataBuilder.GetEdmModel();
 
 builder.Services
