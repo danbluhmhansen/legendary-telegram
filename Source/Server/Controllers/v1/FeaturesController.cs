@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiVersion("1.0")]
 [Route("v1/[controller]")]
-public class CharactersController : BaseODataController<Character, Entities.Character>
+public class FeaturesController : BaseODataController<Feature, Entities.Feature>
 {
-	public CharactersController(ApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper) { }
+	public FeaturesController(ApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper) { }
 }

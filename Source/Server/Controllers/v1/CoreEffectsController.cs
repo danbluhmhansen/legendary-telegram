@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiVersion("1.0")]
 [Route("v1/[controller]")]
-public class CharactersController : BaseODataController<Character, Entities.Character>
+public class CoreEffectsController : BaseODataController<CoreEffect, Entities.CoreEffect>
 {
-	public CharactersController(ApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper) { }
+	public CoreEffectsController(ApplicationDbContext dbContext, IMapper mapper) : base(dbContext, mapper) { }
 }

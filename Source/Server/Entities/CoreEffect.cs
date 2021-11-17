@@ -4,8 +4,6 @@ using System.Text.Json;
 
 public record CoreEffect
 {
-	public CoreEffect() { }
-
 	public CoreEffect(Guid id, string path, JsonElement rule, Guid characterId, Character character)
 	{
 		this.Id = id;
@@ -15,7 +13,9 @@ public record CoreEffect
 		this.Character = character;
 	}
 
-	public Guid Id { get; init; }
+	public CoreEffect() { }
+
+	public Guid Id { get; set; }
 	public string? Path { get; set; }
 	public JsonElement Rule { get; set; }
 

@@ -2,19 +2,20 @@ namespace BlazorApp1.Server.Entities;
 
 public record Character
 {
-	public Character()
-	{
-		this.Features = new List<Feature>();
-	}
-
-	public Character(Guid id, string name, ICollection<Feature> features)
+	public Character(Guid id, string name, ICollection<Feature> features, ICollection<CoreEffect> effects)
 	{
 		this.Id = id;
 		this.Name = name;
 		this.Features = features;
+		this.Effects = effects;
 	}
+	public Character(Guid id, string name) : this(id, name, new List<Feature>(), new List<CoreEffect>()) { }
 
-	public Guid Id { get; init; }
+	public Character() { }
+
+	public Guid Id { get; set; }
 	public string? Name { get; set; }
-	public virtual ICollection<Feature>? Features { get; init; }
+
+	public virtual ICollection<Feature>? Features { get; set; }
+	public virtual ICollection<CoreEffect>? Effects { get; set; }
 }
