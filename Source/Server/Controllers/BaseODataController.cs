@@ -29,7 +29,7 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 	[HttpGet, EnableQuery]
 	public IQueryable<TModel> Get() => this.mapper.ProjectTo<TModel>(this.dbContext.Set<TEntity>());
 
-	[HttpGet("{key}"), EnableQuery]
+	[HttpGet, EnableQuery]
 	public async ValueTask<IActionResult> Get([FromODataUri, Required] Guid key)
 	{
 		TEntity? entity = await this.dbContext.Set<TEntity>().FindAsync(key).ConfigureAwait(false);

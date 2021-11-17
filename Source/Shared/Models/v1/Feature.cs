@@ -1,3 +1,10 @@
 namespace BlazorApp1.Shared.Models.v1;
 
-public record Feature(Guid Id, string Name, ICollection<Character> Characters, ICollection<Effect> Effects);
+public record Feature
+{
+	public Guid Id { get; set; }
+	public string? Name { get; set; }
+
+	public ICollection<Character>? Characters { get; set; }
+	public ICollection<Effect>? Effects { get; set; }
+}
