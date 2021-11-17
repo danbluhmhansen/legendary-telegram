@@ -45,5 +45,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 		builder.Entity<OpenIddictEntityFrameworkCoreAuthorization>().ToTable("OpenIddictAuthorizations", "opid");
 		builder.Entity<OpenIddictEntityFrameworkCoreScope>().ToTable("OpenIddictScopes", "opid");
 		builder.Entity<OpenIddictEntityFrameworkCoreToken>().ToTable("OpenIddictTokens", "opid");
+
+		builder.Entity<CoreEffect>().Property((CoreEffect effect) => effect.Rule).HasColumnType("jsonb");
+		builder.Entity<Effect>().Property((Effect effect) => effect.Rule).HasColumnType("jsonb");
 	}
 }

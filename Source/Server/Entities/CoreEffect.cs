@@ -1,10 +1,8 @@
 namespace BlazorApp1.Server.Entities;
 
-using System.Text.Json;
-
 public record CoreEffect
 {
-	public CoreEffect(Guid id, string path, JsonElement rule, Guid characterId, Character character)
+	public CoreEffect(Guid id, string path, string rule, Guid characterId, Character character)
 	{
 		this.Id = id;
 		this.Path = path;
@@ -17,7 +15,7 @@ public record CoreEffect
 
 	public Guid Id { get; set; }
 	public string? Path { get; set; }
-	public JsonElement Rule { get; set; }
+	public string? Rule { get; set; }
 
 	public Guid CharacterId { get; set; }
 	public virtual Character? Character { get; set; }
