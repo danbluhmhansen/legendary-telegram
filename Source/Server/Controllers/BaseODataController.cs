@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 public abstract class BaseODataController<TModel, TEntity> : ODataController
@@ -32,8 +33,10 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 	[HttpGet, EnableQuery]
 	public async ValueTask<IActionResult> Get([FromODataUri, Required] Guid key)
 	{
-		TEntity? entity = await this.dbContext.Set<TEntity>().FindAsync(key).ConfigureAwait(false);
-		return entity is not null ? Ok(this.mapper.Map<TModel>(entity)) : NotFound(key);
+		TModel? model = await this.mapper.ProjectTo<TModel>(
+			this.dbContext.Set<TEntity>().Where((TEntity entity) => key == EF.Property<Guid>(entity, "Id")))
+			.FirstOrDefaultAsync().ConfigureAwait(false);
+		return model is not null ? Ok(model) : NotFound(key);
 	}
 
 	[HttpPost]
