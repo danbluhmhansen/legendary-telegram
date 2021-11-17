@@ -1,3 +1,24 @@
 @page "/Characters/{id:guid}"
 
-<Heading Size=HeadingSize.Is1>@character.Name</Heading>
+@using BlazorApp1.Shared.Models.v1
+
+<Heading Size=HeadingSize.Is1>@character?.Name</Heading>
+
+<DataGrid TItem=Feature
+	Data=@character?.Features
+	CommandMode=DataGridCommandMode.ButtonRow
+	ShowPager
+	Responsive>
+	<DataGridColumns>
+		<DataGridCommandColumn TItem=Feature />
+		<DataGridColumn TItem=Feature Field=@nameof(Feature.Name) Caption=Name Editable=true />
+	</DataGridColumns>
+	<ButtonRowTemplate>
+		<Button Color=Color.Primary Clicked=context.NewCommand.Clicked>Add</Button>
+		<Button Color=Color.Secondary Clicked=context.DeleteCommand.Clicked>Remove</Button>
+	</ButtonRowTemplate>
+	<EmptyTemplate>No features...</EmptyTemplate>
+	<LoadingTemplate>
+		<SpinKit Type=SpinKitType.Circle Centered />
+	</LoadingTemplate>
+</DataGrid>
