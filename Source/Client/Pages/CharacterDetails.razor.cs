@@ -46,7 +46,7 @@ public partial class CharacterDetails : ComponentBase
 			return;
 
 		HttpResponseMessage response = await this.Client.PutAsJsonAsync(
-			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/characters/{this.Id}",
+			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/characters",
 			this.character);
 
 		this.saving = false;

@@ -52,21 +52,13 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 	}
 
 	[HttpPut]
-	public virtual async ValueTask<IActionResult> Put(
-		[FromODataUri, Required] Guid key,
-		[FromBody, Required] Delta<TModel> input)
+	public virtual async ValueTask<IActionResult> Put([FromBody, Required] TModel input)
 	{
 		if (!this.ModelState.IsValid)
 			return BadRequest(this.ModelState);
 
-		TEntity? entity = await this.dbContext.Set<TEntity>().FindAsync(key).ConfigureAwait(false);
-
-		if (entity is null)
-			return NotFound(key);
-
-		TModel model = this.mapper.Map<TModel>(entity);
-		input.Put(model);
-		this.mapper.Map(model, entity);
+		TEntity entity = this.mapper.Map<TEntity>(input);
+		this.dbContext.Set<TEntity>().Update(entity);
 		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
 
 		return Updated(this.mapper.Map<TModel>(entity));
