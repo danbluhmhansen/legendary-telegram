@@ -45,7 +45,7 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 			return BadRequest(this.ModelState);
 
 		TEntity entity = this.mapper.Map<TEntity>(input);
-		this.dbContext.Set<TEntity>().Add(entity);
+		this.dbContext.Set<TEntity>().Update(entity);
 		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
 
 		return Created(this.mapper.Map<TModel>(entity));
