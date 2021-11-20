@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 public abstract class BaseODataController<TModel, TEntity> : ODataController
 	where TModel : class
@@ -28,10 +27,10 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 	}
 
 	[HttpGet, EnableQuery]
-	public IQueryable<TModel> Get() => this.mapper.ProjectTo<TModel>(this.dbContext.Set<TEntity>());
+	public virtual IQueryable<TModel> Get() => this.mapper.ProjectTo<TModel>(this.dbContext.Set<TEntity>());
 
 	[HttpGet, EnableQuery]
-	public async ValueTask<IActionResult> Get([FromODataUri, Required] Guid key)
+	public virtual async ValueTask<IActionResult> Get([FromODataUri, Required] Guid key)
 	{
 		TModel? model = await this.mapper.ProjectTo<TModel>(
 			this.dbContext.Set<TEntity>().Where((TEntity entity) => key == EF.Property<Guid>(entity, "Id")))
@@ -40,20 +39,20 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 	}
 
 	[HttpPost]
-	public async ValueTask<IActionResult> Post([FromBody, Required] TModel input)
+	public virtual async ValueTask<IActionResult> Post([FromBody, Required] TModel input)
 	{
 		if (!this.ModelState.IsValid)
 			return BadRequest(this.ModelState);
 
-		EntityEntry<TEntity> entityEntry = this.dbContext.Set<TEntity>()
-			.Add(this.mapper.Map<TEntity>(input));
+		TEntity entity = this.mapper.Map<TEntity>(input);
+		this.dbContext.Set<TEntity>().Add(entity);
 		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
 
-		return Created(this.mapper.Map<TModel>(entityEntry.Entity));
+		return Created(this.mapper.Map<TModel>(entity));
 	}
 
 	[HttpPut]
-	public async ValueTask<IActionResult> Put(
+	public virtual async ValueTask<IActionResult> Put(
 		[FromODataUri, Required] Guid key,
 		[FromBody, Required] Delta<TModel> input)
 	{
@@ -74,7 +73,7 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 	}
 
 	[HttpPatch]
-	public async ValueTask<IActionResult> Patch(
+	public virtual async ValueTask<IActionResult> Patch(
 		[FromODataUri, Required] Guid key,
 		[FromBody, Required] Delta<TModel> input)
 	{
@@ -95,7 +94,7 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 	}
 
 	[HttpDelete]
-	public async ValueTask<IActionResult> Delete([FromODataUri, Required] Guid key)
+	public virtual async ValueTask<IActionResult> Delete([FromODataUri, Required] Guid key)
 	{
 		TEntity? entity = await this.dbContext.Set<TEntity>().FindAsync(key).ConfigureAwait(false);
 
