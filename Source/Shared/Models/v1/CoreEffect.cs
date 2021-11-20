@@ -2,7 +2,7 @@ namespace BlazorApp1.Shared.Models.v1;
 
 public record CoreEffect
 {
-	public Guid Id { get; set; }
+	public Guid Id { get; init; }
 	public string? Path { get; set; }
 	public string? Rule { get; set; }
 
