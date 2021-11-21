@@ -37,7 +37,7 @@ public partial class CharacterDetails : ComponentBase
 			return;
 
 		this.character = await this.Client.GetFromJsonAsync<Character>(
-			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Characters/{this.Id}");
+			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Characters/{this.Id}?$expand=Features");
 	}
 
 	private async Task Save()
