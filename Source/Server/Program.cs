@@ -1,10 +1,13 @@
 using AutoMapper;
 
+using BlazorApp1.Server;
 using BlazorApp1.Server.Data;
 using BlazorApp1.Server.Entities;
 
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
@@ -20,23 +23,24 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<ApplicationDbContext>(
+	(DbContextOptionsBuilder options) => options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 	.AddEntityFrameworkStores<ApplicationDbContext>()
 	.AddDefaultTokenProviders();
 
-builder.Services.AddQuartz(options =>
+builder.Services.AddQuartz((IServiceCollectionQuartzConfigurator options) =>
 {
 	options.UseMicrosoftDependencyInjectionJobFactory();
 	options.UseSimpleTypeLoader();
 	options.UseInMemoryStore();
 });
 
-builder.Services.AddOpenIddict(openIddictBuilder =>
+builder.Services.AddOpenIddict((OpenIddictBuilder openIddictBuilder) =>
 {
-	openIddictBuilder.AddCore(openIddictCoreBuilder =>
+	openIddictBuilder.AddCore((OpenIddictCoreBuilder openIddictCoreBuilder) =>
 	{
 		openIddictCoreBuilder
 			.UseEntityFrameworkCore()
@@ -50,7 +54,7 @@ builder.Services.AddOpenIddict(openIddictBuilder =>
 		.AddDevelopmentSigningCertificate()
 		.UseAspNetCore();
 
-	openIddictBuilder.AddValidation(options =>
+	openIddictBuilder.AddValidation((OpenIddictValidationBuilder options) =>
 	{
 		options.UseLocalServer();
 		options.UseAspNetCore();
@@ -74,7 +78,17 @@ IEdmModel edmModel = odataBuilder.GetEdmModel();
 
 builder.Services
 	.AddControllersWithViews()
-	.AddOData(options => options.AddRouteComponents("v1", edmModel));
+	.AddOData((ODataOptions options) =>
+	{
+		options.AddRouteComponents("v1", edmModel);
+		IODataControllerActionConvention? odataConvention = options.Conventions
+			.FirstOrDefault((IODataControllerActionConvention convention) =>
+				convention.GetType() == typeof(EntitySetRoutingConvention));
+		if (odataConvention is not null)
+			options.Conventions.Remove(odataConvention);
+
+		options.Conventions.Add(new CustomEntitySetRoutingConvention());
+	});
 builder.Services.AddRazorPages();
 
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
@@ -93,7 +107,8 @@ if (app.Environment.IsDevelopment())
 	app.UseMigrationsEndPoint();
 	app.UseWebAssemblyDebugging();
 
-	app.UseCors(corsPolicyBuilder => corsPolicyBuilder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+	app.UseCors((CorsPolicyBuilder corsPolicyBuilder) =>
+		corsPolicyBuilder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
 
 	app.UseODataRouteDebug();
 }
@@ -121,6 +136,7 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapControllers();
 
-app.UseEndpoints(options => options.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
+app.UseEndpoints((IEndpointRouteBuilder options) =>
+	options.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
 
 app.Run();

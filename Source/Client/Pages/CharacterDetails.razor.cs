@@ -2,6 +2,8 @@ namespace BlazorApp1.Client.Pages;
 
 using System.Collections.Specialized;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -35,7 +37,7 @@ public partial class CharacterDetails : ComponentBase
 			return;
 
 		this.character = await this.Client.GetFromJsonAsync<Character>(
-			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/characters/{this.Id}");
+			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Characters/{this.Id}");
 	}
 
 	private async Task Save()
@@ -45,9 +47,15 @@ public partial class CharacterDetails : ComponentBase
 		if (this.Client is null || this.character is null)
 			return;
 
+		JsonSerializerOptions jsonSerializerOptions = new()
+		{
+			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+		};
+
 		HttpResponseMessage response = await this.Client.PutAsJsonAsync(
-			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/characters",
-			this.character);
+			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Characters",
+			this.character,
+			jsonSerializerOptions);
 
 		this.saving = false;
 	}
@@ -104,7 +112,7 @@ public partial class CharacterDetails : ComponentBase
 			.Select(column =>
 				column.SortDirection is SortDirection.Ascending ? column.Field : $"{column.Field} desc");
 
-		UriBuilder uriBuilder = new($"{this.Configuration.GetValue<string>("ServerUrl")}v1/features");
+		UriBuilder uriBuilder = new($"{this.Configuration.GetValue<string>("ServerUrl")}v1/Features");
 
 		NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
