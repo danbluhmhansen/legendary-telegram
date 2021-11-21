@@ -172,6 +172,24 @@ public class CustomEntitySetRoutingConvention : IODataControllerActionConvention
 			action.AddSelector("Put", context.Prefix, context.Model, template, context.Options?.RouteOptions);
 			return true;
 		}
+		else if (actionName == "Delete" || actionName == $"Delete{entitySet.EntityType().Name}")
+		{
+			// DELETE ~/Customers
+			IList<ODataSegmentTemplate> segments = new List<ODataSegmentTemplate>
+			{
+				new EntitySetSegmentTemplate(entitySet)
+			};
+
+			if (castType != null)
+			{
+				IEdmCollectionType castCollectionType = ToCollection(castType, true);
+				IEdmCollectionType entityCollectionType = ToCollection(entitySet.EntityType(), true);
+				segments.Add(new CastSegmentTemplate(castCollectionType, entityCollectionType, entitySet));
+			}
+			ODataPathTemplate template = new ODataPathTemplate(segments);
+			action.AddSelector("Delete", context.Prefix, context.Model, template, context.Options?.RouteOptions);
+			return true;
+		}
 		else if (actionName == "Patch" || actionName == $"Patch{entitySet.Name}")
 		{
 			// PATCH ~/Patch  , ~/PatchCustomers

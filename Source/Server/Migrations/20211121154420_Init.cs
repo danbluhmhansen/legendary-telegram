@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -249,7 +248,7 @@ namespace BlazorApp1.Server.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Path = table.Column<string>(type: "text", nullable: true),
-                    Rule = table.Column<JsonElement>(type: "jsonb", nullable: false),
+                    Rule = table.Column<string>(type: "jsonb", nullable: true),
                     CharacterId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -264,24 +263,24 @@ namespace BlazorApp1.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CharacterFeature",
+                name: "CharacterFeatures",
                 columns: table => new
                 {
-                    CharactersId = table.Column<Guid>(type: "uuid", nullable: false),
-                    FeaturesId = table.Column<Guid>(type: "uuid", nullable: false)
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FeatureId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CharacterFeature", x => new { x.CharactersId, x.FeaturesId });
+                    table.PrimaryKey("PK_CharacterFeatures", x => new { x.CharacterId, x.FeatureId });
                     table.ForeignKey(
-                        name: "FK_CharacterFeature_Characters_CharactersId",
-                        column: x => x.CharactersId,
+                        name: "FK_CharacterFeatures_Characters_CharacterId",
+                        column: x => x.CharacterId,
                         principalTable: "Characters",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CharacterFeature_Features_FeaturesId",
-                        column: x => x.FeaturesId,
+                        name: "FK_CharacterFeatures_Features_FeatureId",
+                        column: x => x.FeatureId,
                         principalTable: "Features",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -294,7 +293,7 @@ namespace BlazorApp1.Server.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Path = table.Column<string>(type: "text", nullable: true),
-                    Rule = table.Column<JsonElement>(type: "jsonb", nullable: false),
+                    Rule = table.Column<string>(type: "jsonb", nullable: true),
                     FeatureId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -415,9 +414,9 @@ namespace BlazorApp1.Server.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CharacterFeature_FeaturesId",
-                table: "CharacterFeature",
-                column: "FeaturesId");
+                name: "IX_CharacterFeatures_FeatureId",
+                table: "CharacterFeatures",
+                column: "FeatureId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CoreEffects_CharacterId",
@@ -492,7 +491,7 @@ namespace BlazorApp1.Server.Migrations
                 schema: "identity");
 
             migrationBuilder.DropTable(
-                name: "CharacterFeature");
+                name: "CharacterFeatures");
 
             migrationBuilder.DropTable(
                 name: "CoreEffects");

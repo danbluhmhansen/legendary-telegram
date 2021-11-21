@@ -67,6 +67,8 @@ builder.Services.AddAutoMapper((IMapperConfigurationExpression expression) =>
 	expression.CreateMap<BlazorApp1.Server.Entities.Feature, BlazorApp1.Shared.Models.v1.Feature>().ReverseMap();
 	expression.CreateMap<BlazorApp1.Server.Entities.CoreEffect, BlazorApp1.Shared.Models.v1.CoreEffect>().ReverseMap();
 	expression.CreateMap<BlazorApp1.Server.Entities.Effect, BlazorApp1.Shared.Models.v1.Effect>().ReverseMap();
+	expression.CreateMap<BlazorApp1.Server.Entities.CharacterFeature, BlazorApp1.Shared.Models.v1.CharacterFeature>()
+		.ReverseMap();
 });
 
 ODataConventionModelBuilder odataBuilder = new();
@@ -74,6 +76,11 @@ odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Character>("Characters");
 odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Feature>("Features");
 odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.CoreEffect>("CoreEffects");
 odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Effect>("Effects");
+EntitySetConfiguration<BlazorApp1.Shared.Models.v1.CharacterFeature> characterFeaturesConfiguration = odataBuilder
+	.EntitySet<BlazorApp1.Shared.Models.v1.CharacterFeature>("CharacterFeatures");
+characterFeaturesConfiguration.EntityType
+	.HasKey((BlazorApp1.Shared.Models.v1.CharacterFeature characterFeature) =>
+		new { characterFeature.CharacterId, characterFeature.FeatureId });
 IEdmModel edmModel = odataBuilder.GetEdmModel();
 
 builder.Services

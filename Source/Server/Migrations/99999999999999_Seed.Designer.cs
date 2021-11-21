@@ -103,6 +103,21 @@ namespace BlazorApp1.Server.Migrations
                     b.ToTable("Characters");
                 });
 
+            modelBuilder.Entity("BlazorApp1.Server.Entities.CharacterFeature", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FeatureId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("CharacterId", "FeatureId");
+
+                    b.HasIndex("FeatureId");
+
+                    b.ToTable("CharacterFeatures");
+                });
+
             modelBuilder.Entity("BlazorApp1.Server.Entities.CoreEffect", b =>
                 {
                     b.Property<Guid>("Id")
@@ -115,7 +130,7 @@ namespace BlazorApp1.Server.Migrations
                     b.Property<string>("Path")
                         .HasColumnType("text");
 
-                    b.Property<JsonElement>("Rule")
+                    b.Property<string>("Rule")
                         .HasColumnType("jsonb");
 
                     b.HasKey("Id");
@@ -140,7 +155,7 @@ namespace BlazorApp1.Server.Migrations
                     b.Property<string>("Path")
                         .HasColumnType("text");
 
-                    b.Property<JsonElement>("Rule")
+                    b.Property<string>("Rule")
                         .HasColumnType("jsonb");
 
                     b.HasKey("Id");
@@ -162,21 +177,6 @@ namespace BlazorApp1.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Features");
-                });
-
-            modelBuilder.Entity("CharacterFeature", b =>
-                {
-                    b.Property<Guid>("CharactersId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("FeaturesId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CharactersId", "FeaturesId");
-
-                    b.HasIndex("FeaturesId");
-
-                    b.ToTable("CharacterFeature");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -509,6 +509,25 @@ namespace BlazorApp1.Server.Migrations
                     b.ToTable("OpenIddictTokens", "opid");
                 });
 
+            modelBuilder.Entity("BlazorApp1.Server.Entities.CharacterFeature", b =>
+                {
+                    b.HasOne("BlazorApp1.Server.Entities.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlazorApp1.Server.Entities.Feature", "Feature")
+                        .WithMany()
+                        .HasForeignKey("FeatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("Feature");
+                });
+
             modelBuilder.Entity("BlazorApp1.Server.Entities.CoreEffect", b =>
                 {
                     b.HasOne("BlazorApp1.Server.Entities.Character", "Character")
@@ -529,21 +548,6 @@ namespace BlazorApp1.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("Feature");
-                });
-
-            modelBuilder.Entity("CharacterFeature", b =>
-                {
-                    b.HasOne("BlazorApp1.Server.Entities.Character", null)
-                        .WithMany()
-                        .HasForeignKey("CharactersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BlazorApp1.Server.Entities.Feature", null)
-                        .WithMany()
-                        .HasForeignKey("FeaturesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
