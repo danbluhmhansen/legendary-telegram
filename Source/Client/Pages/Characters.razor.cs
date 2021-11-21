@@ -65,8 +65,8 @@ public partial class Characters : ComponentBase
 
 		uriBuilder.Query = query.ToString();
 
-		ODataResponse<Character>? response = await this.Client.GetFromJsonAsync<ODataResponse<Character>>(
-			uriBuilder.Uri, args.CancellationToken);
+		ODataCollectionResponse<Character>? response = await this.Client
+			.GetFromJsonAsync<ODataCollectionResponse<Character>>(uriBuilder.Uri, args.CancellationToken);
 
 		if (response is null)
 			return;

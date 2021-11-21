@@ -23,6 +23,7 @@ public partial class CharacterDetails : ComponentBase
 	[Inject] private ILogger<CharacterDetails>? Logger { get; init; }
 
 	private Character? character;
+	private Character? original;
 	private readonly List<Feature> selected = new();
 	private bool saving;
 
@@ -38,6 +39,9 @@ public partial class CharacterDetails : ComponentBase
 
 		this.character = await this.Client.GetFromJsonAsync<Character>(
 			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Characters/{this.Id}?$expand=Features");
+
+		if (this.character is not null)
+			this.original = this.character with { };
 	}
 
 	private async Task Save()
@@ -52,10 +56,39 @@ public partial class CharacterDetails : ComponentBase
 			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 		};
 
-		HttpResponseMessage response = await this.Client.PutAsJsonAsync(
-			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Characters",
-			this.character,
-			jsonSerializerOptions);
+		Dictionary<string, IEnumerable<string>> headers = new()
+		{
+			{ "Content-Type", new[] { "application/json" } }
+		};
+
+		IEnumerable<ODataRequest>? requests = this.original?.Features.Except(this.character.Features)
+			.Select((Feature feature, int i) => new ODataRequest(
+				$"{i+2}",
+				"DELETE",
+				new Uri($"{this.Configuration.GetValue<string>("ServerUrl")}v1/CharacterFeatures"),
+				headers,
+				new CharacterFeature
+				{
+					CharacterId = this.Id,
+					FeatureId = feature.Id,
+				}))
+			.Prepend(new ODataRequest(
+				"1",
+				"PUT",
+				new Uri($"{this.Configuration.GetValue<string>("ServerUrl")}v1/Characters"),
+				headers,
+				this.character))
+			.ToList();
+
+		ODataBatchRequest value = new(requests);
+
+		this.Logger?.LogInformation(JsonSerializer.Serialize(value));
+
+		if (requests?.Any() == true)
+			await this.Client.PutAsJsonAsync(
+				$"{this.Configuration.GetValue<string>("ServerUrl")}v1/$batch",
+				value,
+				jsonSerializerOptions);
 
 		this.saving = false;
 	}
@@ -137,8 +170,8 @@ public partial class CharacterDetails : ComponentBase
 
 		uriBuilder.Query = query.ToString();
 
-		ODataResponse<Feature>? response = await this.Client.GetFromJsonAsync<ODataResponse<Feature>>(
-			uriBuilder.Uri, args.CancellationToken);
+		ODataCollectionResponse<Feature>? response = await this.Client
+			.GetFromJsonAsync<ODataCollectionResponse<Feature>>(uriBuilder.Uri, args.CancellationToken);
 
 		if (response is null)
 			return;

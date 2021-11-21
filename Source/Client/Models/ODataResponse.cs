@@ -1,8 +1,15 @@
 namespace BlazorApp1.Client.Models;
 
-using System.Text.Json.Serialization;
+using System.Net;
+
+public record ODataResponse(
+	string Id,
+	HttpStatusCode Status,
+	IDictionary<string, IEnumerable<string>>? Headers,
+	object Body);
 
 public record ODataResponse<T>(
-	[property: JsonPropertyName("@odata.context")] Uri Context,
-	[property: JsonPropertyName("@odata.count")] int? Count,
-	IEnumerable<T> Value);
+	string Id,
+	HttpStatusCode Status,
+	IDictionary<string, IEnumerable<string>>? Headers,
+	T Body);

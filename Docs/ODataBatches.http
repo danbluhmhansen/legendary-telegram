@@ -15,3 +15,35 @@ Content-Type: application/json
         }
     ]
 }
+
+###
+
+POST https://localhost:7289/v1/$batch
+Content-Type: application/json
+
+{
+    "requests": [
+        {
+            "id": "1",
+            "method": "POST",
+            "url": "https://localhost:7289/v1/Characters",
+            "headers": {
+                "content-type": "application/json"
+            },
+            "body": {
+                "name": "TEST"
+            }
+        },
+        {
+            "id": "2",
+            "method": "POST",
+            "url": "https://localhost:7289/v1/Characters",
+            "headers": {
+                "content-type": "application/json"
+            },
+            "body": {
+                "name": "TEST"
+            }
+        }
+    ]
+}
