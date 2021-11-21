@@ -7,6 +7,7 @@ using BlazorApp1.Server.Entities;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
@@ -87,7 +88,8 @@ builder.Services
 	.AddControllersWithViews()
 	.AddOData((ODataOptions options) =>
 	{
-		options.AddRouteComponents("v1", edmModel);
+		options.AddRouteComponents("v1", edmModel, new DefaultODataBatchHandler());
+
 		IODataControllerActionConvention? odataConvention = options.Conventions
 			.FirstOrDefault((IODataControllerActionConvention convention) =>
 				convention.GetType() == typeof(EntitySetRoutingConvention));

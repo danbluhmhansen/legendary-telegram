@@ -64,35 +64,13 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 		return Updated(this.mapper.Map<TModel>(entity));
 	}
 
-	[HttpPatch]
-	public virtual async ValueTask<IActionResult> Patch(
-		[FromODataUri, Required] Guid key,
-		[FromBody, Required] Delta<TModel> input)
+	[HttpDelete]
+	public virtual async ValueTask<IActionResult> Delete([FromBody, Required] TModel input)
 	{
 		if (!this.ModelState.IsValid)
 			return BadRequest(this.ModelState);
 
-		TEntity? entity = await this.dbContext.Set<TEntity>().FindAsync(key).ConfigureAwait(false);
-
-		if (entity is null)
-			return NotFound(key);
-
-		TModel model = this.mapper.Map<TModel>(entity);
-		input.Patch(model);
-		this.mapper.Map(model, entity);
-		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
-
-		return Updated(this.mapper.Map<TModel>(entity));
-	}
-
-	[HttpDelete]
-	public virtual async ValueTask<IActionResult> Delete([FromODataUri, Required] Guid key)
-	{
-		TEntity? entity = await this.dbContext.Set<TEntity>().FindAsync(key).ConfigureAwait(false);
-
-		if (entity is null)
-			return NotFound(key);
-
+		TEntity entity = this.mapper.Map<TEntity>(input);
 		this.dbContext.Set<TEntity>().Remove(entity);
 		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
 
