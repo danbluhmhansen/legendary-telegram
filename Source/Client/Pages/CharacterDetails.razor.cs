@@ -12,6 +12,8 @@ using BlazorApp1.Shared.Models.v1;
 using Blazorise;
 using Blazorise.DataGrid;
 
+using Force.DeepCloner;
+
 using Microsoft.AspNetCore.Components;
 
 public partial class CharacterDetails : ComponentBase
@@ -41,7 +43,7 @@ public partial class CharacterDetails : ComponentBase
 			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Characters/{this.Id}?$expand=Features");
 
 		if (this.character is not null)
-			this.original = this.character with { };
+			this.original = this.character.DeepClone();
 	}
 
 	private async Task Save()
@@ -56,14 +58,14 @@ public partial class CharacterDetails : ComponentBase
 			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 		};
 
-		Dictionary<string, IEnumerable<string>> headers = new()
+		Dictionary<string, string> headers = new()
 		{
-			{ "Content-Type", new[] { "application/json" } }
+			{ "Content-Type", "application/json" }
 		};
 
 		IEnumerable<ODataRequest>? requests = this.original?.Features.Except(this.character.Features)
 			.Select((Feature feature, int i) => new ODataRequest(
-				$"{i+2}",
+				$"{i + 2}",
 				"DELETE",
 				new Uri($"{this.Configuration.GetValue<string>("ServerUrl")}v1/CharacterFeatures"),
 				headers,
@@ -82,13 +84,13 @@ public partial class CharacterDetails : ComponentBase
 
 		ODataBatchRequest value = new(requests);
 
-		this.Logger?.LogInformation(JsonSerializer.Serialize(value));
-
 		if (requests?.Any() == true)
-			await this.Client.PutAsJsonAsync(
+		{
+			await this.Client.PostAsJsonAsync(
 				$"{this.Configuration.GetValue<string>("ServerUrl")}v1/$batch",
 				value,
 				jsonSerializerOptions);
+		}
 
 		this.saving = false;
 	}
@@ -112,7 +114,9 @@ public partial class CharacterDetails : ComponentBase
 		if (this.character.Features is null)
 			this.character.Features = new List<Feature>();
 
-		foreach (Feature feature in this.selectedFeatures.Except(this.character.Features))
+		foreach (Feature feature in this.selectedFeatures.ExceptBy(
+			this.character.Features.Select(x => x.Id),
+			(Feature feature) => feature.Id))
 		{
 			this.character.Features.Add(feature);
 		}
