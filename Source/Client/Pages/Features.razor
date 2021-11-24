@@ -12,23 +12,46 @@
 	Editable
 	EditMode=DataGridEditMode.Popup
 	CommandMode=DataGridCommandMode.ButtonRow
+	PopupSize=ModalSize.Large
 	Responsive>
 	<DataGridColumns>
 		<DataGridCommandColumn TItem=Feature></DataGridCommandColumn>
-		<DataGridColumn TItem=Feature Field=@nameof(Feature.Name) Caption=Name Editable=true />
+		<DataGridColumn TItem=Feature Field=@nameof(Feature.Name) Caption=Name Editable />
+		<DataGridColumn TItem=Feature
+			Field=@nameof(Feature.Effects)
+			Caption=Effects
+			Editable
+			PopupFieldColumnSize=ColumnSize.IsFull>
+			<DisplayTemplate>
+				@string.Join(", ", context.Effects.Select((Effect effect) => effect.Name))
+			</DisplayTemplate>
+			<EditTemplate>
+				<DataGrid TItem=Effect
+					Data=context.Item.Effects
+					CommandMode=DataGridCommandMode.ButtonRow
+					Editable
+					Responsive
+					ShowPager>
+					<DataGridColumns>
+						<DataGridColumn TItem=Effect Field=@nameof(Effect.Name) Caption=Name Editable />
+						<DataGridColumn TItem=Effect Field=@nameof(Effect.Path) Caption=Path Editable />
+						<DataGridColumn TItem=Effect Field=@nameof(Effect.Rule) Caption=Rule Editable />
+					</DataGridColumns>
+					<ButtonRowTemplate Context=EffectsContext>
+						<Button Color=Color.Primary Clicked=EffectsContext.NewCommand.Clicked>
+							@EffectsContext.NewCommand.LocalizationString
+						</Button>
+						<Button Color=Color.Secondary Clicked=EffectsContext.EditCommand.Clicked>
+							@EffectsContext.EditCommand.LocalizationString
+						</Button>
+						<Button Color=Color.Danger Clicked=EffectsContext.DeleteCommand.Clicked>
+							@EffectsContext.DeleteCommand.LocalizationString
+						</Button>
+					</ButtonRowTemplate>
+				</DataGrid>
+			</EditTemplate>
+		</DataGridColumn>
 	</DataGridColumns>
-	<DetailRowTemplate>
-		@{
-			var effects = (context as Feature).Effects;
-			<DataGrid TItem=Effect Data=effects>
-				<DataGridColumns>
-					<DataGridColumn TItem=Effect Field=@nameof(Effect.Name) Caption=Name />
-					<DataGridColumn TItem=Effect Field=@nameof(Effect.Path) Caption=Path />
-					<DataGridColumn TItem=Effect Field=@nameof(Effect.Rule) Caption=Rule />
-				</DataGridColumns>
-			</DataGrid>
-		}
-	</DetailRowTemplate>
 	<ButtonRowTemplate>
 		<Button Color=Color.Primary Clicked=context.NewCommand.Clicked>
 			@context.NewCommand.LocalizationString
