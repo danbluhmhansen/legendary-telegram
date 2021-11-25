@@ -2,6 +2,7 @@ namespace BlazorApp1.Client.Pages;
 
 using System.Collections.Specialized;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Web;
 
 using BlazorApp1.Client.Models;
@@ -11,11 +12,14 @@ using Blazorise;
 using Blazorise.DataGrid;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Options;
 
 public partial class Features : ComponentBase
 {
 	[Inject] private HttpClient? Client { get; init; }
 	[Inject] private IConfiguration? Configuration { get; init; }
+	[Inject] private ILogger<Features>? Logger { get; init; }
+	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
 
 	private ICollection<Feature>? data;
 	private int? count;
@@ -75,5 +79,42 @@ public partial class Features : ComponentBase
 		this.count = response.Count;
 
 		StateHasChanged();
+	}
+
+	private async Task OnRowInserting(CancellableRowChange<Feature> args)
+	{
+		if (this.Client is null || args.Item is null)
+			return;
+
+		HttpResponseMessage response = await this.Client.PostAsJsonAsync(
+			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Features",
+			args.Item,
+			JsonSerializerOptions?.Value);
+	}
+
+	private async Task OnRowUpdating(CancellableRowChange<Feature> args)
+	{
+		if (this.Client is null || args.Item is null)
+			return;
+
+		HttpResponseMessage response = await this.Client.PutAsJsonAsync(
+			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Features",
+			args.Item,
+			JsonSerializerOptions?.Value);
+	}
+
+	private async Task OnRowRemoving(CancellableRowChange<Feature> args)
+	{
+		if (this.Client is null || args.Item is null)
+			return;
+
+		HttpRequestMessage request = new(
+			HttpMethod.Delete,
+			$"{this.Configuration.GetValue<string>("ServerUrl")}v1/Features")
+		{
+			Content = JsonContent.Create(args.Item, options: this.JsonSerializerOptions?.Value)
+		};
+
+		HttpResponseMessage response = await this.Client.SendAsync(request);
 	}
 }

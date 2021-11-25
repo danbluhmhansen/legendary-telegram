@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using BlazorApp1.Client;
 
 using Blazorise;
@@ -41,6 +44,9 @@ builder.Services.AddOidcAuthentication(options =>
 });
 
 builder.Services.AddLogging();
+
+builder.Services.Configure((JsonSerializerOptions options) =>
+	options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 
