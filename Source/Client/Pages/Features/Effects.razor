@@ -1,0 +1,25 @@
+@using BlazorApp1.Shared.Models.v1
+
+<DataGrid TItem=Effect
+	Data=Feature?.Effects
+	CommandMode=DataGridCommandMode.ButtonRow
+	Editable
+	ShowPager
+	Responsive>
+	<DataGridColumns>
+		<DataGridColumn TItem=Effect Field=@nameof(Effect.Name) Caption=Name Editable />
+		<DataGridColumn TItem=Effect Field=@nameof(Effect.Path) Caption=Path Editable />
+		<DataGridColumn TItem=Effect Field=@nameof(Effect.Rule) Caption=Rule Editable />
+	</DataGridColumns>
+	<ButtonRowTemplate>
+		<Button Color=Color.Primary Clicked=context.NewCommand.Clicked>
+			@context.NewCommand.LocalizationString
+		</Button>
+		<Button Color=Color.Secondary Clicked=context.EditCommand.Clicked>
+			@context.EditCommand.LocalizationString
+		</Button>
+		<Button Color=Color.Danger Clicked=context.DeleteCommand.Clicked>
+			@context.DeleteCommand.LocalizationString
+		</Button>
+	</ButtonRowTemplate>
+</DataGrid>

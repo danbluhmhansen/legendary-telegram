@@ -1,4 +1,4 @@
-namespace BlazorApp1.Client.Pages;
+namespace BlazorApp1.Client.Pages.Characters;
 
 using System.Collections.Specialized;
 using System.Net.Http.Json;
@@ -16,13 +16,13 @@ using Force.DeepCloner;
 
 using Microsoft.AspNetCore.Components;
 
-public partial class CharacterDetails : ComponentBase
+public partial class Details : ComponentBase
 {
 	[Parameter] public Guid Id { get; init; }
 
 	[Inject] private HttpClient? Client { get; init; }
 	[Inject] private IConfiguration? Configuration { get; init; }
-	[Inject] private ILogger<CharacterDetails>? Logger { get; init; }
+	[Inject] private ILogger<Details>? Logger { get; init; }
 
 	private Character? character;
 	private Character? original;

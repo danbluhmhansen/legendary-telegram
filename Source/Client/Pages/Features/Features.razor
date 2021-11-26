@@ -29,29 +29,7 @@
 				@string.Join(", ", context.Effects.Select((Effect effect) => effect.Name))
 			</DisplayTemplate>
 			<EditTemplate>
-				<DataGrid TItem=Effect
-					Data=context.Item.Effects
-					CommandMode=DataGridCommandMode.ButtonRow
-					Editable
-					Responsive
-					ShowPager>
-					<DataGridColumns>
-						<DataGridColumn TItem=Effect Field=@nameof(Effect.Name) Caption=Name Editable />
-						<DataGridColumn TItem=Effect Field=@nameof(Effect.Path) Caption=Path Editable />
-						<DataGridColumn TItem=Effect Field=@nameof(Effect.Rule) Caption=Rule Editable />
-					</DataGridColumns>
-					<ButtonRowTemplate Context=EffectsContext>
-						<Button Color=Color.Primary Clicked=EffectsContext.NewCommand.Clicked>
-							@EffectsContext.NewCommand.LocalizationString
-						</Button>
-						<Button Color=Color.Secondary Clicked=EffectsContext.EditCommand.Clicked>
-							@EffectsContext.EditCommand.LocalizationString
-						</Button>
-						<Button Color=Color.Danger Clicked=EffectsContext.DeleteCommand.Clicked>
-							@EffectsContext.DeleteCommand.LocalizationString
-						</Button>
-					</ButtonRowTemplate>
-				</DataGrid>
+				<Effects Feature=context.Item />
 			</EditTemplate>
 		</DataGridColumn>
 	</DataGridColumns>

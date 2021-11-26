@@ -1,4 +1,4 @@
-namespace BlazorApp1.Client.Pages;
+namespace BlazorApp1.Client.Pages.Characters;
 
 using BlazorApp1.Client.Commands;
 using BlazorApp1.Client.Models;

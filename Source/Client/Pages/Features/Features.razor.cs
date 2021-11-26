@@ -1,4 +1,4 @@
-namespace BlazorApp1.Client.Pages;
+namespace BlazorApp1.Client.Pages.Features;
 
 using System.Net.Http.Json;
 using System.Text.Json;
