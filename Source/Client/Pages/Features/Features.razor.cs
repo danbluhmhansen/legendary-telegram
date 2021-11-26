@@ -6,6 +6,7 @@ using System.Text.Json;
 using BlazorApp1.Client.Commands;
 using BlazorApp1.Client.Models;
 using BlazorApp1.Shared.Models.v1;
+
 using Blazorise.DataGrid;
 
 using Microsoft.AspNetCore.Components;
@@ -19,7 +20,7 @@ public partial class Features : ComponentBase
 	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
 	[Inject] private ILogger<Features>? Logger { get; init; }
 
-	private ICollection<Feature>? data;
+	private ICollection<Feature> data = new List<Feature>();
 	private int? count;
 
 	private async Task OnReadData(DataGridReadDataEventArgs<Feature> args)

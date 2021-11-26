@@ -7,14 +7,14 @@
 		<Heading Size=HeadingSize.Is1>@character?.Name</Heading>
 	</Column>
 	<Column ColumnSize=ColumnSize.Is1>
-		<Button Color=Color.Primary Loading=@saving Clicked=Save>Save</Button>
+		<Button Color=Color.Primary Loading=saving Clicked=Save>Save</Button>
 	</Column>
 </Row>
 
 <DataGrid
 	TItem=Feature
-	Data=@character?.Features
-	SelectedRows=@selected
+	Data=character?.Features
+	SelectedRows=selected
 	RowRemoving=OnRowRemoving
 	SelectionMode=DataGridSelectionMode.Multiple
 	CommandMode=DataGridCommandMode.ButtonRow
@@ -46,10 +46,10 @@
 			<DataGrid
 				TItem=Feature
 				ReadData=OnReadFeatures
-				Data=@features
-				TotalItems=@featuresCount
+				Data=features
+				TotalItems=featuresCount
 				SelectionMode=DataGridSelectionMode.Multiple
-				SelectedRows=@selectedFeatures
+				SelectedRows=selectedFeatures
 				ShowPager
 				Responsive>
 				<DataGridColumns>
