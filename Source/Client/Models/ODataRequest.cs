@@ -4,18 +4,12 @@ public record ODataRequest(
 	string Id,
 	string Method,
 	Uri Url,
-	IDictionary<string, string>? Headers,
-	object? Body)
-{
-	public ODataRequest(string id, string method, Uri url) : this(id, method, url, default, default) { }
-}
+	IDictionary<string, string>? Headers = default,
+	object? Body = default);
 
 public record ODataRequest<T>(
 	string Id,
 	string Method,
 	Uri Url,
-	IDictionary<string, string>? Headers,
-	T? Body)
-{
-	public ODataRequest(string id, string method, Uri url) : this(id, method, url, default, default) { }
-}
+	IDictionary<string, string>? Headers = default,
+	T? Body = default);

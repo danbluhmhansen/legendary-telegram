@@ -1,15 +1,17 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using BlazorApp1.Client;
 using BlazorApp1.Client.Commands;
+using BlazorApp1.Client.Configuration;
 
 using Blazorise;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
 
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Options;
 
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -17,7 +19,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services
-	.AddBlazorise(options => options.ChangeTextOnKeyPress = true)
+	.AddBlazorise()
 	.AddBootstrap5Providers()
 	.AddFontAwesomeIcons();
 
@@ -25,13 +27,15 @@ builder.Services.AddScoped<CustomAddressAuthorizationMessageHandler>();
 
 builder.Services
 	.AddHttpClient("BlazorApp1.ServerAPI",
-		client => client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ServerUrl")))
+		(IServiceProvider serviceProvider, HttpClient client) =>
+			client.BaseAddress = serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route)
 	.AddHttpMessageHandler<CustomAddressAuthorizationMessageHandler>();
 
 // Supply HttpClient instances that include access tokens when making requests to the server project
-builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorApp1.ServerAPI"));
+builder.Services.AddScoped((IServiceProvider serviceProvider) =>
+	serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorApp1.ServerAPI"));
 
-builder.Services.AddOidcAuthentication(options =>
+builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProviderOptions> options) =>
 {
 	builder.Configuration
 		.GetSection("RemoteAuthentication")
@@ -48,9 +52,12 @@ builder.Services.AddLogging();
 
 builder.Services.AddScoped<ReadDataCommand>();
 
-builder.Services.Configure((JsonSerializerOptions options) =>
-	options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+builder.Services.Configure<BlazoriseOptions>(builder.Configuration.GetSection(nameof(BlazoriseOptions)));
+builder.Services.Configure<JsonSerializerOptions>(builder.Configuration.GetSection(nameof(JsonSerializerOptions)));
+builder.Services.Configure<ServerOptions>(builder.Configuration.GetSection(nameof(ServerOptions)));
 
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 
-await builder.Build().RunAsync().ConfigureAwait(false);
+WebAssemblyHost host = builder.Build();
+
+await host.RunAsync().ConfigureAwait(false);

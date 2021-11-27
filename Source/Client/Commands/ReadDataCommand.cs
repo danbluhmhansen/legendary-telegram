@@ -4,21 +4,25 @@ using System.Collections.Specialized;
 using System.Net.Http.Json;
 using System.Web;
 
+using BlazorApp1.Client.Configuration;
 using BlazorApp1.Client.Models;
+
 using Blazorise;
 using Blazorise.DataGrid;
+
+using Microsoft.Extensions.Options;
 
 public class ReadDataCommand
 {
 	private readonly HttpClient client;
-	private readonly IConfiguration configuration;
+	private readonly IOptions<ServerOptions> serverOptions;
 	private readonly ILogger<ReadDataCommand> logger;
 
-	public ReadDataCommand(HttpClient client, IConfiguration configuration, ILogger<ReadDataCommand> logger)
+	public ReadDataCommand(HttpClient client, IOptions<ServerOptions> serverOptions, ILogger<ReadDataCommand> logger)
 	{
 		this.client = client;
-		this.configuration = configuration;
 		this.logger = logger;
+		this.serverOptions = serverOptions;
 	}
 
 	public async Task<ODataCollectionResponse<T>?> ExecuteAsync<T>(DataGridReadDataEventArgs<T> eventArgs, string path,
@@ -38,7 +42,7 @@ public class ReadDataCommand
 			.Select(column =>
 				column.SortDirection is SortDirection.Ascending ? column.Field : $"{column.Field} desc");
 
-		UriBuilder uriBuilder = new(this.configuration.GetValue<string>("ServerUrl") + path);
+		UriBuilder uriBuilder = new(this.serverOptions.Value.Route + path);
 
 		NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
