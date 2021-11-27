@@ -26,15 +26,18 @@ public class ReadDataCommand
 	}
 
 	public async Task<ODataCollectionResponse<T>?> ExecuteAsync<T>(DataGridReadDataEventArgs<T> eventArgs, string path,
-		string? expand = default)
+		string? expand = default, IEnumerable<string>? filters = default)
 	{
-		IEnumerable<string> filters = eventArgs.Columns
+		IEnumerable<string> columnFilters = eventArgs.Columns
 			.Where(column => column.SearchValue is not null)
 			.Select(column => column.ColumnType switch
 			{
 				DataGridColumnType.Text => $"contains({column.Field},'{column.SearchValue}')",
 				_ => "",
 			});
+
+		if (filters is not null)
+			columnFilters = columnFilters.Concat(filters);
 
 		IEnumerable<string> orderBy = eventArgs.Columns
 			.Where(column => column.SortDirection is not SortDirection.None)
@@ -46,8 +49,8 @@ public class ReadDataCommand
 
 		NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
-		if (filters.Any())
-			query["$filter"] = string.Join(", ", filters);
+		if (columnFilters.Any())
+			query["$filter"] = string.Join(", ", columnFilters);
 		if (orderBy.Any())
 			query["$orderby"] = string.Join(", ", orderBy);
 
