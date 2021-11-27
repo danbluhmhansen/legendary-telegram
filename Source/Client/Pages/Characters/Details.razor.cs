@@ -9,10 +9,7 @@ using BlazorApp1.Client.Configuration;
 using BlazorApp1.Client.Models;
 using BlazorApp1.Shared.Models.v1;
 
-using Blazorise;
 using Blazorise.DataGrid;
-
-using Force.DeepCloner;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
@@ -22,20 +19,18 @@ public partial class Details : ComponentBase
 	[Parameter] public Guid Id { get; init; }
 
 	[Inject] private ReadDataCommand? ReadDataCommand { get; init; }
+	[Inject] private ComputeCharacterCommand? ComputeCharacterCommand { get; init; }
 	[Inject] private HttpClient? Client { get; init; }
 	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
 	[Inject] private IOptions<ServerOptions>? ServerOptions { get; init; }
 	[Inject] private ILogger<Details>? Logger { get; init; }
 
 	private Character? character;
-	private Character? original;
-	private readonly List<Feature> selected = new();
-	private bool saving;
+	private JsonElement json;
 
-	private bool showFeatureModal;
 	private IEnumerable<Feature>? features;
 	private int? featuresCount;
-	private readonly List<Feature> selectedFeatures = new();
+	private List<Feature> selectedFeatures = new();
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -43,72 +38,10 @@ public partial class Details : ComponentBase
 			return;
 
 		this.character = await this.Client.GetFromJsonAsync<Character>(
-			$"{this.ServerOptions.Value.Route}v1/Characters/{this.Id}?$expand=Features");
+			$"{this.ServerOptions.Value.Route}v1/Characters/{this.Id}?$expand=Features($expand=Effects),Effects");
 
-		if (this.character is not null)
-			this.original = this.character.DeepClone();
-	}
-
-	private async Task Save()
-	{
-		this.saving = true;
-
-		if (this.Client is null || this.ServerOptions is null || this.character is null)
-			return;
-
-		Dictionary<string, string> headers = new() { { "Content-Type", "application/json" } };
-
-		IEnumerable<ODataRequest>? requests = this.original?.Features.Except(this.character.Features)
-			.Select((Feature feature, int i) => new ODataRequest($"{i + 2}", "DELETE",
-				new Uri($"{this.ServerOptions.Value.Route}v1/CharacterFeatures"), headers,
-				new CharacterFeature
-				{
-					CharacterId = this.Id,
-					FeatureId = feature.Id,
-				}))
-			.Prepend(new ODataRequest("1", "PUT",
-				new Uri($"{this.ServerOptions.Value.Route}v1/Characters"), headers, this.character))
-			.ToList();
-
-		if (requests?.Any() == true)
-			await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch",
-				new ODataBatchRequest(requests), this.JsonSerializerOptions?.Value);
-
-		this.saving = false;
-	}
-
-	private void OnRowRemoving(CancellableRowChange<Feature> args)
-	{
-		if (this.character is null || this.character.Features?.Any() != true)
-			return;
-
-		foreach (Feature feature in this.selected)
-		{
-			this.character.Features.Remove(feature);
-		}
-	}
-
-	private void OnAddFeatures()
-	{
-		if (this.character is null)
-			return;
-
-		if (this.character.Features is null)
-			this.character.Features = new List<Feature>();
-
-		foreach (Feature feature in this.selectedFeatures.ExceptBy(this.character.Features.Select(x => x.Id),
-			(Feature feature) => feature.Id))
-		{
-			this.character.Features.Add(feature);
-		}
-
-		this.showFeatureModal = false;
-	}
-
-	private Task OnFeatureModalClosing(ModalClosingEventArgs args)
-	{
-		this.selectedFeatures.Clear();
-		return Task.CompletedTask;
+		if (this.ComputeCharacterCommand is not null && this.character is not null)
+			this.json = this.ComputeCharacterCommand.Execute(this.character);
 	}
 
 	private async Task OnReadFeatures(DataGridReadDataEventArgs<Feature> args)
@@ -117,7 +50,7 @@ public partial class Details : ComponentBase
 			return;
 
 		ODataCollectionResponse<Feature>? response = await this.ReadDataCommand.ExecuteAsync(args, "v1/Features",
-			filters: new[] { $"Characters/any(c:c/Id ne {this.Id})" });
+			filters: new[] { $"Characters/all(c:c/Id ne {this.Id})" });
 
 		if (response is null)
 			return;
@@ -128,5 +61,72 @@ public partial class Details : ComponentBase
 		this.featuresCount = response.Count;
 
 		StateHasChanged();
+	}
+
+	private async Task OnFeatureInserting()
+	{
+		if (this.Client is null || this.ServerOptions is null || this.selectedFeatures?.Any() != true)
+			return;
+
+		IEnumerable<ODataRequest> requests = this.selectedFeatures
+			.Select((Feature feature, int i) => new ODataRequest(i.ToString(), "POST",
+				new Uri($"{this.ServerOptions.Value.Route}v1/CharacterFeatures"),
+				new Dictionary<string, string>() { { "Content-Type", "application/json" } },
+				new CharacterFeature
+				{
+					CharacterId = this.Id,
+					FeatureId = feature.Id,
+				}));
+
+		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch", new ODataBatchRequest(requests),
+			this.JsonSerializerOptions?.Value);
+	}
+
+	private async Task OnFeatureRemoving()
+	{
+		if (this.Client is null || this.ServerOptions is null || this.selectedFeatures?.Any() != true)
+			return;
+
+		IEnumerable<ODataRequest> requests = this.selectedFeatures
+			.Select((Feature feature, int i) => new ODataRequest(i.ToString(), "DELETE",
+				new Uri($"{this.ServerOptions.Value.Route}v1/CharacterFeatures"),
+				new Dictionary<string, string>() { { "Content-Type", "application/json" } },
+				new CharacterFeature
+				{
+					CharacterId = this.Id,
+					FeatureId = feature.Id,
+				}));
+
+		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch", new ODataBatchRequest(requests),
+			this.JsonSerializerOptions?.Value);
+	}
+
+	private async Task OnEffectInserting(CancellableRowChange<CoreEffect, Dictionary<string, object>> args)
+	{
+		if (this.Client is null || this.ServerOptions is null)
+			return;
+
+		args.Values[nameof(CoreEffect.CharacterId)] = this.Id;
+
+		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
+			this.JsonSerializerOptions?.Value);
+	}
+
+	private async Task OnEffectUpdating(CancellableRowChange<CoreEffect, Dictionary<string, object>> args)
+	{
+		if (this.Client is null || this.ServerOptions is null)
+			return;
+
+		await this.Client.PutAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
+			this.JsonSerializerOptions?.Value);
+	}
+
+	private async Task OnEffectRemoving(CancellableRowChange<CoreEffect> args)
+	{
+		if (this.Client is null || this.ServerOptions is null)
+			return;
+
+		await this.Client.DeleteAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Item,
+			this.JsonSerializerOptions?.Value);
 	}
 }

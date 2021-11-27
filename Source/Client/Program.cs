@@ -51,6 +51,7 @@ builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProvider
 builder.Services.AddLogging();
 
 builder.Services.AddScoped<ReadDataCommand>();
+builder.Services.AddScoped<ComputeCharacterCommand>();
 
 builder.Services.Configure<BlazoriseOptions>(builder.Configuration.GetSection(nameof(BlazoriseOptions)));
 builder.Services.Configure<JsonSerializerOptions>(builder.Configuration.GetSection(nameof(JsonSerializerOptions)));

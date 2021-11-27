@@ -34,10 +34,10 @@
 		</DataGridColumn>
 	</DataGridColumns>
 	<ButtonRowTemplate>
-		<Button Color=Color.Primary Clicked=context.NewCommand.Clicked>
+		<Button Color=Color.Success Clicked=context.NewCommand.Clicked>
 			@context.NewCommand.LocalizationString
 		</Button>
-		<Button Color=Color.Secondary Clicked=context.EditCommand.Clicked>
+		<Button Color=Color.Warning Clicked=context.EditCommand.Clicked>
 			@context.EditCommand.LocalizationString
 		</Button>
 		<Button Color=Color.Danger Clicked=context.DeleteCommand.Clicked>
