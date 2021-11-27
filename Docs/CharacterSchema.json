@@ -1,5 +1,5 @@
 {
-	"$schema": "http://json-schema.org/schema",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"$id": "https://localhost:7289/v1/Schemas/Character",
 	"title": "Character",
 	"type": "object",
