@@ -7,7 +7,6 @@ using AutoMapper;
 using BlazorApp1.Server.Data;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -45,7 +44,7 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 			return BadRequest(this.ModelState);
 
 		TEntity entity = this.mapper.Map<TEntity>(input);
-		this.dbContext.Set<TEntity>().Update(entity);
+		this.dbContext.Set<TEntity>().Add(entity);
 		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
 
 		return Created(this.mapper.Map<TModel>(entity));

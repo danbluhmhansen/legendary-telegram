@@ -117,6 +117,9 @@ public partial class Details : ComponentBase
 		if (this.Client is null || this.ServerOptions is null)
 			return;
 
+		args.Values[nameof(args.Item.Id)] = args.Item.Id;
+		args.Values[nameof(args.Item.CharacterId)] = args.Item.CharacterId;
+
 		await this.Client.PutAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
 			this.JsonSerializerOptions?.Value);
 	}
