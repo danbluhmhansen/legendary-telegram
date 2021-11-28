@@ -1,13 +1,13 @@
 ﻿@inherits LayoutComponentBase
 
-<Layout Sider=true>
+<Layout Sider>
 	<LayoutSider>
 		<LayoutSiderContent>
 			<NavMenu />
 		</LayoutSiderContent>
 	</LayoutSider>
 	<Layout>
-		<LayoutHeader Fixed=true>
+		<LayoutHeader Fixed>
 			<Bar>
 				<BarMenu>
 					<BarStart></BarStart>
@@ -20,7 +20,9 @@
 			</Bar>
 		</LayoutHeader>
 		<LayoutContent>
-			@Body
+			<Container Fluid>
+				@Body
+			</Container>
 		</LayoutContent>
 	</Layout>
 </Layout>

@@ -30,7 +30,7 @@ public partial class Details : ComponentBase
 
 	private IEnumerable<Feature>? features;
 	private int? featuresCount;
-	private List<Feature> selectedFeatures = new();
+	private readonly List<Feature> selectedFeatures = new();
 
 	protected override async Task OnParametersSetAsync()
 	{
