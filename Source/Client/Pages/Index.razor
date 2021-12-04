@@ -11,11 +11,26 @@ Welcome to your new app.
 
 <Card>
 	<CardHeader>
-		@if (!string.IsNullOrWhiteSpace(selected.Key) || selected.Value is not null)
-		{
-			<Button Outline Color=Color.Dark><Icon Name=IconName.Add /></Button>
-			<Button Outline Color=Color.Dark><Icon Name=IconName.Remove /></Button>
-		}
+		<Tooltip Text=Add><Button Outline Color=Color.Dark Clicked=@(() => modalVisible = true)><Icon Name=IconName.Add /></Button>
+		</Tooltip>
+		<Tooltip Text=Edit>
+			<Button Outline Color=Color.Dark
+				Disabled=@(selected.Value is not JsonValue)>
+				<Icon Name=IconName.Edit />
+			</Button>
+		</Tooltip>
+		<Tooltip Text=Remove>
+			<Button Outline Color=Color.Dark Clicked=Remove
+				Disabled=@(selected.Value is null)>
+				<Icon Name=IconName.Remove />
+			</Button>
+		</Tooltip>
+		<Tooltip Text=Clear>
+			<Button Outline Color=Color.Dark Clicked=Clear
+				Disabled=@(selected.Value is null)>
+				<Icon Name=IconName.Clear />
+			</Button>
+		</Tooltip>
 	</CardHeader>
 	<CardBody>
 		<TreeView Nodes=tree HasChildNodes=HasChildNodes GetChildNodes=GetChildNodes @bind-SelectedNode=selected>
@@ -36,3 +51,22 @@ Welcome to your new app.
 		</TreeView>
 	</CardBody>
 </Card>
+
+<Modal Visible=modalVisible>
+	<ModalContent>
+		<ModalHeader>
+			<ModalTitle>Test</ModalTitle>
+			<CloseButton />
+		</ModalHeader>
+		<ModalBody>
+			<ListGroup Mode=ListGroupMode.Selectable @bind-bind-SelectedItem=selectedOperation>
+				<ListGroupItem Name=Plus><Icon Name=@("fa-plus") /></ListGroupItem>
+				<ListGroupItem Name=Minus><Icon Name=@("fa-minus") /></ListGroupItem>
+				<ListGroupItem Name=Times><Icon Name=@("fa-times") /></ListGroupItem>
+				<ListGroupItem Name=Divide><Icon Name=@("fa-divide") /></ListGroupItem>
+			</ListGroup>
+		</ModalBody>
+		<ModalFooter>
+		</ModalFooter>
+	</ModalContent>
+</Modal>

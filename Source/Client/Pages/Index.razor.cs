@@ -24,6 +24,9 @@ public partial class Index : ComponentBase
 
 	private KeyValuePair<string, JsonNode?> selected;
 
+	private bool modalVisible;
+	private string selectedOperation;
+
 	private bool HasChildNodes(KeyValuePair<string, JsonNode?> parent)
 	{
 		return parent.Value switch
@@ -46,5 +49,18 @@ public partial class Index : ComponentBase
 					new KeyValuePair<string, JsonNode?>(string.Empty, val))),
 			_ => Enumerable.Empty<KeyValuePair<string, JsonNode?>>(),
 		};
+	}
+
+	private void Clear() => this.selected = new KeyValuePair<string, JsonNode?>();
+
+	private void Remove()
+	{
+		if (this.selected.Value is null)
+			return;
+
+		if (this.selected.Value.Parent is JsonObject obj)
+			obj.Remove(this.selected.Key);
+		else if (this.selected.Value.Parent is JsonArray arr)
+			arr.Remove(this.selected.Value);
 	}
 }
