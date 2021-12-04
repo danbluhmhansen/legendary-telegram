@@ -1,7 +1,10 @@
 namespace BlazorApp1.Client.Pages;
 
-using System.Text.Json;
+using System.Linq;
 using System.Text.Json.Nodes;
+
+using BlazorApp1.Shared.Extensions;
+
 using Microsoft.AspNetCore.Components;
 
 public partial class Index : ComponentBase
@@ -19,12 +22,6 @@ public partial class Index : ComponentBase
 		}
 	};
 
-	protected override void OnParametersSet()
-	{
-		this.Logger?.LogInformation(((JsonObject)tree).ToJsonString());
-		base.OnParametersSet();
-	}
-
 	private bool HasChildNodes(KeyValuePair<string, JsonNode?> parent)
 	{
 		return parent.Value switch
@@ -37,20 +34,14 @@ public partial class Index : ComponentBase
 
 	private IEnumerable<KeyValuePair<string, JsonNode?>> GetChildNodes(KeyValuePair<string, JsonNode?> parent)
 	{
-		// this.Logger?.LogInformation(JsonSerializer.Serialize(parent));
 		return parent.Value switch
 		{
 			JsonObject obj => obj,
-			JsonArray arr => arr.Select((JsonNode? node) =>
-			{
-				// this.Logger?.LogInformation(node.GetType().Name);
-				// this.Logger?.LogInformation(JsonSerializer.Serialize(node));
-				if (node is JsonObject obj)
-				{
-					this.Logger?.LogInformation(JsonSerializer.Serialize(obj));
-				}
-				return new KeyValuePair<string, JsonNode?>(string.Empty, node);
-			}),
+			JsonArray arr => arr.OfType<JsonObject>().SelectMany()
+				.Concat(arr.OfType<JsonArray>().SelectMany().Select((JsonNode? node) =>
+					new KeyValuePair<string, JsonNode?>(string.Empty, node)))
+				.Concat(arr.OfType<JsonValue>().Select((JsonValue val) =>
+					new KeyValuePair<string, JsonNode?>(string.Empty, val))),
 			_ => Enumerable.Empty<KeyValuePair<string, JsonNode?>>(),
 		};
 	}

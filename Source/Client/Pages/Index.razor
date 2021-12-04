@@ -21,10 +21,6 @@ Welcome to your new app.
 				{
 					<Text>@context.Key</Text>
 				}
-				else if (context.Value is JsonObject or JsonArray)
-				{
-					<Text>[]</Text>
-				}
 				@if (context.Value is JsonValue val)
 				{
 					<Text>@val.ToJsonString()</Text>
