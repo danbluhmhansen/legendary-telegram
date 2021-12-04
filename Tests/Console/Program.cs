@@ -1,14 +1,27 @@
-﻿using System.Text.Json;
+﻿using System.Text.Json.Nodes;
 
-using Json.Logic;
-using Json.Schema;
-
-JsonDocument doc = JsonDocument.Parse("{\"Strength\":8}");
-
-Rule? rule = JsonSerializer.Deserialize<Rule>("{\"+\":[{\"var\":\"Strength\"},2]}");
-
-if (rule is not null)
+JsonNode tree = new JsonObject
 {
-	JsonElement result = rule.Apply(doc.RootElement);
-	Console.WriteLine(result.GetRawText());
+	{
+		"+",
+		new JsonArray(
+			new JsonObject
+			{
+				{
+					"var",
+					"Strength"
+				}
+			},
+			2
+		)
+	}
+};
+
+if (tree is JsonObject o)
+{
+	Console.WriteLine("Object");
+}
+if (tree is JsonArray a)
+{
+	Console.WriteLine("Array");
 }

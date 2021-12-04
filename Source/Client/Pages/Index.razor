@@ -1,7 +1,35 @@
 ﻿@page "/"
 
+@using System.Text.Json.Nodes
+
 <PageTitle>Index</PageTitle>
 
 <Heading Size=HeadingSize.Is1>Hello, world!</Heading>
 
 Welcome to your new app.
+
+
+<Card>
+	<CardHeader>
+		<Button Outline Color=Color.Dark>One</Button>
+		<Button Outline Color=Color.Dark>Two</Button>
+	</CardHeader>
+	<CardBody>
+		<TreeView Nodes=tree HasChildNodes=HasChildNodes GetChildNodes=GetChildNodes>
+			<NodeContent>
+				@if (!string.IsNullOrWhiteSpace(context.Key))
+				{
+					<Text>@context.Key</Text>
+				}
+				else if (context.Value is JsonObject or JsonArray)
+				{
+					<Text>[]</Text>
+				}
+				@if (context.Value is JsonValue val)
+				{
+					<Text>@val.ToJsonString()</Text>
+				}
+			</NodeContent>
+		</TreeView>
+	</CardBody>
+</Card>
