@@ -22,6 +22,8 @@ public partial class Index : ComponentBase
 		}
 	};
 
+	private KeyValuePair<string, JsonNode?> selected;
+
 	private bool HasChildNodes(KeyValuePair<string, JsonNode?> parent)
 	{
 		return parent.Value switch
