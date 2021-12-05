@@ -1,0 +1,91 @@
+@using System.Text.Json.Nodes
+
+<Card Width=Width.Is25>
+	<CardHeader>
+		<Buttons Role=ButtonsRole.Addons>
+			<Tooltip Text=Edit>
+				<Button Color=Color.Secondary Clicked=@(() => modalVisible = true)>
+					<Icon Name=IconName.Edit />
+				</Button>
+			</Tooltip>
+			<Tooltip Text=Remove>
+				<Button Color=Color.Secondary Clicked=Remove
+					Disabled=@(selected.Value is null)>
+					<Icon Name=IconName.Archive />
+				</Button>
+			</Tooltip>
+			<Tooltip Text=Clear>
+				<Button Color=Color.Secondary Clicked=Clear
+					Disabled=@(selected.Value is null)>
+					<Icon Name=IconName.Clear />
+				</Button>
+			</Tooltip>
+		</Buttons>
+	</CardHeader>
+	<CardBody>
+		<TreeView Nodes=Nodes HasChildNodes=HasChildNodes GetChildNodes=GetChildNodes @bind-SelectedNode=selected>
+			<NodeContent>
+				@if (context.Value is JsonObject or JsonArray)
+				{
+					<Text>@context.Key</Text>
+				}
+				else if (!string.IsNullOrWhiteSpace(context.Key))
+				{
+					<Text>@context.Key: @context.Value.ToJsonString()</Text>
+				}
+				else
+				{
+					<Text>@context.Value.ToJsonString()</Text>
+				}
+			</NodeContent>
+		</TreeView>
+	</CardBody>
+</Card>
+
+<Modal @bind-Visible=modalVisible Opening=Opening>
+	<ModalContent>
+		<ModalHeader>
+			<ModalTitle>Rules</ModalTitle>
+			<CloseButton />
+		</ModalHeader>
+		<ModalBody>
+			@if (this.selected.Value is JsonValue)
+			{
+				<TextEdit @bind-Text=selectedValue />
+			}
+			else
+			{
+				<ListGroup Mode=ListGroupMode.Selectable @bind-SelectedItem=selectedOperation>
+					<ListGroupItem Name=lit TextAlignment=TextAlignment.Center>
+						<Icon Name=@("fa-exclamation") />
+						<Text>Literal data</Text>
+					</ListGroupItem>
+					<ListGroupItem Name=var TextAlignment=TextAlignment.Center>
+						<Icon Name=@("fa-question") />
+						<Text>Variable data access</Text>
+					</ListGroupItem>
+					<ListGroupItem Name=+ TextAlignment=TextAlignment.Center>
+						<Icon Name=@("fa-plus") />
+						<Text>Addition operation</Text>
+					</ListGroupItem>
+					<ListGroupItem Name=- TextAlignment=TextAlignment.Center>
+						<Icon Name=@("fa-minus") />
+						<Text>Subtraction operation</Text>
+					</ListGroupItem>
+					<ListGroupItem Name=* TextAlignment=TextAlignment.Center>
+						<Icon Name=@("fa-times") />
+						<Text>Multiplication operation</Text>
+					</ListGroupItem>
+					<ListGroupItem Name=/ TextAlignment=TextAlignment.Center>
+						<Icon Name=@("fa-divide") />
+						<Text>Division operation</Text>
+					</ListGroupItem>
+				</ListGroup>
+			}
+		</ModalBody>
+		<ModalFooter>
+			<Button Clicked=@(() => modalVisible = false)>Cancel</Button>
+			<Button Clicked=Submit>Submit</Button>
+		</ModalFooter>
+	</ModalContent>
+</Modal>

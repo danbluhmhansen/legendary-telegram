@@ -1,4 +1,4 @@
-namespace BlazorApp1.Client.Pages;
+namespace BlazorApp1.Client.Components;
 
 using System.Linq;
 using System.Text.Json.Nodes;
@@ -9,20 +9,11 @@ using Blazorise;
 
 using Microsoft.AspNetCore.Components;
 
-public partial class Index : ComponentBase
+public partial class JsonLogicEdit : ComponentBase
 {
-	[Inject] private ILogger<Index>? Logger { get; init; }
+	[Parameter] public ICollection<KeyValuePair<string, JsonNode?>> Nodes { get; init; } =  new JsonObject();
 
-	private ICollection<KeyValuePair<string, JsonNode?>> tree = new JsonObject
-	{
-		{
-			"+",
-			new JsonArray(
-				new JsonObject { { "var", "Strength" } },
-				2
-			)
-		}
-	};
+	[Inject] private ILogger<JsonLogicEdit>? Logger { get; init; }
 
 	private KeyValuePair<string, JsonNode?> selected;
 
@@ -97,7 +88,7 @@ public partial class Index : ComponentBase
 					});
 					break;
 				default:
-					this.tree.Add(new KeyValuePair<string, JsonNode?>(this.selectedOperation, new JsonArray()));
+					this.Nodes.Add(new KeyValuePair<string, JsonNode?>(this.selectedOperation, new JsonArray()));
 					break;
 			}
 
