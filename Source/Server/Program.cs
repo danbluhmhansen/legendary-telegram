@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
@@ -82,13 +83,18 @@ EntitySetConfiguration<BlazorApp1.Shared.Models.v1.CharacterFeature> characterFe
 characterFeaturesConfiguration.EntityType
 	.HasKey((BlazorApp1.Shared.Models.v1.CharacterFeature characterFeature) =>
 		new { characterFeature.CharacterId, characterFeature.FeatureId });
+odataBuilder.EntitySet<BlazorApp1.Server.Controllers.Test>("Tests");
 IEdmModel edmModel = odataBuilder.GetEdmModel();
 
 builder.Services
 	.AddControllersWithViews()
 	.AddOData((ODataOptions options) =>
 	{
-		options.AddRouteComponents("v1", edmModel, new DefaultODataBatchHandler());
+		options.AddRouteComponents("v1", edmModel, (IServiceCollection services) =>
+		{
+			services.AddSingleton(new DefaultODataBatchHandler());
+			services.AddSingleton<ODataResourceSerializer, CustomODataResourceSerializer>();
+		});
 
 		IODataControllerActionConvention? odataConvention = options.Conventions
 			.FirstOrDefault((IODataControllerActionConvention convention) =>
