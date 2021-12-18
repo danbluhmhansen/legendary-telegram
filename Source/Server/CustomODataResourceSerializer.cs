@@ -2,7 +2,7 @@ namespace BlazorApp1.Server;
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Microsoft.AspNetCore.OData.Formatter;
+
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -14,62 +14,33 @@ public class CustomODataResourceSerializer : ODataResourceSerializer
 	public override async Task WriteObjectInlineAsync(
 		object graph, IEdmTypeReference expectedType, ODataWriter writer, ODataSerializerContext writeContext)
 	{
-		switch (graph)
+		if (graph is JsonObject obj)
 		{
-			case JsonObject obj:
-				ODataResource resource = new()
-				{
-					Properties = obj.Select((KeyValuePair<string, JsonNode?> node) => new ODataProperty
-					{
-						Name = node.Key,
-						Value = JsonNodeToOdataValue(node.Value),
-					}),
-				};
-				await writer.WriteStartAsync(resource);
-				await writer.WriteEndAsync();
-				break;
-			case JsonArray arr:
-				break;
-			case JsonValue val:
-				break;
-			default:
-				await base.WriteObjectInlineAsync(graph, expectedType, writer, writeContext);
-				break;
-		}
-	}
-
-	private ODataResourceValue JsonObjectToODataResource(JsonObject jsonObject)
-	{
-		return new ODataResourceValue
-		{
-			TypeName = nameof(JsonObject),
-			Properties = jsonObject.Select((KeyValuePair<string, JsonNode?> node) => new ODataProperty
+			await writer.WriteStartAsync(new ODataResource
 			{
-				Name = node.Key,
-				Value = JsonNodeToOdataValue(node.Value),
-			}),
-		};
-	}
-
-	private ODataCollectionValue JsonArrayToODataCollection(JsonArray jsonArray)
-	{
-		return new ODataCollectionValue
+				Properties = obj.Select((KeyValuePair<string, JsonNode?> node) => new ODataProperty
+				{
+					Name = node.Key,
+					Value = new ODataUntypedValue { RawValue = node.Value?.ToJsonString() },
+				}),
+			});
+			await writer.WriteEndAsync();
+		}
+		else if (graph is JsonElement element && element.ValueKind is JsonValueKind.Object)
 		{
-			Items = jsonArray.Select((JsonNode? node) => JsonNodeToOdataValue(node)),
-		};
-	}
-
-	private object? JsonNodeToOdataValue(JsonNode? jsonNode)
-	{
-		return jsonNode switch
+			await writer.WriteStartAsync(new ODataResource
+			{
+				Properties = element.EnumerateObject().Select((JsonProperty prop) => new ODataProperty
+				{
+					Name = prop.Name,
+					Value = new ODataUntypedValue { RawValue = prop.Value.GetRawText() },
+				}),
+			});
+			await writer.WriteEndAsync();
+		}
+		else
 		{
-			JsonValue val when val.TryGetValue(out int number) => number,
-			JsonValue val when val.TryGetValue(out decimal number) => number,
-			JsonValue val when val.TryGetValue(out bool boolean) => boolean,
-			JsonValue val when val.TryGetValue(out string? text) => text,
-			JsonObject obj => JsonObjectToODataResource(obj),
-			JsonArray arr => JsonArrayToODataCollection(arr),
-			_ => null,
-		};
+			await base.WriteObjectInlineAsync(graph, expectedType, writer, writeContext);
+		}
 	}
 }
