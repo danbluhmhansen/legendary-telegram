@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"razor.disableBlazorDebugPrompt": true
+	}
+}
