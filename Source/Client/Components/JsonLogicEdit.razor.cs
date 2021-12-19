@@ -1,6 +1,7 @@
 namespace BlazorApp1.Client.Components;
 
 using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using BlazorApp1.Shared.Extensions;
@@ -9,17 +10,43 @@ using Blazorise;
 
 using Microsoft.AspNetCore.Components;
 
-public partial class JsonLogicEdit : ComponentBase
+public partial class JsonLogicEdit : BaseTextInput<JsonObject>
 {
-	[Parameter] public ICollection<KeyValuePair<string, JsonNode?>> Nodes { get; init; } =  new JsonObject();
+	[Parameter] public string Value { get; set; } = string.Empty;
+	[Parameter] public EventCallback<string> ValueChanged { get; set; }
 
 	[Inject] private ILogger<JsonLogicEdit>? Logger { get; init; }
+
+	protected override JsonObject InternalValue
+	{
+		get => JsonObject.Create(JsonDocument.Parse(this.Value).RootElement) ?? new JsonObject();
+		set => this.Value = value.ToJsonString();
+	}
 
 	private KeyValuePair<string, JsonNode?> selected;
 
 	private bool modalVisible;
 	private string? selectedOperation;
 	private string? selectedValue;
+
+	protected override Task<ParseValue<JsonObject>> ParseValueFromStringAsync(
+		string value)
+	{
+		try
+		{
+			JsonObject? obj = JsonObject.Create(JsonDocument.Parse(value).RootElement);
+			if (obj is null)
+				return Task.FromResult(ParseValue<JsonObject>.Empty);
+			return Task.FromResult(new ParseValue<JsonObject>(true, obj));
+		}
+		catch (JsonException)
+		{
+			return Task.FromResult(ParseValue<JsonObject>.Empty);
+		}
+	}
+
+	protected override Task OnInternalValueChanged(JsonObject value) =>
+		this.ValueChanged.InvokeAsync(value.ToJsonString());
 
 	private bool HasChildNodes(KeyValuePair<string, JsonNode?> parent)
 	{
@@ -88,7 +115,8 @@ public partial class JsonLogicEdit : ComponentBase
 					});
 					break;
 				default:
-					this.Nodes.Add(new KeyValuePair<string, JsonNode?>(this.selectedOperation, new JsonArray()));
+					this.InternalValue.Add(new KeyValuePair<string, JsonNode?>(
+						this.selectedOperation, new JsonArray()));
 					break;
 			}
 

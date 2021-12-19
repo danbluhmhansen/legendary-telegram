@@ -1,6 +1,7 @@
 @using System.Text.Json.Nodes
+@inherits BaseTextInput<JsonObject>
 
-<Card Width=Width.Is25>
+<Card>
 	<CardHeader>
 		<Buttons Role=ButtonsRole.Addons>
 			<Tooltip Text=Edit>
@@ -23,7 +24,8 @@
 		</Buttons>
 	</CardHeader>
 	<CardBody>
-		<TreeView Nodes=Nodes HasChildNodes=HasChildNodes GetChildNodes=GetChildNodes @bind-SelectedNode=selected>
+		<TreeView Nodes=InternalValue HasChildNodes=HasChildNodes GetChildNodes=GetChildNodes
+			@bind-SelectedNode=selected>
 			<NodeContent>
 				@if (context.Value is JsonObject or JsonArray)
 				{
