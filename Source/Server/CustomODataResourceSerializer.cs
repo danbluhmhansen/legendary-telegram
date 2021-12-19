@@ -14,6 +14,9 @@ public class CustomODataResourceSerializer : ODataResourceSerializer
 	public override async Task WriteObjectInlineAsync(
 		object graph, IEdmTypeReference expectedType, ODataWriter writer, ODataSerializerContext writeContext)
 	{
+		if (graph is null)
+			return;
+
 		if (graph is JsonObject obj)
 		{
 			await writer.WriteStartAsync(new ODataResource

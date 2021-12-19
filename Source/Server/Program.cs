@@ -73,18 +73,17 @@ builder.Services.AddAutoMapper((IMapperConfigurationExpression expression) =>
 		.ReverseMap();
 });
 
-ODataConventionModelBuilder odataBuilder = new();
-odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Character>("Characters");
-odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Feature>("Features");
-odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.CoreEffect>("CoreEffects");
-odataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Effect>("Effects");
-EntitySetConfiguration<BlazorApp1.Shared.Models.v1.CharacterFeature> characterFeaturesConfiguration = odataBuilder
+ODataConventionModelBuilder oDataBuilder = new();
+oDataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Character>("Characters");
+oDataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Feature>("Features");
+oDataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.CoreEffect>("CoreEffects");
+oDataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Effect>("Effects");
+EntitySetConfiguration<BlazorApp1.Shared.Models.v1.CharacterFeature> characterFeaturesConfiguration = oDataBuilder
 	.EntitySet<BlazorApp1.Shared.Models.v1.CharacterFeature>("CharacterFeatures");
 characterFeaturesConfiguration.EntityType
 	.HasKey((BlazorApp1.Shared.Models.v1.CharacterFeature characterFeature) =>
 		new { characterFeature.CharacterId, characterFeature.FeatureId });
-odataBuilder.EntitySet<BlazorApp1.Server.Controllers.Test>("Tests");
-IEdmModel edmModel = odataBuilder.GetEdmModel();
+IEdmModel edmModel = oDataBuilder.GetEdmModel();
 
 builder.Services
 	.AddControllersWithViews()
@@ -96,11 +95,11 @@ builder.Services
 			services.AddSingleton<ODataResourceSerializer, CustomODataResourceSerializer>();
 		});
 
-		IODataControllerActionConvention? odataConvention = options.Conventions
+		IODataControllerActionConvention? oDataConvention = options.Conventions
 			.FirstOrDefault((IODataControllerActionConvention convention) =>
 				convention.GetType() == typeof(EntitySetRoutingConvention));
-		if (odataConvention is not null)
-			options.Conventions.Remove(odataConvention);
+		if (oDataConvention is not null)
+			options.Conventions.Remove(oDataConvention);
 
 		options.Conventions.Add(new CustomEntitySetRoutingConvention());
 	});
