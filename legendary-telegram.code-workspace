@@ -1,0 +1,30 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "Solution"
+		}
+	],
+	"settings": {
+		"razor.disableBlazorDebugPrompt": true,
+		"csharp.semanticHighlighting.enabled": true,
+		"editor.suggestSelection": "first",
+		"editor.rulers": [ 120 ],
+		"editor.semanticHighlighting.enabled": true,
+		"files.insertFinalNewline": true,
+		"files.trimFinalNewlines": true,
+		"files.trimTrailingWhitespace": true,
+		"omnisharp.enableRoslynAnalyzers": true,
+		"omnisharp.organizeImportsOnFormat": true,
+		"vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+		"[jsonc]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"[json]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"editor.wrappingIndent": "indent",
+		"editor.wordWrap": "wordWrapColumn",
+		"editor.wordWrapColumn": 120
+	}
+}
