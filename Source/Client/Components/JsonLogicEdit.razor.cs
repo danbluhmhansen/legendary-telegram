@@ -10,7 +10,7 @@ using Blazorise;
 
 using Microsoft.AspNetCore.Components;
 
-public partial class JsonLogicEdit : BaseTextInput<JsonObject>
+public partial class JsonLogicEdit : BaseInputComponent<JsonObject>
 {
 	[Parameter] public string Value { get; set; } = string.Empty;
 	[Parameter] public EventCallback<string> ValueChanged { get; set; }

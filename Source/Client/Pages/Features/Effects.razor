@@ -10,11 +10,7 @@
 	<DataGridColumns>
 		<DataGridColumn TItem=Effect Field=@nameof(Effect.Name) Caption=Name Editable />
 		<DataGridColumn TItem=Effect Field=@nameof(Effect.Path) Caption=Path Editable />
-		<DataGridColumn TItem=Effect Field=@nameof(Effect.Rule) Caption=Rule Editable>
-			<EditTemplate>
-				<JsonLogicEdit Value=@((string)context.CellValue) />
-			</EditTemplate>
-		</DataGridColumn>
+		<DataGridColumn TItem=Effect Field=@nameof(Effect.Rule) Caption=Rule Editable />
 	</DataGridColumns>
 	<ButtonRowTemplate>
 		<Button Color=Color.Success Clicked=context.NewCommand.Clicked>
