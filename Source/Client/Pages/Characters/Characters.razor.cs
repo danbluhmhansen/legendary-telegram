@@ -1,35 +1,66 @@
 namespace BlazorApp1.Client.Pages.Characters;
 
-using BlazorApp1.Client.Commands;
-using BlazorApp1.Client.Models;
+using BlazorApp1.Client.Data;
+using BlazorApp1.Shared.Extensions;
 using BlazorApp1.Shared.Models.v1;
 
+using Blazorise;
 using Blazorise.DataGrid;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.OData.Client;
 
 public partial class Characters : ComponentBase
 {
-	[Inject] private ReadDataCommand? ReadDataCommand { get; init; }
+	[Inject] private ODataServiceContext? Context { get; init; }
 	[Inject] private NavigationManager? Navigation { get; init; }
+	[Inject] private ILogger<Characters> Logger { get; init; }
 
 	private ICollection<Character> data = new List<Character>();
 	private int? count;
 
 	private async Task OnReadData(DataGridReadDataEventArgs<Character> args)
 	{
-		if (this.ReadDataCommand is null)
+		if (this.Context is null)
 			return;
 
-		ODataCollectionResponse<Character>? response = await this.ReadDataCommand.ExecuteAsync(args, "v1/Characters");
+		IQueryable<Character> query = this.Context.Characters.IncludeCount();
 
-		if (response is null)
-			return;
+		switch (args.ReadDataMode)
+		{
+			case DataGridReadDataMode.Paging:
+				query = query.Skip((args.Page - 1) * args.PageSize).Take(args.PageSize);
+				break;
+			case DataGridReadDataMode.Virtualize:
+				query = query.Skip(args.VirtualizeOffset).Take(args.VirtualizeCount);
+				break;
+		}
 
-		this.data = response.Value.ToList();
-		this.count = response.Count;
+		IOrderedEnumerable<DataGridColumnInfo> orderColumns = args.Columns
+			.Where((DataGridColumnInfo column) => column.SortDirection is not SortDirection.None)
+			.OrderBy((DataGridColumnInfo column) => column.SortIndex);
+		if (orderColumns.Any())
+		{
+			DataGridColumnInfo firstColumn = orderColumns.First();
+			IOrderedQueryable<Character> orderedQuery = firstColumn.SortDirection is SortDirection.Ascending
+				? query.OrderBy(firstColumn.SortField)
+				: query.OrderByDescending(firstColumn.SortField);
 
-		StateHasChanged();
+			foreach (DataGridColumnInfo column in orderColumns.Skip(1))
+			{
+				orderedQuery = firstColumn.SortDirection is SortDirection.Ascending
+					? query.OrderBy(firstColumn.SortField)
+					: query.OrderByDescending(firstColumn.SortField);
+			}
+
+			query = orderedQuery;
+		}
+
+		IEnumerable<Character> response = await ((DataServiceQuery<Character>)query)
+			.ExecuteAsync(args.CancellationToken);
+
+		this.data = response.ToList();
+		this.count = 1337;
 	}
 
 	private void OnSelectRow(Character args) => this.Navigation?.NavigateTo($"/Characters/{args.Id}");

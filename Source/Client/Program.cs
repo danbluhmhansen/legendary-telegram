@@ -3,6 +3,7 @@ using System.Text.Json;
 using BlazorApp1.Client;
 using BlazorApp1.Client.Commands;
 using BlazorApp1.Client.Configuration;
+using BlazorApp1.Client.Data;
 
 using Blazorise;
 using Blazorise.Bootstrap5;
@@ -12,6 +13,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.OData.Client;
+using Microsoft.OData.Extensions.Client;
 
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -49,6 +52,19 @@ builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProvider
 });
 
 builder.Services.AddLogging();
+
+builder.Services.AddODataClient()
+	.ConfigureODataClient((DataServiceContext context) =>
+	{
+		context.BaseUri = new Uri(builder.Configuration.GetSection("ServerOptions").GetValue<string>("Route") + "v1/");
+		context.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;
+		context.Format.UseJson();
+	})
+	.AddHttpClient();
+
+builder.Services.AddScoped((IServiceProvider serviceProvider) =>
+	serviceProvider.GetRequiredService<IODataClientFactory>().CreateClient<ODataServiceContext>(
+		serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route));
 
 builder.Services.AddScoped<ReadDataCommand>();
 builder.Services.AddScoped<ComputeCharacterCommand>();
