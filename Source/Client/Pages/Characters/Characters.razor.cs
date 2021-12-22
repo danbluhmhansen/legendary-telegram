@@ -56,11 +56,12 @@ public partial class Characters : ComponentBase
 			query = orderedQuery;
 		}
 
-		IEnumerable<Character> response = await ((DataServiceQuery<Character>)query)
-			.ExecuteAsync(args.CancellationToken);
+		if (await ((DataServiceQuery<Character>)query).ExecuteAsync(args.CancellationToken)
+			is not QueryOperationResponse<Character> response)
+			return;
 
 		this.data = response.ToList();
-		this.count = 1337;
+		this.count = (int?)response.Count;
 	}
 
 	private void OnSelectRow(Character args) => this.Navigation?.NavigateTo($"/Characters/{args.Id}");

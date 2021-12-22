@@ -53,10 +53,9 @@ builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProvider
 
 builder.Services.AddLogging();
 
-builder.Services.AddODataClient()
+builder.Services.AddODataClient("BlazorApp1.ServerAPI")
 	.ConfigureODataClient((DataServiceContext context) =>
 	{
-		context.BaseUri = new Uri(builder.Configuration.GetSection("ServerOptions").GetValue<string>("Route") + "v1/");
 		context.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;
 		context.Format.UseJson();
 	})
@@ -64,7 +63,7 @@ builder.Services.AddODataClient()
 
 builder.Services.AddScoped((IServiceProvider serviceProvider) =>
 	serviceProvider.GetRequiredService<IODataClientFactory>().CreateClient<ODataServiceContext>(
-		serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route));
+		new Uri(serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route + "v1/")));
 
 builder.Services.AddScoped<ReadDataCommand>();
 builder.Services.AddScoped<ComputeCharacterCommand>();
