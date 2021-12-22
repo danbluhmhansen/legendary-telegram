@@ -19,15 +19,29 @@ public partial class JsonLogicEdit : BaseInputComponent<JsonObject>
 
 	protected override JsonObject InternalValue
 	{
-		get => JsonObject.Create(JsonDocument.Parse(this.Value).RootElement) ?? new JsonObject();
-		set => this.Value = value.ToJsonString();
+		get
+		{
+			return this.internalValue;
+		}
+		set
+		{
+			this.internalValue = value;
+			this.Value = this.internalValue.ToJsonString();
+		}
 	}
 
+	private JsonObject internalValue = new JsonObject();
 	private KeyValuePair<string, JsonNode?> selected;
 
 	private bool modalVisible;
 	private string? selectedOperation;
 	private string? selectedValue;
+
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+		this.internalValue = JsonObject.Create(JsonDocument.Parse(this.Value).RootElement) ?? new JsonObject();
+	}
 
 	protected override Task<ParseValue<JsonObject>> ParseValueFromStringAsync(
 		string value)
