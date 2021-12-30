@@ -17,6 +17,7 @@ public partial class Effects : ComponentBase
 	[Inject] private HttpClient? Client { get; init; }
 	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
 	[Inject] private IOptions<ServerOptions>? ServerOptions { get; init; }
+	[Inject] private ILogger<Effects>? Logger { get; init; }
 
 	private async Task OnRowRemoving(CancellableRowChange<Effect> args)
 	{
