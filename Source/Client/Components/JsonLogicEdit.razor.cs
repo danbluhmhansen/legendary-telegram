@@ -17,20 +17,8 @@ public partial class JsonLogicEdit : BaseInputComponent<JsonObject>
 
 	[Inject] private ILogger<JsonLogicEdit>? Logger { get; init; }
 
-	protected override JsonObject InternalValue
-	{
-		get
-		{
-			return this.internalValue;
-		}
-		set
-		{
-			this.internalValue = value;
-			this.Value = this.internalValue.ToJsonString();
-		}
-	}
+	protected override JsonObject InternalValue { get; set; } = new();
 
-	private JsonObject internalValue = new JsonObject();
 	private KeyValuePair<string, JsonNode?> selected;
 
 	private bool modalVisible;
@@ -40,11 +28,10 @@ public partial class JsonLogicEdit : BaseInputComponent<JsonObject>
 	protected override void OnParametersSet()
 	{
 		base.OnParametersSet();
-		this.internalValue = JsonObject.Create(JsonDocument.Parse(this.Value).RootElement) ?? new JsonObject();
+		this.InternalValue = JsonObject.Create(JsonDocument.Parse(this.Value).RootElement) ?? new JsonObject();
 	}
 
-	protected override Task<ParseValue<JsonObject>> ParseValueFromStringAsync(
-		string value)
+	protected override Task<ParseValue<JsonObject>> ParseValueFromStringAsync(string value)
 	{
 		try
 		{
@@ -129,7 +116,7 @@ public partial class JsonLogicEdit : BaseInputComponent<JsonObject>
 					});
 					break;
 				default:
-					this.InternalValue.Add(new KeyValuePair<string, JsonNode?>(
+					this.CurrentValue.Add(new KeyValuePair<string, JsonNode?>(
 						this.selectedOperation, new JsonArray()));
 					break;
 			}
