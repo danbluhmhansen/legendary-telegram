@@ -10,13 +10,15 @@
 	ShowPager
 	Filterable
 	Editable
+	Responsive
 	EditMode=DataGridEditMode.Popup
 	CommandMode=DataGridCommandMode.ButtonRow
 	PopupSize=ModalSize.Large
+	RowDoubleClicked=@(async args => await this.dataGrid.Edit(args.Item))
 	RowInserting=OnRowInserting
 	RowUpdating=OnRowUpdating
 	RowRemoving=OnRowRemoving
-	Responsive>
+	@ref=dataGrid>
 	<DataGridColumns>
 		<DataGridCommandColumn TItem=Feature></DataGridCommandColumn>
 		<DataGridColumn TItem=Feature Field=@nameof(Feature.Name) Caption=Name Editable />

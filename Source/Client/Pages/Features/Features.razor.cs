@@ -24,6 +24,8 @@ public partial class Features : ComponentBase
 	private ICollection<Feature> data = new List<Feature>();
 	private int? count;
 
+	private DataGrid<Feature>? dataGrid;
+
 	private async Task OnReadData(DataGridReadDataEventArgs<Feature> args)
 	{
 		if (this.ReadDataCommand is null)
