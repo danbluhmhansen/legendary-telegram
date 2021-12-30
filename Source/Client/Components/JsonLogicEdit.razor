@@ -51,7 +51,7 @@
 			<CloseButton />
 		</ModalHeader>
 		<ModalBody>
-			<Condition Evaluation="@(selected.Value is JsonValue)">
+			<Condition Evaluation=@(selected.Value is JsonValue)>
 				<True>
 					<TextEdit @bind-Text=selectedValue />
 				</True>
