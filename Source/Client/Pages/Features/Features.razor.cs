@@ -59,7 +59,7 @@ public partial class Features : ComponentBase
 			return;
 
 		await this.Client.PutAsJsonAsync(
-			$"{this.ServerOptions.Value.Route}v1/Features", args.Values,
+			$"{this.ServerOptions.Value.Route}v1/Features", args.Item,
 			this.JsonSerializerOptions?.Value);
 	}
 

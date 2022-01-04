@@ -44,7 +44,7 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 			return BadRequest(this.ModelState);
 
 		TEntity entity = this.mapper.Map<TEntity>(input);
-		this.dbContext.Set<TEntity>().Add(entity);
+		this.dbContext.Add(entity);
 		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
 
 		return Created(this.mapper.Map<TModel>(entity));
@@ -57,7 +57,7 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 			return BadRequest(this.ModelState);
 
 		TEntity entity = this.mapper.Map<TEntity>(input);
-		this.dbContext.Set<TEntity>().Update(entity);
+		this.dbContext.Update(entity);
 		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
 
 		return Updated(this.mapper.Map<TModel>(entity));
@@ -70,7 +70,7 @@ public abstract class BaseODataController<TModel, TEntity> : ODataController
 			return BadRequest(this.ModelState);
 
 		TEntity entity = this.mapper.Map<TEntity>(input);
-		this.dbContext.Set<TEntity>().Remove(entity);
+		this.dbContext.Remove(entity);
 		await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
 
 		return NoContent();
