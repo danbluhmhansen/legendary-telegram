@@ -24,6 +24,8 @@ public partial class Features : ComponentBase
 	private ICollection<Feature> data = new List<Feature>();
 	private int? count;
 
+	private DataGrid<Feature>? dataGrid;
+
 	private async Task OnReadData(DataGridReadDataEventArgs<Feature> args)
 	{
 		if (this.ReadDataCommand is null)
@@ -57,7 +59,7 @@ public partial class Features : ComponentBase
 			return;
 
 		await this.Client.PutAsJsonAsync(
-			$"{this.ServerOptions.Value.Route}v1/Features", args.Values,
+			$"{this.ServerOptions.Value.Route}v1/Features", args.Item,
 			this.JsonSerializerOptions?.Value);
 	}
 

@@ -64,5 +64,6 @@ public partial class Characters : ComponentBase
 		this.count = (int?)response.Count;
 	}
 
-	private void OnSelectRow(Character args) => this.Navigation?.NavigateTo($"/Characters/{args.Id}");
+	private void OnRowClicked(DataGridRowMouseEventArgs<Character> args) =>
+		this.Navigation?.NavigateTo($"/Characters/{args.Item.Id}");
 }

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.OData.Edm;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.OData.Routing.Template;
@@ -71,7 +70,7 @@ public class CustomEntitySetRoutingConvention : IODataControllerActionConvention
 			return false;
 		}
 
-		string castTypeName = actionName.Substring(index + 4); // + 4 means to skip the "From"
+		string castTypeName = actionName[(index + 4)..]; // + 4 means to skip the "From"
 
 		if (castTypeName.Length == 0)
 		{
@@ -82,22 +81,22 @@ public class CustomEntitySetRoutingConvention : IODataControllerActionConvention
 			return false;
 		}
 
-		IEdmStructuredType castType = FindTypeInInheritance(entityType, context.Model, castTypeName);
+		IEdmStructuredType? castType = FindTypeInInheritance(entityType, context.Model, castTypeName);
 		if (castType == null)
 		{
 			return false;
 		}
 
-		string actionPrefix = actionName.Substring(0, index);
+		string actionPrefix = actionName[..index];
 		return ProcessEntitySetAction(actionPrefix, entitySet, castType, context, action);
 	}
 
-	private bool ProcessEntitySetAction(string actionName, IEdmEntitySet entitySet, IEdmStructuredType castType,
+	private bool ProcessEntitySetAction(string actionName, IEdmEntitySet entitySet, IEdmStructuredType? castType,
 		ODataControllerActionContext context, ActionModel action)
 	{
 		if (actionName == "Get" || actionName == $"Get{entitySet.Name}")
 		{
-			IEdmCollectionType castCollectionType = null;
+			IEdmCollectionType? castCollectionType = null;
 			if (castType != null)
 			{
 				castCollectionType = ToCollection(castType, true);
@@ -220,7 +219,8 @@ public class CustomEntitySetRoutingConvention : IODataControllerActionConvention
 	/// <param name="model">The Edm model.</param>
 	/// <param name="typeName">The searching type name.</param>
 	/// <returns>The found type.</returns>
-	public IEdmStructuredType FindTypeInInheritance(IEdmStructuredType structuralType, IEdmModel model, string typeName)
+	public IEdmStructuredType? FindTypeInInheritance(
+		IEdmStructuredType structuralType, IEdmModel model, string typeName)
 	{
 		IEdmStructuredType baseType = structuralType;
 		while (baseType != null)
@@ -236,16 +236,8 @@ public class CustomEntitySetRoutingConvention : IODataControllerActionConvention
 		return model.FindAllDerivedTypes(structuralType).FirstOrDefault(c => GetName(c) == typeName);
 	}
 
-	private static string GetName(IEdmStructuredType type)
-	{
-		IEdmEntityType entityType = type as IEdmEntityType;
-		if (entityType != null)
-		{
-			return entityType.Name;
-		}
-
-		return ((IEdmComplexType)type).Name;
-	}
+	private static string GetName(IEdmStructuredType type) =>
+		type is IEdmEntityType entityType ? entityType.Name : ((IEdmComplexType)type).Name;
 
 	/// <summary>
 	/// Converts the <see cref="IEdmType"/> to <see cref="IEdmCollectionType"/>.

@@ -32,6 +32,14 @@ public partial class Details : ComponentBase
 	private int? featuresCount;
 	private readonly List<Feature> selectedFeatures = new();
 
+	private IEnumerable<JsonProperty> GetJsonProperties =>
+		this.json.EnumerateObject()
+			.Where(x => x.Value.ValueKind switch
+			{
+				JsonValueKind.String or JsonValueKind.Number => true,
+				_ => false,
+			});
+
 	protected override async Task OnParametersSetAsync()
 	{
 		if (this.Client is null || this.ServerOptions is null)

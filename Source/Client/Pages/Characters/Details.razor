@@ -7,38 +7,26 @@
 	<Column><Heading Size=HeadingSize.Is1>@character?.Name</Heading></Column>
 </Row>
 <Row>
-	@foreach (JsonProperty property in this.json.EnumerateObject()
-		.Where(x => x.Value.ValueKind switch
-		{
-			JsonValueKind.String or JsonValueKind.Number => true,
-			_ => false,
-		}))
-	{
+	<Iterator Items=GetJsonProperties>
 		<Column TextAlignment=TextAlignment.Center>
-			<Text>@property.Name</Text>
+			<Text>@context.Item.Name</Text>
 		</Column>
-	}
+	</Iterator>
 </Row>
 <Row>
-	@foreach (JsonProperty property in this.json.EnumerateObject()
-		.Where(x => x.Value.ValueKind switch
-		{
-			JsonValueKind.String or JsonValueKind.Number => true,
-			_ => false,
-		}))
-	{
+	<Iterator Items=GetJsonProperties>
 		<Column TextAlignment=TextAlignment.Center>
-			@switch (property.Value.ValueKind)
+			@switch (context.Item.Value.ValueKind)
 			{
 				case JsonValueKind.String:
-					<Text>@property.Value.GetString()</Text>
+					<Text>@context.Item.Value.GetString()</Text>
 					break;
 				case JsonValueKind.Number:
-					<Text>@property.Value.GetInt32()</Text>
+					<Text>@context.Item.Value.GetInt32()</Text>
 					break;
 			}
 		</Column>
-	}
+	</Iterator>
 </Row>
 
 <Row Flex=Flex.AlignItems.Center>
