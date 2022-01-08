@@ -1,13 +1,17 @@
 ﻿
 <AuthorizeView>
 	<Authorized>
-		<Button Type=ButtonType.Link Color=Color.Primary To="authentication/profile">
-			Hello, @context.User.Identity?.Name!
-		</Button>
-		<Button Type=ButtonType.Link Color=Color.Secondary Clicked="@BeginSignOut">Log out</Button>
+		<Buttons>
+			<Button Type=ButtonType.Link Color=Color.Primary To="authentication/profile">
+				Hello, @context.User.Identity?.Name!
+			</Button>
+			<Button Type=ButtonType.Link Color=Color.Secondary Clicked="@BeginSignOut">Log out</Button>
+		</Buttons>
 	</Authorized>
 	<NotAuthorized>
-		<Button Type=ButtonType.Link Color=Color.Primary To="authentication/register">Register</Button>
-		<Button Type=ButtonType.Link Color=Color.Secondary To="authentication/login">Log in</Button>
+		<Buttons>
+			<Button Type=ButtonType.Link Color=Color.Primary To="authentication/register">Register</Button>
+			<Button Type=ButtonType.Link Color=Color.Secondary To="authentication/login">Log in</Button>
+		</Buttons>
 	</NotAuthorized>
 </AuthorizeView>

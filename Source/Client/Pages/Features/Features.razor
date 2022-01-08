@@ -36,18 +36,18 @@
 		</DataGridColumn>
 	</DataGridColumns>
 	<ButtonRowTemplate>
-		<Button Color=Color.Success Clicked=context.NewCommand.Clicked>
-			@context.NewCommand.LocalizationString
-		</Button>
-		<Button Color=Color.Warning Clicked=context.EditCommand.Clicked>
-			@context.EditCommand.LocalizationString
-		</Button>
-		<Button Color=Color.Danger Clicked=context.DeleteCommand.Clicked>
-			@context.DeleteCommand.LocalizationString
-		</Button>
+		<Buttons>
+			<Button Color=Color.Success Clicked=context.NewCommand.Clicked>
+				@context.NewCommand.LocalizationString
+			</Button>
+			<Button Color=Color.Warning Clicked=context.EditCommand.Clicked>
+				@context.EditCommand.LocalizationString
+			</Button>
+			<Button Color=Color.Danger Clicked=context.DeleteCommand.Clicked>
+				@context.DeleteCommand.LocalizationString
+			</Button>
+		</Buttons>
 	</ButtonRowTemplate>
 	<EmptyTemplate>No records...</EmptyTemplate>
-	<LoadingTemplate>
-		<SpinKit Type=SpinKitType.Circle Centered />
-	</LoadingTemplate>
+	<LoadingTemplate><Progress><ProgressBar Animated /></Progress></LoadingTemplate>
 </DataGrid>
