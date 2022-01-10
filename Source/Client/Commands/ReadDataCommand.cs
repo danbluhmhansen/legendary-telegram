@@ -1,33 +1,67 @@
 namespace BlazorApp1.Client.Commands;
 
-using System.Collections.Specialized;
 using System.Net.Http.Json;
-using System.Web;
 
-using BlazorApp1.Client.Configuration;
+using BlazorApp1.Client.Data;
 using BlazorApp1.Client.Models;
+using BlazorApp1.Shared.Extensions;
 
 using Blazorise;
 using Blazorise.DataGrid;
 
-using Microsoft.Extensions.Options;
+using Microsoft.OData.Client;
 
 public class ReadDataCommand
 {
+	private readonly ODataServiceContext context;
 	private readonly HttpClient client;
-	private readonly IOptions<ServerOptions> serverOptions;
 	private readonly ILogger<ReadDataCommand> logger;
 
-	public ReadDataCommand(HttpClient client, IOptions<ServerOptions> serverOptions, ILogger<ReadDataCommand> logger)
+	public ReadDataCommand(ODataServiceContext context, HttpClient client, ILogger<ReadDataCommand> logger)
 	{
 		this.client = client;
 		this.logger = logger;
-		this.serverOptions = serverOptions;
+		this.context = context;
 	}
 
-	public async Task<ODataCollectionResponse<T>?> ExecuteAsync<T>(DataGridReadDataEventArgs<T> eventArgs, string path,
-		string? expand = default, IEnumerable<string>? filters = default)
+	public async Task<ODataCollectionResponse<T>?> ExecuteAsync<T>(
+		DataGridReadDataEventArgs<T> eventArgs,
+		string path,
+		string? expand = default,
+		IEnumerable<string>? filters = default)
 	{
+		DataServiceQuery<T> query = this.context.CreateQuery<T>(path);
+
+		switch (eventArgs.ReadDataMode)
+		{
+			case DataGridReadDataMode.Paging:
+				query = (DataServiceQuery<T>)query.Skip((eventArgs.Page - 1) * eventArgs.PageSize).Take(eventArgs.PageSize);
+				break;
+			case DataGridReadDataMode.Virtualize:
+				query = (DataServiceQuery<T>)query.Skip(eventArgs.VirtualizeOffset).Take(eventArgs.VirtualizeCount);
+				break;
+		}
+
+		IOrderedEnumerable<DataGridColumnInfo> orderColumns = eventArgs.Columns
+			.Where((DataGridColumnInfo column) => column.SortDirection is not SortDirection.None)
+			.OrderBy((DataGridColumnInfo column) => column.SortIndex);
+		if (orderColumns.Any())
+		{
+			DataGridColumnInfo firstColumn = orderColumns.First();
+			IOrderedQueryable<T> orderedQuery = firstColumn.SortDirection is SortDirection.Ascending
+				? query.OrderBy(firstColumn.SortField)
+				: query.OrderByDescending(firstColumn.SortField);
+
+			foreach (DataGridColumnInfo column in orderColumns.Skip(1))
+			{
+				orderedQuery = firstColumn.SortDirection is SortDirection.Ascending
+					? query.OrderBy(firstColumn.SortField)
+					: query.OrderByDescending(firstColumn.SortField);
+			}
+
+			query = (DataServiceQuery<T>)orderedQuery;
+		}
+
 		IEnumerable<string> columnFilters = eventArgs.Columns
 			.Where(column => column.SearchValue is not null)
 			.Select(column => column.ColumnType switch
@@ -39,41 +73,7 @@ public class ReadDataCommand
 		if (filters is not null)
 			columnFilters = columnFilters.Concat(filters);
 
-		IEnumerable<string> orderBy = eventArgs.Columns
-			.Where(column => column.SortDirection is not SortDirection.None)
-			.OrderBy(column => column.SortIndex)
-			.Select(column =>
-				column.SortDirection is SortDirection.Ascending ? column.Field : $"{column.Field} desc");
-
-		UriBuilder uriBuilder = new(this.serverOptions.Value.Route + path);
-
-		NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
-
-		if (columnFilters.Any())
-			query["$filter"] = string.Join(", ", columnFilters);
-		if (orderBy.Any())
-			query["$orderby"] = string.Join(", ", orderBy);
-
-		switch (eventArgs.ReadDataMode)
-		{
-			case DataGridReadDataMode.Paging:
-				query["$skip"] = ((eventArgs.Page - 1) * eventArgs.PageSize).ToString();
-				query["$top"] = eventArgs.PageSize.ToString();
-				break;
-			case DataGridReadDataMode.Virtualize:
-				query["$skip"] = eventArgs.VirtualizeOffset.ToString();
-				query["$top"] = eventArgs.VirtualizeCount.ToString();
-				break;
-		}
-
-		query["$count"] = "true";
-
-		if (!string.IsNullOrWhiteSpace(expand))
-			query["$expand"] = expand;
-
-		uriBuilder.Query = query.ToString();
-
 		return await this.client
-			.GetFromJsonAsync<ODataCollectionResponse<T>>(uriBuilder.Uri, eventArgs.CancellationToken);
+			.GetFromJsonAsync<ODataCollectionResponse<T>>(query.RequestUri, eventArgs.CancellationToken);
 	}
 }

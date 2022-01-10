@@ -57,7 +57,7 @@ public partial class Details : ComponentBase
 		if (this.ReadDataCommand is null)
 			return;
 
-		ODataCollectionResponse<Feature>? response = await this.ReadDataCommand.ExecuteAsync(args, "v1/Features",
+		ODataCollectionResponse<Feature>? response = await this.ReadDataCommand.ExecuteAsync(args, "Features",
 			filters: new[] { $"Characters/all(c:c/Id ne {this.Id})" });
 
 		if (response is null)

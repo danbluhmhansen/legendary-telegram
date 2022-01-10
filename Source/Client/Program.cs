@@ -16,6 +16,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.OData.Client;
 using Microsoft.OData.Extensions.Client;
 
+const string apiClientName = "BlazorApp1.ServerAPI";
+
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.RootComponents.Add<App>("#app");
@@ -29,31 +31,31 @@ builder.Services
 builder.Services.AddScoped<CustomAddressAuthorizationMessageHandler>();
 
 builder.Services
-	.AddHttpClient("BlazorApp1.ServerAPI",
+	.AddHttpClient(apiClientName,
 		(IServiceProvider serviceProvider, HttpClient client) =>
 			client.BaseAddress = serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route)
 	.AddHttpMessageHandler<CustomAddressAuthorizationMessageHandler>();
 
 // Supply HttpClient instances that include access tokens when making requests to the server project
 builder.Services.AddScoped((IServiceProvider serviceProvider) =>
-	serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorApp1.ServerAPI"));
+	serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(apiClientName));
 
 builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProviderOptions> options) =>
 {
 	builder.Configuration
 		.GetSection("RemoteAuthentication")
-		.GetSection("AuthenticationPaths")
+		.GetSection(nameof(options.AuthenticationPaths))
 		.Bind(options.AuthenticationPaths);
 
 	builder.Configuration
 		.GetSection("RemoteAuthentication")
-		.GetSection("ProviderOptions")
+		.GetSection(nameof(options.ProviderOptions))
 		.Bind(options.ProviderOptions);
 });
 
 builder.Services.AddLogging();
 
-builder.Services.AddODataClient("BlazorApp1.ServerAPI")
+builder.Services.AddODataClient(apiClientName)
 	.ConfigureODataClient((DataServiceContext context) =>
 	{
 		context.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;

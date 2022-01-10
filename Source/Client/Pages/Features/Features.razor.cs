@@ -32,7 +32,7 @@ public partial class Features : ComponentBase
 			return;
 
 		ODataCollectionResponse<Feature>? response = await this.ReadDataCommand.ExecuteAsync(
-			args, "v1/Features", "Effects");
+			args, "Features", "Effects");
 
 		if (response is null)
 			return;
