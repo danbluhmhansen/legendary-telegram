@@ -6,7 +6,7 @@ using BlazorApp1.Client.Configuration;
 using BlazorApp1.Client.Data;
 
 using Blazorise;
-using Blazorise.Bootstrap5;
+using Blazorise.Bulma;
 using Blazorise.Icons.FontAwesome;
 
 using Microsoft.AspNetCore.Components.Web;
@@ -23,7 +23,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services
 	.AddBlazorise()
-	.AddBootstrap5Providers()
+	.AddBulmaProviders()
 	.AddFontAwesomeIcons();
 
 builder.Services.AddScoped<CustomAddressAuthorizationMessageHandler>();

@@ -68,11 +68,13 @@
 			"args": [
 				"watch",
 				"run",
-				"${workspaceFolder}/Source/Server/BlazorApp1.Server.csproj",
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
-			"problemMatcher": "$msCompile"
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}/Source/Server/"
+			}
 		},
 		{
 			"label": "watchClient",
@@ -81,11 +83,24 @@
 			"args": [
 				"watch",
 				"run",
-				"${workspaceFolder}/Source/Client/BlazorApp1.Client.csproj",
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
-			"problemMatcher": "$msCompile"
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}/Source/Client/"
+			}
+		},
+		{
+			"label": "watchAll",
+			"dependsOn": [
+				"watchServer",
+				"watchClient"
+			],
+			"dependsOrder": "parallel",
+			"group": "build",
+			"problemMatcher": "$msCompile",
+			"isBackground": true
 		}
 	]
 }

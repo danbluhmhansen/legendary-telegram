@@ -91,7 +91,7 @@ builder.Services
 	{
 		options.AddRouteComponents("v1", edmModel, (IServiceCollection services) =>
 		{
-			services.AddSingleton(new DefaultODataBatchHandler());
+			services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler());
 			services.AddSingleton<ODataResourceSerializer, CustomODataResourceSerializer>();
 		});
 

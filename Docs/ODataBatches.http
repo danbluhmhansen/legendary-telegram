@@ -2,18 +2,18 @@ POST https://localhost:7289/v1/$batch
 Content-Type: application/json
 
 {
-    "requests": [
-        {
-            "id": "1",
-            "method": "GET",
-            "url": "https://localhost:7289/v1/Characters/02c07b82-1b85-8d01-17a3-ad6059be2a1c"
-        },
-        {
-            "id": "2",
-            "method": "GET",
-            "url": "https://localhost:7289/v1/Features/333bad4f-b10d-4a30-971b-f449e4469952"
-        }
-    ]
+	"requests": [
+		{
+			"id": "1",
+			"method": "GET",
+			"url": "https://localhost:7289/v1/Characters/02c07b82-1b85-8d01-17a3-ad6059be2a1c"
+		},
+		{
+			"id": "2",
+			"method": "GET",
+			"url": "https://localhost:7289/v1/Features/333bad4f-b10d-4a30-971b-f449e4469952"
+		}
+	]
 }
 
 ###
@@ -22,28 +22,28 @@ POST https://localhost:7289/v1/$batch
 Content-Type: application/json
 
 {
-    "requests": [
-        {
-            "id": "1",
-            "method": "POST",
-            "url": "https://localhost:7289/v1/Characters",
-            "headers": {
-                "content-type": "application/json"
-            },
-            "body": {
-                "name": "TEST"
-            }
-        },
-        {
-            "id": "2",
-            "method": "POST",
-            "url": "https://localhost:7289/v1/Characters",
-            "headers": {
-                "content-type": "application/json"
-            },
-            "body": {
-                "name": "TEST"
-            }
-        }
-    ]
+	"requests": [
+		{
+			"id": "1",
+			"method": "POST",
+			"url": "https://localhost:7289/v1/Characters",
+			"headers": {
+				"content-type": "application/json"
+			},
+			"body": {
+				"name": "TEST"
+			}
+		},
+		{
+			"id": "2",
+			"method": "POST",
+			"url": "https://localhost:7289/v1/Characters",
+			"headers": {
+				"content-type": "application/json"
+			},
+			"body": {
+				"name": "TEST"
+			}
+		}
+	]
 }
