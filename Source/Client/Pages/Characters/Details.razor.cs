@@ -13,6 +13,7 @@ using Blazorise.DataGrid;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
+using Microsoft.OData.Client;
 
 public partial class Details : ComponentBase
 {
@@ -20,7 +21,7 @@ public partial class Details : ComponentBase
 
 	[Inject] private ReadDataCommand? ReadDataCommand { get; init; }
 	[Inject] private ComputeCharacterCommand? ComputeCharacterCommand { get; init; }
-	[Inject] private HttpClient? Client { get; init; }
+	[Inject] private HttpClient? HttpClient { get; init; }
 	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
 	[Inject] private IOptions<ServerOptions>? ServerOptions { get; init; }
 	[Inject] private ILogger<Details>? Logger { get; init; }
@@ -42,10 +43,10 @@ public partial class Details : ComponentBase
 
 	protected override async Task OnParametersSetAsync()
 	{
-		if (this.Client is null || this.ServerOptions is null)
+		if (this.HttpClient is null || this.ServerOptions is null)
 			return;
 
-		this.character = await this.Client.GetFromJsonAsync<Character>(
+		this.character = await this.HttpClient.GetFromJsonAsync<Character>(
 			$"{this.ServerOptions.Value.Route}v1/Characters/{this.Id}?$expand=Features($expand=Effects),Effects");
 
 		if (this.ComputeCharacterCommand is not null && this.character is not null)
@@ -54,11 +55,14 @@ public partial class Details : ComponentBase
 
 	private async Task OnReadFeatures(DataGridReadDataEventArgs<Feature> args)
 	{
-		if (this.ReadDataCommand is null)
+		if (this.ReadDataCommand is null || this.HttpClient is null)
 			return;
 
-		ODataCollectionResponse<Feature>? response = await this.ReadDataCommand.ExecuteAsync(args, "Features",
-			filters: new[] { $"Characters/all(c:c/Id ne {this.Id})" });
+		DataServiceQuery<Feature> query = (DataServiceQuery<Feature>)this.ReadDataCommand.Execute(args, "Features")
+			.Where((Feature feature) => feature.Characters.All((Character character) => this.Id == character.Id));
+
+		ODataCollectionResponse<Feature>? response = await this.HttpClient
+			.GetFromJsonAsync<ODataCollectionResponse<Feature>>(query.RequestUri, args.CancellationToken);
 
 		if (response is null)
 			return;
@@ -73,7 +77,7 @@ public partial class Details : ComponentBase
 
 	private async Task OnFeatureInserting()
 	{
-		if (this.Client is null || this.ServerOptions is null || this.selectedFeatures?.Any() != true)
+		if (this.HttpClient is null || this.ServerOptions is null || this.selectedFeatures?.Any() != true)
 			return;
 
 		IEnumerable<ODataRequest> requests = this.selectedFeatures
@@ -86,13 +90,13 @@ public partial class Details : ComponentBase
 					FeatureId = feature.Id,
 				}));
 
-		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch", new ODataBatchRequest(requests),
+		await this.HttpClient.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch", new ODataBatchRequest(requests),
 			this.JsonSerializerOptions?.Value);
 	}
 
 	private async Task OnFeatureRemoving()
 	{
-		if (this.Client is null || this.ServerOptions is null || this.selectedFeatures?.Any() != true)
+		if (this.HttpClient is null || this.ServerOptions is null || this.selectedFeatures?.Any() != true)
 			return;
 
 		IEnumerable<ODataRequest> requests = this.selectedFeatures
@@ -105,39 +109,39 @@ public partial class Details : ComponentBase
 					FeatureId = feature.Id,
 				}));
 
-		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch", new ODataBatchRequest(requests),
+		await this.HttpClient.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch", new ODataBatchRequest(requests),
 			this.JsonSerializerOptions?.Value);
 	}
 
 	private async Task OnEffectInserting(CancellableRowChange<CoreEffect, Dictionary<string, object>> args)
 	{
-		if (this.Client is null || this.ServerOptions is null)
+		if (this.HttpClient is null || this.ServerOptions is null)
 			return;
 
 		args.Values[nameof(CoreEffect.CharacterId)] = this.Id;
 
-		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
+		await this.HttpClient.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
 			this.JsonSerializerOptions?.Value);
 	}
 
 	private async Task OnEffectUpdating(CancellableRowChange<CoreEffect, Dictionary<string, object>> args)
 	{
-		if (this.Client is null || this.ServerOptions is null)
+		if (this.HttpClient is null || this.ServerOptions is null)
 			return;
 
 		args.Values[nameof(args.Item.Id)] = args.Item.Id;
 		args.Values[nameof(args.Item.CharacterId)] = args.Item.CharacterId;
 
-		await this.Client.PutAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
+		await this.HttpClient.PutAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
 			this.JsonSerializerOptions?.Value);
 	}
 
 	private async Task OnEffectRemoving(CancellableRowChange<CoreEffect> args)
 	{
-		if (this.Client is null || this.ServerOptions is null)
+		if (this.HttpClient is null || this.ServerOptions is null)
 			return;
 
-		await this.Client.DeleteAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Item,
+		await this.HttpClient.DeleteAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Item,
 			this.JsonSerializerOptions?.Value);
 	}
 }

@@ -1,9 +1,9 @@
 namespace BlazorApp1.Client.Commands;
 
-using System.Net.Http.Json;
+using System.Linq.Expressions;
+using System.Reflection;
 
 using BlazorApp1.Client.Data;
-using BlazorApp1.Client.Models;
 using BlazorApp1.Shared.Extensions;
 
 using Blazorise;
@@ -14,21 +14,15 @@ using Microsoft.OData.Client;
 public class ReadDataCommand
 {
 	private readonly ODataServiceContext context;
-	private readonly HttpClient client;
 	private readonly ILogger<ReadDataCommand> logger;
 
-	public ReadDataCommand(ODataServiceContext context, HttpClient client, ILogger<ReadDataCommand> logger)
+	public ReadDataCommand(ODataServiceContext context, ILogger<ReadDataCommand> logger)
 	{
-		this.client = client;
 		this.logger = logger;
 		this.context = context;
 	}
 
-	public async Task<ODataCollectionResponse<T>?> ExecuteAsync<T>(
-		DataGridReadDataEventArgs<T> eventArgs,
-		string path,
-		string? expand = default,
-		IEnumerable<string>? filters = default)
+	public DataServiceQuery<T> Execute<T>(DataGridReadDataEventArgs<T> eventArgs, string path)
 	{
 		DataServiceQuery<T> query = this.context.CreateQuery<T>(path);
 
@@ -42,38 +36,56 @@ public class ReadDataCommand
 				break;
 		}
 
-		IOrderedEnumerable<DataGridColumnInfo> orderColumns = eventArgs.Columns
-			.Where((DataGridColumnInfo column) => column.SortDirection is not SortDirection.None)
-			.OrderBy((DataGridColumnInfo column) => column.SortIndex);
-		if (orderColumns.Any())
+		foreach (DataGridColumnInfo column in eventArgs.Columns
+			.OrderBy((DataGridColumnInfo column) => column.SortIndex))
 		{
-			DataGridColumnInfo firstColumn = orderColumns.First();
-			IOrderedQueryable<T> orderedQuery = firstColumn.SortDirection is SortDirection.Ascending
-				? query.OrderBy(firstColumn.SortField)
-				: query.OrderByDescending(firstColumn.SortField);
-
-			foreach (DataGridColumnInfo column in orderColumns.Skip(1))
+			switch (column.SortDirection)
 			{
-				orderedQuery = firstColumn.SortDirection is SortDirection.Ascending
-					? query.OrderBy(firstColumn.SortField)
-					: query.OrderByDescending(firstColumn.SortField);
+				case SortDirection.Ascending:
+					if (query is IOrderedQueryable<T> ascending)
+						query = (DataServiceQuery<T>)ascending.ThenBy(column.SortField);
+					else
+						query = (DataServiceQuery<T>)query.OrderBy(column.SortField);
+					break;
+				case SortDirection.Descending:
+					if (query is IOrderedQueryable<T> descending)
+						query = (DataServiceQuery<T>)descending.ThenByDescending(column.SortField);
+					else
+						query = (DataServiceQuery<T>)query.OrderByDescending(column.SortField);
+					break;
 			}
 
-			query = (DataServiceQuery<T>)orderedQuery;
+			ParameterExpression parameterExpression = Expression.Parameter(typeof(T));
+
+			switch (column.ColumnType)
+			{
+				case DataGridColumnType.Text when column.SearchValue is string s && !string.IsNullOrWhiteSpace(s):
+					MethodInfo? method = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+					if (method is null)
+						break;
+					query = (DataServiceQuery<T>)query
+						.Where(Expression.Lambda<Func<T, bool>>(
+							Expression.Call(
+								Expression.Property(parameterExpression, column.Field),
+								method,
+								Expression.Constant(s, typeof(string))),
+							parameterExpression));
+					break;
+				case DataGridColumnType.Numeric when column.SearchValue is int i:
+					query = (DataServiceQuery<T>)query
+						.Where(Expression.Lambda<Func<T, bool>>(
+							Expression.Equal(parameterExpression, Expression.Constant(i, typeof(int))),
+							parameterExpression));
+					break;
+				case DataGridColumnType.Check when column.SearchValue is bool b:
+					query = (DataServiceQuery<T>)query
+						.Where(Expression.Lambda<Func<T, bool>>(
+							Expression.Equal(parameterExpression, Expression.Constant(b, typeof(bool))),
+							parameterExpression));
+					break;
+			}
 		}
 
-		IEnumerable<string> columnFilters = eventArgs.Columns
-			.Where(column => column.SearchValue is not null)
-			.Select(column => column.ColumnType switch
-			{
-				DataGridColumnType.Text => $"contains({column.Field},'{column.SearchValue}')",
-				_ => "",
-			});
-
-		if (filters is not null)
-			columnFilters = columnFilters.Concat(filters);
-
-		return await this.client
-			.GetFromJsonAsync<ODataCollectionResponse<T>>(query.RequestUri, eventArgs.CancellationToken);
+		return query;
 	}
 }
