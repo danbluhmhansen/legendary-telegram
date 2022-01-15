@@ -22,7 +22,9 @@
 			"type": "blazorwasm",
 			"request": "launch",
 			"preLaunchTask": "buildClient",
-			"cwd": "${workspaceFolder}/Source/Client"
+			"cwd": "${workspaceFolder}/Source/Client",
+			"browser": "edge",
+			"url": "https://localhost:7290"
 		},
 		{
 			"name": "Launch Test Console",
