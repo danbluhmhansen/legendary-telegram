@@ -27,16 +27,6 @@ public class ReadDataCommand
 		DataServiceQuery<T> query = this.context.CreateQuery<T>(path)
 			.IncludeCount();
 
-		switch (eventArgs.ReadDataMode)
-		{
-			case DataGridReadDataMode.Paging:
-				query = (DataServiceQuery<T>)query.Skip((eventArgs.Page - 1) * eventArgs.PageSize).Take(eventArgs.PageSize);
-				break;
-			case DataGridReadDataMode.Virtualize:
-				query = (DataServiceQuery<T>)query.Skip(eventArgs.VirtualizeOffset).Take(eventArgs.VirtualizeCount);
-				break;
-		}
-
 		foreach (DataGridColumnInfo column in eventArgs.Columns
 			.OrderBy((DataGridColumnInfo column) => column.SortIndex))
 		{

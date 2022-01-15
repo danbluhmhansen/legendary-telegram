@@ -1,25 +1,18 @@
 namespace BlazorApp1.Client.Pages.Features;
 
-using System.Net.Http.Json;
-using System.Text.Json;
-
 using BlazorApp1.Client.Commands;
-using BlazorApp1.Client.Configuration;
-using BlazorApp1.Client.Models;
+using BlazorApp1.Client.Data;
 using BlazorApp1.Shared.Models.v1;
 
 using Blazorise.DataGrid;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Options;
 using Microsoft.OData.Client;
 
 public partial class Features : ComponentBase
 {
 	[Inject] private ReadDataCommand? ReadDataCommand { get; init; }
-	[Inject] private HttpClient? HttpClient { get; init; }
-	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
-	[Inject] private IOptions<ServerOptions>? ServerOptions { get; init; }
+	[Inject] private ODataServiceContext? ServiceContext { get; init; }
 	[Inject] private ILogger<Features>? Logger { get; init; }
 
 	private ICollection<Feature> data = new List<Feature>();
@@ -44,33 +37,32 @@ public partial class Features : ComponentBase
 		StateHasChanged();
 	}
 
-	private async Task OnRowInserting(CancellableRowChange<Feature, Dictionary<string, object>> args)
+	private async Task OnRowInserted(SavedRowItem<Feature, Dictionary<string, object>> args)
 	{
-		if (this.HttpClient is null || this.ServerOptions is null || args.Item is null)
+		if (this.ServiceContext is null || args.Item is null)
 			return;
 
-		await this.HttpClient.PostAsJsonAsync(
-			$"{this.ServerOptions.Value.Route}v1/Features", args.Values,
-			this.JsonSerializerOptions?.Value);
+		this.ServiceContext.AddObject("v1/Features", args.Item);
+		await this.ServiceContext.SaveChangesAsync();
 	}
 
-	private async Task OnRowUpdating(CancellableRowChange<Feature, Dictionary<string, object>> args)
+	private async Task OnRowUpdated(SavedRowItem<Feature, Dictionary<string, object>> args)
 	{
-		if (this.HttpClient is null || this.ServerOptions is null || args.Item is null)
+		if (this.ServiceContext is null || args.Item is null)
 			return;
 
-		await this.HttpClient.PutAsJsonAsync(
-			$"{this.ServerOptions.Value.Route}v1/Features", args.Item,
-			this.JsonSerializerOptions?.Value);
+		this.ServiceContext.AttachTo("v1/Features", args.Item);
+		this.ServiceContext.UpdateObject(args.Item);
+		await this.ServiceContext.SaveChangesAsync();
 	}
 
 	private async Task OnRowRemoving(CancellableRowChange<Feature> args)
 	{
-		if (this.HttpClient is null || this.ServerOptions is null || args.Item is null)
+		if (this.ServiceContext is null || args.Item is null)
 			return;
 
-		await this.HttpClient.DeleteAsJsonAsync(
-			$"{this.ServerOptions.Value.Route}v1/Features", args.Item,
-			this.JsonSerializerOptions?.Value);
+		this.ServiceContext.AttachTo("v1/Features", args.Item);
+		this.ServiceContext.DeleteObject(args.Item);
+		await this.ServiceContext.SaveChangesAsync();
 	}
 }
