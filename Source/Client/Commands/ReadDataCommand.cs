@@ -24,7 +24,8 @@ public class ReadDataCommand
 
 	public DataServiceQuery<T> Execute<T>(DataGridReadDataEventArgs<T> eventArgs, string path)
 	{
-		DataServiceQuery<T> query = this.context.CreateQuery<T>(path);
+		DataServiceQuery<T> query = this.context.CreateQuery<T>(path)
+			.IncludeCount();
 
 		switch (eventArgs.ReadDataMode)
 		{

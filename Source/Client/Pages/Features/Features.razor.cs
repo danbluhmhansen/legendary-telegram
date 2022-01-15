@@ -29,20 +29,17 @@ public partial class Features : ComponentBase
 
 	private async Task OnReadData(DataGridReadDataEventArgs<Feature> args)
 	{
-		if (this.ReadDataCommand is null || this.HttpClient is null)
+		if (this.ReadDataCommand is null)
 			return;
 
-		DataServiceQuery<Feature> query = this.ReadDataCommand.Execute(args, "Features")
+		DataServiceQuery<Feature> query = this.ReadDataCommand.Execute(args, "v1/Features")
 			.Expand(nameof(Feature.Effects));
 
-		ODataCollectionResponse<Feature>? response = await this.HttpClient
-			.GetFromJsonAsync<ODataCollectionResponse<Feature>>(query.RequestUri, args.CancellationToken);
-
-		if (response is null)
+		if (await query.ExecuteAsync(args.CancellationToken) is not QueryOperationResponse<Feature> response)
 			return;
 
-		this.data = response.Value.ToList();
-		this.count = response.Count;
+		this.data = response.ToList();
+		this.count = (int)response.Count;
 
 		StateHasChanged();
 	}

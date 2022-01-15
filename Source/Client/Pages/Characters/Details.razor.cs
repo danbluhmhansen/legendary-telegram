@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using BlazorApp1.Client.Commands;
 using BlazorApp1.Client.Configuration;
+using BlazorApp1.Client.Data;
 using BlazorApp1.Client.Models;
 using BlazorApp1.Shared.Models.v1;
 
@@ -21,6 +22,7 @@ public partial class Details : ComponentBase
 
 	[Inject] private ReadDataCommand? ReadDataCommand { get; init; }
 	[Inject] private ComputeCharacterCommand? ComputeCharacterCommand { get; init; }
+	[Inject] private ODataServiceContext? ServiceContext { get; init; }
 	[Inject] private HttpClient? HttpClient { get; init; }
 	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
 	[Inject] private IOptions<ServerOptions>? ServerOptions { get; init; }
@@ -55,22 +57,19 @@ public partial class Details : ComponentBase
 
 	private async Task OnReadFeatures(DataGridReadDataEventArgs<Feature> args)
 	{
-		if (this.ReadDataCommand is null || this.HttpClient is null)
+		if (this.ReadDataCommand is null)
 			return;
 
-		DataServiceQuery<Feature> query = (DataServiceQuery<Feature>)this.ReadDataCommand.Execute(args, "Features")
+		DataServiceQuery<Feature> query = (DataServiceQuery<Feature>)this.ReadDataCommand.Execute(args, "v1/Features")
 			.Where((Feature feature) => feature.Characters.All((Character character) => this.Id == character.Id));
 
-		ODataCollectionResponse<Feature>? response = await this.HttpClient
-			.GetFromJsonAsync<ODataCollectionResponse<Feature>>(query.RequestUri, args.CancellationToken);
-
-		if (response is null)
+		if (await query.ExecuteAsync(args.CancellationToken) is not QueryOperationResponse<Feature> response)
 			return;
 
 		this.features = this.character?.Features?.Any() == true
-			? response.Value.Except(this.character.Features).ToList()
-			: response.Value.ToList();
-		this.featuresCount = response.Count;
+			? response.Except(this.character.Features).ToList()
+			: response.ToList();
+		this.featuresCount = (int)response.Count;
 
 		StateHasChanged();
 	}
@@ -115,13 +114,24 @@ public partial class Details : ComponentBase
 
 	private async Task OnEffectInserting(CancellableRowChange<CoreEffect, Dictionary<string, object>> args)
 	{
-		if (this.HttpClient is null || this.ServerOptions is null)
+		if (this.ServiceContext is null)
 			return;
 
-		args.Values[nameof(CoreEffect.CharacterId)] = this.Id;
+		this.Logger?.LogInformation(args.Item.ToString());
+		this.ServiceContext.AddObject("CoreEffects", args.Item);
+		await this.ServiceContext.SaveChangesAsync();
+	}
 
-		await this.HttpClient.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
-			this.JsonSerializerOptions?.Value);
+	private async Task OnEffectInserted(SavedRowItem<CoreEffect, Dictionary<string, object>> args)
+	{
+		if (this.ServiceContext is null)
+			return;
+
+		args.Item.CharacterId = this.Id;
+
+		this.Logger?.LogInformation(args.Item.ToString());
+		this.ServiceContext.AddObject("CoreEffects", args.Item);
+		await this.ServiceContext.SaveChangesAsync();
 	}
 
 	private async Task OnEffectUpdating(CancellableRowChange<CoreEffect, Dictionary<string, object>> args)

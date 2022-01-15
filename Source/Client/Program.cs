@@ -4,7 +4,6 @@ using BlazorApp1.Client;
 using BlazorApp1.Client.Commands;
 using BlazorApp1.Client.Configuration;
 using BlazorApp1.Client.Data;
-
 using Blazorise;
 using Blazorise.Bulma;
 using Blazorise.Icons.FontAwesome;
@@ -13,8 +12,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.OData.Client;
-using Microsoft.OData.Extensions.Client;
 
 const string apiClientName = "BlazorApp1.ServerAPI";
 
@@ -55,17 +52,7 @@ builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProvider
 
 builder.Services.AddLogging();
 
-builder.Services.AddODataClient(apiClientName)
-	.ConfigureODataClient((DataServiceContext context) =>
-	{
-		context.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;
-		context.Format.UseJson();
-	})
-	.AddHttpClient();
-
-builder.Services.AddScoped((IServiceProvider serviceProvider) =>
-	serviceProvider.GetRequiredService<IODataClientFactory>().CreateClient<ODataServiceContext>(
-		new Uri(serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route + "v1/")));
+builder.Services.AddScoped<ODataServiceContext>();
 
 builder.Services.AddScoped<ReadDataCommand>();
 builder.Services.AddScoped<ComputeCharacterCommand>();
