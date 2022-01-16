@@ -7,26 +7,26 @@
 	<Column><Heading Size=HeadingSize.Is1>@character?.Name</Heading></Column>
 </Row>
 <Row>
-	<Virtualize TItem=JsonProperty Items=GetJsonProperties>
+	<Iterator Items=GetJsonProperties>
 		<Column TextAlignment=TextAlignment.Center>
-			<Text>@context.Name</Text>
+			<Text>@context.Item.Name</Text>
 		</Column>
-	</Virtualize>
+	</Iterator>
 </Row>
 <Row>
-	<Virtualize TItem=JsonProperty Items=GetJsonProperties>
+	<Iterator Items=GetJsonProperties>
 		<Column TextAlignment=TextAlignment.Center>
-			@switch (context.Value.ValueKind)
+			@switch (context.Item.Value.ValueKind)
 			{
 				case JsonValueKind.String:
-					<Text>@context.Value.GetString()</Text>
+					<Text>@context.Item.Value.GetString()</Text>
 					break;
 				case JsonValueKind.Number:
-					<Text>@context.Value.GetInt32()</Text>
+					<Text>@context.Item.Value.GetInt32()</Text>
 					break;
 			}
 		</Column>
-	</Virtualize>
+	</Iterator>
 </Row>
 
 <Row Flex=Flex.AlignItems.Center>
