@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 using BlazorApp1.Client.Commands;
-using BlazorApp1.Client.Configuration;
 using BlazorApp1.Client.Data;
 using BlazorApp1.Client.Extensions;
 using BlazorApp1.Shared.Models.v1;
@@ -12,7 +11,6 @@ using BlazorApp1.Shared.Models.v1;
 using Blazorise.DataGrid;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Options;
 using Microsoft.OData.Client;
 
 public partial class Details : ComponentBase
@@ -22,8 +20,6 @@ public partial class Details : ComponentBase
 	[Inject] private ReadDataCommand? ReadDataCommand { get; init; }
 	[Inject] private ComputeCharacterCommand? ComputeCharacterCommand { get; init; }
 	[Inject] private ODataServiceContext? ServiceContext { get; init; }
-	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
-	[Inject] private IOptions<ServerOptions>? ServerOptions { get; init; }
 	[Inject] private ILogger<Details>? Logger { get; init; }
 
 	private Character? character;
@@ -84,6 +80,41 @@ public partial class Details : ComponentBase
 		StateHasChanged();
 	}
 
+	private CoreEffect NewEffectCreator() =>
+		new()
+		{
+			CharacterId = this.Id,
+		};
+
+	private async Task OnEffectInserted(SavedRowItem<CoreEffect, Dictionary<string, object>> args)
+	{
+		if (this.ServiceContext is null)
+			return;
+
+		this.ServiceContext.AddObject("v1/CoreEffects", args.Item);
+		await this.ServiceContext.SaveChangesAsync();
+	}
+
+	private async Task OnEffectUpdated(SavedRowItem<CoreEffect, Dictionary<string, object>> args)
+	{
+		if (this.ServiceContext is null)
+			return;
+
+		this.ServiceContext.AttachTo("v1/CoreEffects", args.Item);
+		this.ServiceContext.UpdateObject(args.Item);
+		await this.ServiceContext.SaveChangesAsync();
+	}
+
+	private async Task OnEffectRemoving(CancellableRowChange<CoreEffect> args)
+	{
+		if (this.ServiceContext is null)
+			return;
+
+		this.ServiceContext.AttachTo("v1/CoreEffects", args.Item);
+		this.ServiceContext.DeleteObject(args.Item);
+		await this.ServiceContext.SaveChangesAsync();
+	}
+
 	private async Task OnFeatureInserting()
 	{
 		if (this.ServiceContext is null || this.selectedFeatures?.Any() != true)
@@ -107,48 +138,17 @@ public partial class Details : ComponentBase
 		if (this.ServiceContext is null || this.selectedFeatures?.Any() != true)
 			return;
 
-		foreach (Feature feature in this.selectedFeatures)
-		{
-			var entity = new CharacterFeature
+		foreach (CharacterFeature characterFeature in this.selectedFeatures.Select((Feature feature) =>
+			new CharacterFeature
 			{
 				CharacterId = this.Id,
 				FeatureId = feature.Id,
-			};
-			this.ServiceContext.AttachTo("v1/CharacterFeatures", entity);
-			this.ServiceContext.DeleteObject(entity);
+			}))
+		{
+			this.ServiceContext.AttachTo("v1/CharacterFeatures", characterFeature);
+			this.ServiceContext.DeleteObject(characterFeature);
 		}
 
-		await this.ServiceContext.SaveChangesAsync();
-	}
-
-	private async Task OnEffectInserted(SavedRowItem<CoreEffect, Dictionary<string, object>> args)
-	{
-		if (this.ServiceContext is null)
-			return;
-
-		args.Item.CharacterId = this.Id;
-
-		this.ServiceContext.AddObject("v1/CoreEffects", args.Item);
-		await this.ServiceContext.SaveChangesAsync();
-	}
-
-	private async Task OnEffectUpdated(SavedRowItem<CoreEffect, Dictionary<string, object>> args)
-	{
-		if (this.ServiceContext is null)
-			return;
-
-		this.ServiceContext.AttachTo("v1/CoreEffects", args.Item);
-		this.ServiceContext.UpdateObject(args.Item);
-		await this.ServiceContext.SaveChangesAsync();
-	}
-
-	private async Task OnEffectRemoving(CancellableRowChange<CoreEffect> args)
-	{
-		if (this.ServiceContext is null)
-			return;
-
-		this.ServiceContext.AttachTo("v1/CoreEffects", args.Item);
-		this.ServiceContext.DeleteObject(args.Item);
 		await this.ServiceContext.SaveChangesAsync();
 	}
 }
