@@ -18,6 +18,8 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0" />
+		<PackageReference Include="Microsoft.OData.Client" Version="7.9.4" />
+		<PackageReference Include="Microsoft.OData.ModelBuilder" Version="1.0.8" />
 	</ItemGroup>
 
 	<ItemGroup>

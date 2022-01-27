@@ -15,8 +15,8 @@
 	CommandMode=DataGridCommandMode.ButtonRow
 	PopupSize=ModalSize.Large
 	RowDoubleClicked=@(async args => await this.dataGrid.Edit(args.Item))
-	RowInserting=OnRowInserting
-	RowUpdating=OnRowUpdating
+	RowInserted=OnRowInserted
+	RowUpdated=OnRowUpdated
 	RowRemoving=OnRowRemoving
 	@ref=dataGrid>
 	<DataGridColumns>

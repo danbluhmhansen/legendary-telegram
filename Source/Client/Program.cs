@@ -3,7 +3,7 @@ using System.Text.Json;
 using BlazorApp1.Client;
 using BlazorApp1.Client.Commands;
 using BlazorApp1.Client.Configuration;
-
+using BlazorApp1.Client.Data;
 using Blazorise;
 using Blazorise.Bulma;
 using Blazorise.Icons.FontAwesome;
@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Options;
+
+const string apiClientName = "BlazorApp1.ServerAPI";
 
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -26,29 +28,31 @@ builder.Services
 builder.Services.AddScoped<CustomAddressAuthorizationMessageHandler>();
 
 builder.Services
-	.AddHttpClient("BlazorApp1.ServerAPI",
+	.AddHttpClient(apiClientName,
 		(IServiceProvider serviceProvider, HttpClient client) =>
 			client.BaseAddress = serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route)
 	.AddHttpMessageHandler<CustomAddressAuthorizationMessageHandler>();
 
 // Supply HttpClient instances that include access tokens when making requests to the server project
 builder.Services.AddScoped((IServiceProvider serviceProvider) =>
-	serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorApp1.ServerAPI"));
+	serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(apiClientName));
 
 builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProviderOptions> options) =>
 {
 	builder.Configuration
 		.GetSection("RemoteAuthentication")
-		.GetSection("AuthenticationPaths")
+		.GetSection(nameof(options.AuthenticationPaths))
 		.Bind(options.AuthenticationPaths);
 
 	builder.Configuration
 		.GetSection("RemoteAuthentication")
-		.GetSection("ProviderOptions")
+		.GetSection(nameof(options.ProviderOptions))
 		.Bind(options.ProviderOptions);
 });
 
 builder.Services.AddLogging();
+
+builder.Services.AddScoped<ODataServiceContext>();
 
 builder.Services.AddScoped<ReadDataCommand>();
 builder.Services.AddScoped<ComputeCharacterCommand>();

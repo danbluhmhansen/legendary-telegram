@@ -1,18 +1,17 @@
 namespace BlazorApp1.Client.Pages.Characters;
 
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 using BlazorApp1.Client.Commands;
-using BlazorApp1.Client.Configuration;
-using BlazorApp1.Client.Models;
+using BlazorApp1.Client.Data;
+using BlazorApp1.Client.Extensions;
 using BlazorApp1.Shared.Models.v1;
 
 using Blazorise.DataGrid;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Options;
+using Microsoft.OData.Client;
 
 public partial class Details : ComponentBase
 {
@@ -20,9 +19,7 @@ public partial class Details : ComponentBase
 
 	[Inject] private ReadDataCommand? ReadDataCommand { get; init; }
 	[Inject] private ComputeCharacterCommand? ComputeCharacterCommand { get; init; }
-	[Inject] private HttpClient? Client { get; init; }
-	[Inject] private IOptions<JsonSerializerOptions>? JsonSerializerOptions { get; init; }
-	[Inject] private IOptions<ServerOptions>? ServerOptions { get; init; }
+	[Inject] private ODataServiceContext? ServiceContext { get; init; }
 	[Inject] private ILogger<Details>? Logger { get; init; }
 
 	private Character? character;
@@ -32,21 +29,24 @@ public partial class Details : ComponentBase
 	private int? featuresCount;
 	private readonly List<Feature> selectedFeatures = new();
 
-	private IEnumerable<JsonProperty> GetJsonProperties =>
-		this.json.EnumerateObject()
-			.Where(x => x.Value.ValueKind switch
-			{
-				JsonValueKind.String or JsonValueKind.Number => true,
-				_ => false,
-			});
+	private ICollection<JsonProperty> GetJsonProperties =>
+		 this.json.ValueKind != JsonValueKind.Object
+			? new List<JsonProperty>()
+			: this.json.EnumerateObject()
+				.Where((JsonProperty property) =>
+					property.Value.ValueKind is JsonValueKind.String or JsonValueKind.Number)
+				.ToList();
 
 	protected override async Task OnParametersSetAsync()
 	{
-		if (this.Client is null || this.ServerOptions is null)
+		if (this.ServiceContext is null)
 			return;
 
-		this.character = await this.Client.GetFromJsonAsync<Character>(
-			$"{this.ServerOptions.Value.Route}v1/Characters/{this.Id}?$expand=Features($expand=Effects),Effects");
+		DataServiceQuerySingle<Character> query = new DataServiceQuerySingle<Character>(
+			this.ServiceContext, $"Characters/{this.Id}")
+			.Expand($"{nameof(Character.Features)}($expand={nameof(Feature.Effects)})")
+			.Expand(nameof(Character.Effects));
+		this.character = await query.GetValueAsync();
 
 		if (this.ComputeCharacterCommand is not null && this.character is not null)
 			this.json = this.ComputeCharacterCommand.Execute(this.character);
@@ -57,87 +57,98 @@ public partial class Details : ComponentBase
 		if (this.ReadDataCommand is null)
 			return;
 
-		ODataCollectionResponse<Feature>? response = await this.ReadDataCommand.ExecuteAsync(args, "v1/Features",
-			filters: new[] { $"Characters/all(c:c/Id ne {this.Id})" });
+		IQueryable<Feature> query = this.ReadDataCommand.Execute(args, "Features")
+			.Where((Feature feature) => !feature.Characters.Any((Character character) => this.Id == character.Id));
 
-		if (response is null)
-			return;
+		switch (args.ReadDataMode)
+		{
+			case DataGridReadDataMode.Paging:
+				query = query.Skip((args.Page - 1) * args.PageSize).Take(args.PageSize);
+				break;
+			case DataGridReadDataMode.Virtualize:
+				query = query.Skip(args.VirtualizeOffset).Take(args.VirtualizeCount);
+				break;
+		}
+
+		QueryOperationResponse<Feature> response = await query.ExecuteAsync(args.CancellationToken);
 
 		this.features = this.character?.Features?.Any() == true
-			? response.Value.Except(this.character.Features).ToList()
-			: response.Value.ToList();
-		this.featuresCount = response.Count;
+			? response.Except(this.character.Features).ToList()
+			: response.ToList();
+		this.featuresCount = (int)response.Count;
 
 		StateHasChanged();
 	}
 
-	private async Task OnFeatureInserting()
+	private CoreEffect NewEffectCreator() =>
+		new()
+		{
+			CharacterId = this.Id,
+		};
+
+	private async Task OnEffectInserted(SavedRowItem<CoreEffect, Dictionary<string, object>> args)
 	{
-		if (this.Client is null || this.ServerOptions is null || this.selectedFeatures?.Any() != true)
+		if (this.ServiceContext is null)
 			return;
 
-		IEnumerable<ODataRequest> requests = this.selectedFeatures
-			.Select((Feature feature, int i) => new ODataRequest(i.ToString(), "POST",
-				new Uri($"{this.ServerOptions.Value.Route}v1/CharacterFeatures"),
-				new Dictionary<string, string>() { { "Content-Type", "application/json" } },
-				new CharacterFeature
-				{
-					CharacterId = this.Id,
-					FeatureId = feature.Id,
-				}));
-
-		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch", new ODataBatchRequest(requests),
-			this.JsonSerializerOptions?.Value);
+		this.ServiceContext.AddObject("CoreEffects", args.Item);
+		await this.ServiceContext.SaveChangesAsync();
 	}
 
-	private async Task OnFeatureRemoving()
+	private async Task OnEffectUpdated(SavedRowItem<CoreEffect, Dictionary<string, object>> args)
 	{
-		if (this.Client is null || this.ServerOptions is null || this.selectedFeatures?.Any() != true)
+		if (this.ServiceContext is null)
 			return;
 
-		IEnumerable<ODataRequest> requests = this.selectedFeatures
-			.Select((Feature feature, int i) => new ODataRequest(i.ToString(), "DELETE",
-				new Uri($"{this.ServerOptions.Value.Route}v1/CharacterFeatures"),
-				new Dictionary<string, string>() { { "Content-Type", "application/json" } },
-				new CharacterFeature
-				{
-					CharacterId = this.Id,
-					FeatureId = feature.Id,
-				}));
-
-		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/$batch", new ODataBatchRequest(requests),
-			this.JsonSerializerOptions?.Value);
-	}
-
-	private async Task OnEffectInserting(CancellableRowChange<CoreEffect, Dictionary<string, object>> args)
-	{
-		if (this.Client is null || this.ServerOptions is null)
-			return;
-
-		args.Values[nameof(CoreEffect.CharacterId)] = this.Id;
-
-		await this.Client.PostAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
-			this.JsonSerializerOptions?.Value);
-	}
-
-	private async Task OnEffectUpdating(CancellableRowChange<CoreEffect, Dictionary<string, object>> args)
-	{
-		if (this.Client is null || this.ServerOptions is null)
-			return;
-
-		args.Values[nameof(args.Item.Id)] = args.Item.Id;
-		args.Values[nameof(args.Item.CharacterId)] = args.Item.CharacterId;
-
-		await this.Client.PutAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Values,
-			this.JsonSerializerOptions?.Value);
+		this.ServiceContext.AttachTo("CoreEffects", args.Item);
+		this.ServiceContext.UpdateObject(args.Item);
+		await this.ServiceContext.SaveChangesAsync();
 	}
 
 	private async Task OnEffectRemoving(CancellableRowChange<CoreEffect> args)
 	{
-		if (this.Client is null || this.ServerOptions is null)
+		if (this.ServiceContext is null)
 			return;
 
-		await this.Client.DeleteAsJsonAsync($"{this.ServerOptions.Value.Route}v1/CoreEffects", args.Item,
-			this.JsonSerializerOptions?.Value);
+		this.ServiceContext.AttachTo("CoreEffects", args.Item);
+		this.ServiceContext.DeleteObject(args.Item);
+		await this.ServiceContext.SaveChangesAsync();
+	}
+
+	private async Task OnFeatureInserting()
+	{
+		if (this.ServiceContext is null || this.selectedFeatures?.Any() != true)
+			return;
+
+		foreach (Feature feature in this.selectedFeatures)
+		{
+			this.ServiceContext.AddObject("CharacterFeatures",
+				new CharacterFeature
+				{
+					CharacterId = this.Id,
+					FeatureId = feature.Id,
+				});
+		}
+
+		await this.ServiceContext.SaveChangesAsync();
+	}
+
+	private async Task OnFeatureRemoving()
+	{
+		if (this.ServiceContext is null || this.selectedFeatures?.Any() != true)
+			return;
+
+		foreach (CharacterFeature characterFeature in this.selectedFeatures.Select((Feature feature) =>
+			new CharacterFeature
+			{
+				CharacterId = this.Id,
+				FeatureId = feature.Id,
+			}))
+		{
+			this.ServiceContext.AttachTo("CharacterFeatures", characterFeature);
+			this.ServiceContext.DeleteObject(characterFeature);
+		}
+
+		await this.ServiceContext.SaveChangesAsync();
 	}
 }

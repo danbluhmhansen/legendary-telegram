@@ -1,79 +1,82 @@
 namespace BlazorApp1.Client.Commands;
 
-using System.Collections.Specialized;
-using System.Net.Http.Json;
-using System.Web;
+using System.Linq.Expressions;
+using System.Reflection;
 
-using BlazorApp1.Client.Configuration;
-using BlazorApp1.Client.Models;
+using BlazorApp1.Client.Data;
+using BlazorApp1.Shared.Extensions;
 
 using Blazorise;
 using Blazorise.DataGrid;
 
-using Microsoft.Extensions.Options;
+using Microsoft.OData.Client;
 
 public class ReadDataCommand
 {
-	private readonly HttpClient client;
-	private readonly IOptions<ServerOptions> serverOptions;
+	private readonly ODataServiceContext context;
 	private readonly ILogger<ReadDataCommand> logger;
 
-	public ReadDataCommand(HttpClient client, IOptions<ServerOptions> serverOptions, ILogger<ReadDataCommand> logger)
+	public ReadDataCommand(ODataServiceContext context, ILogger<ReadDataCommand> logger)
 	{
-		this.client = client;
 		this.logger = logger;
-		this.serverOptions = serverOptions;
+		this.context = context;
 	}
 
-	public async Task<ODataCollectionResponse<T>?> ExecuteAsync<T>(DataGridReadDataEventArgs<T> eventArgs, string path,
-		string? expand = default, IEnumerable<string>? filters = default)
+	public DataServiceQuery<T> Execute<T>(DataGridReadDataEventArgs<T> eventArgs, string path)
 	{
-		IEnumerable<string> columnFilters = eventArgs.Columns
-			.Where(column => column.SearchValue is not null)
-			.Select(column => column.ColumnType switch
-			{
-				DataGridColumnType.Text => $"contains({column.Field},'{column.SearchValue}')",
-				_ => "",
-			});
+		DataServiceQuery<T> query = this.context.CreateQuery<T>(path)
+			.IncludeCount();
 
-		if (filters is not null)
-			columnFilters = columnFilters.Concat(filters);
-
-		IEnumerable<string> orderBy = eventArgs.Columns
-			.Where(column => column.SortDirection is not SortDirection.None)
-			.OrderBy(column => column.SortIndex)
-			.Select(column =>
-				column.SortDirection is SortDirection.Ascending ? column.Field : $"{column.Field} desc");
-
-		UriBuilder uriBuilder = new(this.serverOptions.Value.Route + path);
-
-		NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
-
-		if (columnFilters.Any())
-			query["$filter"] = string.Join(", ", columnFilters);
-		if (orderBy.Any())
-			query["$orderby"] = string.Join(", ", orderBy);
-
-		switch (eventArgs.ReadDataMode)
+		foreach (DataGridColumnInfo column in eventArgs.Columns
+			.OrderBy((DataGridColumnInfo column) => column.SortIndex))
 		{
-			case DataGridReadDataMode.Paging:
-				query["$skip"] = ((eventArgs.Page - 1) * eventArgs.PageSize).ToString();
-				query["$top"] = eventArgs.PageSize.ToString();
-				break;
-			case DataGridReadDataMode.Virtualize:
-				query["$skip"] = eventArgs.VirtualizeOffset.ToString();
-				query["$top"] = eventArgs.VirtualizeCount.ToString();
-				break;
+			switch (column.SortDirection)
+			{
+				case SortDirection.Ascending:
+					if (query is IOrderedQueryable<T> ascending)
+						query = (DataServiceQuery<T>)ascending.ThenBy(column.SortField);
+					else
+						query = (DataServiceQuery<T>)query.OrderBy(column.SortField);
+					break;
+				case SortDirection.Descending:
+					if (query is IOrderedQueryable<T> descending)
+						query = (DataServiceQuery<T>)descending.ThenByDescending(column.SortField);
+					else
+						query = (DataServiceQuery<T>)query.OrderByDescending(column.SortField);
+					break;
+			}
+
+			ParameterExpression parameterExpression = Expression.Parameter(typeof(T));
+
+			switch (column.ColumnType)
+			{
+				case DataGridColumnType.Text when column.SearchValue is string s && !string.IsNullOrWhiteSpace(s):
+					MethodInfo? method = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+					if (method is null)
+						break;
+					query = (DataServiceQuery<T>)query
+						.Where(Expression.Lambda<Func<T, bool>>(
+							Expression.Call(
+								Expression.Property(parameterExpression, column.Field),
+								method,
+								Expression.Constant(s, typeof(string))),
+							parameterExpression));
+					break;
+				case DataGridColumnType.Numeric when column.SearchValue is int i:
+					query = (DataServiceQuery<T>)query
+						.Where(Expression.Lambda<Func<T, bool>>(
+							Expression.Equal(parameterExpression, Expression.Constant(i, typeof(int))),
+							parameterExpression));
+					break;
+				case DataGridColumnType.Check when column.SearchValue is bool b:
+					query = (DataServiceQuery<T>)query
+						.Where(Expression.Lambda<Func<T, bool>>(
+							Expression.Equal(parameterExpression, Expression.Constant(b, typeof(bool))),
+							parameterExpression));
+					break;
+			}
 		}
 
-		query["$count"] = "true";
-
-		if (!string.IsNullOrWhiteSpace(expand))
-			query["$expand"] = expand;
-
-		uriBuilder.Query = query.ToString();
-
-		return await this.client
-			.GetFromJsonAsync<ODataCollectionResponse<T>>(uriBuilder.Uri, eventArgs.CancellationToken);
+		return query;
 	}
 }
