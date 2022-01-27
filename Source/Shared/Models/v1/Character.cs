@@ -5,7 +5,7 @@ using Microsoft.OData.Client;
 [Key(nameof(Id))]
 public record Character
 {
-	public Guid Id { get; init; }
+	public Guid Id { get; set; }
 	public string? Name { get; set; }
 
 	public ICollection<Feature> Features { get; set; } = new List<Feature>();

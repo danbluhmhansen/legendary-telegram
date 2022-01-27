@@ -95,13 +95,13 @@ builder.Services
 			services.AddSingleton<ODataResourceSerializer, CustomODataResourceSerializer>();
 		});
 
-		IODataControllerActionConvention? oDataConvention = options.Conventions
-			.FirstOrDefault((IODataControllerActionConvention convention) =>
-				convention.GetType() == typeof(EntitySetRoutingConvention));
-		if (oDataConvention is not null)
-			options.Conventions.Remove(oDataConvention);
+		// IODataControllerActionConvention? oDataConvention = options.Conventions
+		// 	.FirstOrDefault((IODataControllerActionConvention convention) =>
+		// 		convention.GetType() == typeof(EntitySetRoutingConvention));
+		// if (oDataConvention is not null)
+		// 	options.Conventions.Remove(oDataConvention);
 
-		options.Conventions.Add(new CustomEntitySetRoutingConvention());
+		// options.Conventions.Add(new CustomEntitySetRoutingConvention());
 	});
 builder.Services.AddRazorPages();
 

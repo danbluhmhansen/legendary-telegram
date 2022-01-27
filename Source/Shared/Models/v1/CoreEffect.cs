@@ -5,7 +5,7 @@ using Microsoft.OData.Client;
 [Key(nameof(Id))]
 public record CoreEffect
 {
-	public Guid Id { get; init; }
+	public Guid Id { get; set; }
 	public string? Path { get; set; }
 	public string? Rule { get; set; }
 
