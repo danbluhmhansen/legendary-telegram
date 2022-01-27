@@ -23,19 +23,11 @@ public partial class Details : ComponentBase
 	[Inject] private ILogger<Details>? Logger { get; init; }
 
 	private Character? character;
-	private JsonElement json;
+	private ICollection<JsonProperty> jsonProperties = new List<JsonProperty>();
 
 	private IEnumerable<Feature>? features;
 	private int? featuresCount;
 	private readonly List<Feature> selectedFeatures = new();
-
-	private ICollection<JsonProperty> GetJsonProperties =>
-		 this.json.ValueKind != JsonValueKind.Object
-			? new List<JsonProperty>()
-			: this.json.EnumerateObject()
-				.Where((JsonProperty property) =>
-					property.Value.ValueKind is JsonValueKind.String or JsonValueKind.Number)
-				.ToList();
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -49,7 +41,13 @@ public partial class Details : ComponentBase
 		this.character = await query.GetValueAsync();
 
 		if (this.ComputeCharacterCommand is not null && this.character is not null)
-			this.json = this.ComputeCharacterCommand.Execute(this.character);
+		{
+			this.jsonProperties = this.ComputeCharacterCommand.Execute(this.character)
+				.EnumerateObject()
+					.Where((JsonProperty property) =>
+						property.Value.ValueKind is JsonValueKind.String or JsonValueKind.Number)
+					.ToList();
+		}
 	}
 
 	private async Task OnReadFeatures(DataGridReadDataEventArgs<Feature> args)
@@ -80,11 +78,7 @@ public partial class Details : ComponentBase
 		StateHasChanged();
 	}
 
-	private CoreEffect NewEffectCreator() =>
-		new()
-		{
-			CharacterId = this.Id,
-		};
+	private CoreEffect NewEffectCreator() => new() { CharacterId = this.Id, };
 
 	private async Task OnEffectInserted(SavedRowItem<CoreEffect, Dictionary<string, object>> args)
 	{
