@@ -25,7 +25,7 @@ public partial class Characters : ComponentBase
 		if (this.ReadDataCommand is null)
 			return;
 
-		DataServiceQuery<Character> query = this.ReadDataCommand.Execute(args, "v1/Characters");
+		DataServiceQuery<Character> query = this.ReadDataCommand.Execute(args, "Characters");
 
 		if (await query.ExecuteAsync(args.CancellationToken) is not QueryOperationResponse<Character> response)
 			return;

@@ -1,4 +1,4 @@
-GET https://localhost:7289/v1/Characters
+GET https://localhost:7289/v1/Characters?$expand=Features,Effects
 
 ###
 

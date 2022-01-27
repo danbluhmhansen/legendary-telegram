@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.EntityFrameworkCore;
 
 [ApiVersion("1.0")]
 public class CharactersController : ODataController
@@ -30,8 +31,9 @@ public class CharactersController : ODataController
 	[HttpGet, EnableQuery]
 	public virtual async ValueTask<IActionResult> Get([FromODataUri, Required] Guid key)
 	{
-		Entities.Character? entity = await this.dbContext.Characters.FindAsync(key);
-		Character? model = this.mapper.Map<Character>(entity);
+		Character? model = await this.mapper.ProjectTo<Character>(
+			this.dbContext.Characters.Where((Entities.Character entity) => entity.Id == key))
+			.FirstOrDefaultAsync().ConfigureAwait(false);
 		return model is not null ? Ok(model) : NotFound(key);
 	}
 

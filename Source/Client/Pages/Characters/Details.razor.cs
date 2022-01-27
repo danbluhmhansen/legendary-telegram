@@ -43,7 +43,7 @@ public partial class Details : ComponentBase
 			return;
 
 		DataServiceQuerySingle<Character> query = new DataServiceQuerySingle<Character>(
-			this.ServiceContext, $"v1/Characters/{this.Id}")
+			this.ServiceContext, $"Characters/{this.Id}")
 			.Expand($"{nameof(Character.Features)}($expand={nameof(Feature.Effects)})")
 			.Expand(nameof(Character.Effects));
 		this.character = await query.GetValueAsync();
@@ -57,7 +57,7 @@ public partial class Details : ComponentBase
 		if (this.ReadDataCommand is null)
 			return;
 
-		IQueryable<Feature> query = this.ReadDataCommand.Execute(args, "v1/Features")
+		IQueryable<Feature> query = this.ReadDataCommand.Execute(args, "Features")
 			.Where((Feature feature) => !feature.Characters.Any((Character character) => this.Id == character.Id));
 
 		switch (args.ReadDataMode)
@@ -91,7 +91,7 @@ public partial class Details : ComponentBase
 		if (this.ServiceContext is null)
 			return;
 
-		this.ServiceContext.AddObject("v1/CoreEffects", args.Item);
+		this.ServiceContext.AddObject("CoreEffects", args.Item);
 		await this.ServiceContext.SaveChangesAsync();
 	}
 
@@ -100,7 +100,7 @@ public partial class Details : ComponentBase
 		if (this.ServiceContext is null)
 			return;
 
-		this.ServiceContext.AttachTo("v1/CoreEffects", args.Item);
+		this.ServiceContext.AttachTo("CoreEffects", args.Item);
 		this.ServiceContext.UpdateObject(args.Item);
 		await this.ServiceContext.SaveChangesAsync();
 	}
@@ -110,7 +110,7 @@ public partial class Details : ComponentBase
 		if (this.ServiceContext is null)
 			return;
 
-		this.ServiceContext.AttachTo("v1/CoreEffects", args.Item);
+		this.ServiceContext.AttachTo("CoreEffects", args.Item);
 		this.ServiceContext.DeleteObject(args.Item);
 		await this.ServiceContext.SaveChangesAsync();
 	}
@@ -122,7 +122,7 @@ public partial class Details : ComponentBase
 
 		foreach (Feature feature in this.selectedFeatures)
 		{
-			this.ServiceContext.AddObject("v1/CharacterFeatures",
+			this.ServiceContext.AddObject("CharacterFeatures",
 				new CharacterFeature
 				{
 					CharacterId = this.Id,
@@ -145,7 +145,7 @@ public partial class Details : ComponentBase
 				FeatureId = feature.Id,
 			}))
 		{
-			this.ServiceContext.AttachTo("v1/CharacterFeatures", characterFeature);
+			this.ServiceContext.AttachTo("CharacterFeatures", characterFeature);
 			this.ServiceContext.DeleteObject(characterFeature);
 		}
 

@@ -19,7 +19,7 @@ public partial class Effects : ComponentBase
 		if (this.ServiceContext is null || args.Item is null)
 			return;
 
-		this.ServiceContext.AttachTo("v1/Features", args.Item);
+		this.ServiceContext.AttachTo("Features", args.Item);
 		this.ServiceContext.DeleteObject(args.Item);
 		await this.ServiceContext.SaveChangesAsync();
 	}

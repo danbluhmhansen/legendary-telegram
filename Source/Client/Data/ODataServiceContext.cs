@@ -20,8 +20,11 @@ public class ODataServiceContext : DataServiceContext
 	public ODataServiceContext(
 		HttpClient httpClient,
 		IOptions<ServerOptions> serverOptions,
-		ILogger<ODataServiceContext> logger) : base(serverOptions.Value.Route)
+		ILogger<ODataServiceContext> logger) : base(new Uri(serverOptions.Value.Route + "v1"))
 	{
+		this.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;
+		this.SaveChangesDefaultOptions = SaveChangesOptions.BatchWithSingleChangeset | SaveChangesOptions.UseJsonBatch;
+
 		ODataConventionModelBuilder oDataBuilder = new();
 		oDataBuilder.EntitySet<Character>("Characters");
 		oDataBuilder.EntitySet<Feature>("Features");
@@ -34,17 +37,16 @@ public class ODataServiceContext : DataServiceContext
 				new { characterFeature.CharacterId, characterFeature.FeatureId });
 		IEdmModel edmModel = oDataBuilder.GetEdmModel();
 
-		this.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;
 		this.Format.UseJson(edmModel);
 
 		this.Configurations.RequestPipeline.OnMessageCreating = (DataServiceClientRequestMessageArgs args) =>
 			new HttpClientRequestMessage(httpClient, args, this.Configurations);
 
-		this.Characters = base.CreateQuery<Character>("v1/Characters");
-		this.Features = base.CreateQuery<Feature>("v1/Features");
-		this.CoreEffects = base.CreateQuery<CoreEffect>("v1/CoreEffects");
-		this.Effects = base.CreateQuery<Effect>("v1/Effects");
-		this.CharacterFeatures = base.CreateQuery<CharacterFeature>("v1/CharacterFeatures");
+		this.Characters = base.CreateQuery<Character>("Characters");
+		this.Features = base.CreateQuery<Feature>("Features");
+		this.CoreEffects = base.CreateQuery<CoreEffect>("CoreEffects");
+		this.Effects = base.CreateQuery<Effect>("Effects");
+		this.CharacterFeatures = base.CreateQuery<CharacterFeature>("CharacterFeatures");
 		this.logger = logger;
 	}
 

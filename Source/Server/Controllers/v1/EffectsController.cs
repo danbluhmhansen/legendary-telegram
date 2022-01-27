@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.EntityFrameworkCore;
 
 [ApiVersion("1.0")]
 public class EffectsController : ODataController
@@ -30,8 +31,9 @@ public class EffectsController : ODataController
 	[HttpGet, EnableQuery]
 	public virtual async ValueTask<IActionResult> Get([FromODataUri, Required] Guid key)
 	{
-		Entities.Effect? entity = await this.dbContext.Effects.FindAsync(key);
-		Effect? model = this.mapper.Map<Effect>(entity);
+		Effect? model = await this.mapper.ProjectTo<Effect>(
+			this.dbContext.Effects.Where((Entities.Effect entity) => entity.Id == key))
+			.FirstOrDefaultAsync().ConfigureAwait(false);
 		return model is not null ? Ok(model) : NotFound(key);
 	}
 

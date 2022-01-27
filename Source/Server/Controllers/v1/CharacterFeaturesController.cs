@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.EntityFrameworkCore;
 
 [ApiVersion("1.0")]
 public class CharacterFeaturesController : ODataController
@@ -33,9 +34,11 @@ public class CharacterFeaturesController : ODataController
 		[FromODataUri, Required] Guid keyCharacterId,
 		[FromODataUri, Required] Guid keyFeatureId)
 	{
-		Entities.CharacterFeature? entity = await this.dbContext.CharacterFeatures
-			.FindAsync(keyCharacterId, keyFeatureId);
-		CharacterFeature? model = this.mapper.Map<CharacterFeature>(entity);
+		CharacterFeature? model = await this.mapper.ProjectTo<CharacterFeature>(
+			this.dbContext.CharacterFeatures.Where((Entities.CharacterFeature entity) =>
+				entity.CharacterId == keyCharacterId
+				&& entity.FeatureId == keyFeatureId))
+			.FirstOrDefaultAsync().ConfigureAwait(false);
 		return model is not null ? Ok(model) : NotFound(new { keyCharacterId, keyFeatureId });
 	}
 

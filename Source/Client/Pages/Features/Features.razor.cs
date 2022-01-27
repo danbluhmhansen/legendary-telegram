@@ -25,7 +25,7 @@ public partial class Features : ComponentBase
 		if (this.ReadDataCommand is null)
 			return;
 
-		DataServiceQuery<Feature> query = this.ReadDataCommand.Execute(args, "v1/Features")
+		DataServiceQuery<Feature> query = this.ReadDataCommand.Execute(args, "Features")
 			.Expand(nameof(Feature.Effects));
 
 		if (await query.ExecuteAsync(args.CancellationToken) is not QueryOperationResponse<Feature> response)
@@ -42,7 +42,7 @@ public partial class Features : ComponentBase
 		if (this.ServiceContext is null || args.Item is null)
 			return;
 
-		this.ServiceContext.AddObject("v1/Features", args.Item);
+		this.ServiceContext.AddObject("Features", args.Item);
 		await this.ServiceContext.SaveChangesAsync();
 	}
 
@@ -51,7 +51,7 @@ public partial class Features : ComponentBase
 		if (this.ServiceContext is null || args.Item is null)
 			return;
 
-		this.ServiceContext.AttachTo("v1/Features", args.Item);
+		this.ServiceContext.AttachTo("Features", args.Item);
 		this.ServiceContext.UpdateObject(args.Item);
 		await this.ServiceContext.SaveChangesAsync();
 	}
@@ -61,7 +61,7 @@ public partial class Features : ComponentBase
 		if (this.ServiceContext is null || args.Item is null)
 			return;
 
-		this.ServiceContext.AttachTo("v1/Features", args.Item);
+		this.ServiceContext.AttachTo("Features", args.Item);
 		this.ServiceContext.DeleteObject(args.Item);
 		await this.ServiceContext.SaveChangesAsync();
 	}
