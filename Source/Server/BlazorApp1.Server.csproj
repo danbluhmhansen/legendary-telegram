@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Shared\BlazorApp1.Shared.csproj" />
+		<ProjectReference Include="..\OData.Model\BlazorApp1.OData.Model.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

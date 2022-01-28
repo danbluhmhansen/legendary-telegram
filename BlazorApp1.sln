@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{F2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp1.Console", "Tests\Console\BlazorApp1.Console.csproj", "{3CA19B49-FB14-47E7-A41F-0EDA1E548ED9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp1.OData.Model", "Source\OData.Model\BlazorApp1.OData.Model.csproj", "{000784B1-5C47-46E2-977E-E4DAF51F72CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{3CA19B49-FB14-47E7-A41F-0EDA1E548ED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CA19B49-FB14-47E7-A41F-0EDA1E548ED9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CA19B49-FB14-47E7-A41F-0EDA1E548ED9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{000784B1-5C47-46E2-977E-E4DAF51F72CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{000784B1-5C47-46E2-977E-E4DAF51F72CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{000784B1-5C47-46E2-977E-E4DAF51F72CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{000784B1-5C47-46E2-977E-E4DAF51F72CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

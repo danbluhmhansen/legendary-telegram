@@ -4,6 +4,8 @@ using BlazorApp1.Client;
 using BlazorApp1.Client.Commands;
 using BlazorApp1.Client.Configuration;
 using BlazorApp1.Client.Data;
+using BlazorApp1.OData.Model;
+
 using Blazorise;
 using Blazorise.Bulma;
 using Blazorise.Icons.FontAwesome;
@@ -51,6 +53,8 @@ builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProvider
 });
 
 builder.Services.AddLogging();
+
+builder.Services.AddODataModel();
 
 builder.Services.AddScoped<ODataServiceContext>();
 

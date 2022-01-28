@@ -7,37 +7,25 @@ using System.Net;
 using System.Net.Http.Headers;
 
 using BlazorApp1.Client.Configuration;
+using BlazorApp1.OData.Model;
 using BlazorApp1.Shared.Models.v1;
 
 using Microsoft.Extensions.Options;
 using Microsoft.OData;
 using Microsoft.OData.Client;
-using Microsoft.OData.Edm;
-using Microsoft.OData.ModelBuilder;
 
 public class ODataServiceContext : DataServiceContext
 {
 	public ODataServiceContext(
 		HttpClient httpClient,
+		IODataModelProvider odataModelProvider,
 		IOptions<ServerOptions> serverOptions,
 		ILogger<ODataServiceContext> logger) : base(new Uri(serverOptions.Value.Route + "v1"))
 	{
 		this.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;
 		this.SaveChangesDefaultOptions = SaveChangesOptions.BatchWithSingleChangeset | SaveChangesOptions.UseJsonBatch;
 
-		ODataConventionModelBuilder oDataBuilder = new();
-		oDataBuilder.EntitySet<Character>("Characters");
-		oDataBuilder.EntitySet<Feature>("Features");
-		oDataBuilder.EntitySet<CoreEffect>("CoreEffects");
-		oDataBuilder.EntitySet<Effect>("Effects");
-		EntitySetConfiguration<CharacterFeature> characterFeaturesConfiguration = oDataBuilder
-			.EntitySet<CharacterFeature>("CharacterFeatures");
-		characterFeaturesConfiguration.EntityType
-			.HasKey((CharacterFeature characterFeature) =>
-				new { characterFeature.CharacterId, characterFeature.FeatureId });
-		IEdmModel edmModel = oDataBuilder.GetEdmModel();
-
-		this.Format.UseJson(edmModel);
+		this.Format.UseJson(odataModelProvider.GetEdmModel("1"));
 
 		this.Configurations.RequestPipeline.OnMessageCreating = (DataServiceClientRequestMessageArgs args) =>
 			new HttpClientRequestMessage(httpClient, args, this.Configurations);

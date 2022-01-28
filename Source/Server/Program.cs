@@ -1,5 +1,6 @@
 using AutoMapper;
 
+using BlazorApp1.OData.Model;
 using BlazorApp1.Server;
 using BlazorApp1.Server.Data;
 using BlazorApp1.Server.Entities;
@@ -9,10 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OData.Edm;
-using Microsoft.OData.ModelBuilder;
 
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
@@ -73,29 +71,20 @@ builder.Services.AddAutoMapper((IMapperConfigurationExpression expression) =>
 		.ReverseMap();
 });
 
-ODataConventionModelBuilder oDataBuilder = new();
-oDataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Character>("Characters");
-oDataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Feature>("Features");
-oDataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.CoreEffect>("CoreEffects");
-oDataBuilder.EntitySet<BlazorApp1.Shared.Models.v1.Effect>("Effects");
-EntitySetConfiguration<BlazorApp1.Shared.Models.v1.CharacterFeature> characterFeaturesConfiguration = oDataBuilder
-	.EntitySet<BlazorApp1.Shared.Models.v1.CharacterFeature>("CharacterFeatures");
-characterFeaturesConfiguration.EntityType
-	.HasKey((BlazorApp1.Shared.Models.v1.CharacterFeature characterFeature) =>
-		new { characterFeature.CharacterId, characterFeature.FeatureId });
-IEdmModel edmModel = oDataBuilder.GetEdmModel();
-
 builder.Services
 	.AddControllersWithViews()
-	.AddOData((ODataOptions options) =>
+	.AddOData((ODataOptions options, IServiceProvider serviceProvider) =>
 	{
-		options.AddRouteComponents("v1", edmModel, (IServiceCollection services) =>
+		IODataModelProvider odataModelProvider = serviceProvider.GetRequiredService<IODataModelProvider>();
+		options.AddRouteComponents("v1", odataModelProvider.GetEdmModel("1"), (IServiceCollection services) =>
 		{
 			services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler());
 			services.AddSingleton<ODataResourceSerializer, CustomODataResourceSerializer>();
 		});
 	});
 builder.Services.AddRazorPages();
+
+builder.Services.AddODataModel();
 
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
 builder.Services.Configure<ODataOptions>(builder.Configuration.GetSection(nameof(ODataOptions)));
