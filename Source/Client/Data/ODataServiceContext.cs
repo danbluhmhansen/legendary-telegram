@@ -84,7 +84,10 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	/// <param name="client">The client</param>
 	/// <param name="args">The args</param>
 	/// <param name="config">The config</param>
-	public HttpClientRequestMessage(HttpClient client, DataServiceClientRequestMessageArgs args, DataServiceClientConfigurations config)
+	public HttpClientRequestMessage(
+		HttpClient client,
+		DataServiceClientRequestMessageArgs args,
+		DataServiceClientConfigurations config)
 		: base(args.ActualMethod)
 	{
 		this.requestMessage = new HttpRequestMessage();
@@ -94,9 +97,9 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 
 		this.contentHeaderValueCache = new Dictionary<string, string>();
 
-		foreach (var header in args.Headers)
+		foreach (KeyValuePair<string, string> header in args.Headers)
 		{
-			this.SetHeader(header.Key, header.Value);
+			SetHeader(header.Key, header.Value);
 		}
 
 		this.Url = args.RequestUri;
@@ -137,49 +140,30 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	/// <summary>
 	/// Gets or sets the request url.
 	/// </summary>
-	public override Uri Url
-	{
-		get
-		{
-			return requestMessage.RequestUri;
-		}
-
-		set
-		{
-			requestMessage.RequestUri = value;
-		}
-	}
+	public override Uri? Url { get => this.requestMessage.RequestUri; set => this.requestMessage.RequestUri = value; }
 
 	/// <summary>
 	/// Gets or sets the method for this request.
 	/// </summary>
 	public override string Method
 	{
-		get
-		{
-			return this.requestMessage.Method.ToString();
-		}
-
-		set
-		{
-			this.requestMessage.Method = new HttpMethod(value);
-		}
+		get => this.requestMessage.Method.ToString();
+		set => this.requestMessage.Method = new HttpMethod(value);
 	}
 
 	/// <summary>
 	///  Gets or set the credentials for this request.
 	/// </summary>
-	public override ICredentials Credentials
+	public override ICredentials? Credentials
 	{
-		get
-		{
-			return this.requestMessage.Properties[typeof(ICredentials).FullName] as ICredentials;
-		}
-
-		set
-		{
-			this.requestMessage.Properties[typeof(ICredentials).FullName] = value;
-		}
+		get => this.requestMessage.Options.TryGetValue(
+				new HttpRequestOptionsKey<ICredentials>(typeof(ICredentials).FullName),
+				out ICredentials? credentials)
+				? credentials
+				: null;
+		set => this.requestMessage.Options.Set(
+			new HttpRequestOptionsKey<ICredentials?>(typeof(ICredentials).FullName),
+			value);
 	}
 
 	/// <summary>
@@ -187,26 +171,14 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	/// </summary>
 	public override int Timeout
 	{
-		get
-		{
-			return (int)this.client.Timeout.TotalSeconds;
-		}
-		set
-		{
-			this.client.Timeout = new TimeSpan(0, 0, value);
-		}
+		get => (int)this.client.Timeout.TotalSeconds;
+		set => this.client.Timeout = new TimeSpan(0, 0, value);
 	}
 
 	public override int ReadWriteTimeout
 	{
-		get
-		{
-			return (int)this.client.Timeout.TotalSeconds;
-		}
-		set
-		{
-			this.client.Timeout = new TimeSpan(0, 0, value);
-		}
+		get => (int)this.client.Timeout.TotalSeconds;
+		set => this.client.Timeout = new TimeSpan(0, 0, value);
 	}
 
 #if !(NETCOREAPP1_0 || NETCOREAPP2_0)
@@ -215,15 +187,8 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	/// </summary>
 	public override bool SendChunked
 	{
-		get
-		{
-			bool? transferEncodingChunked = this.requestMessage.Headers.TransferEncodingChunked;
-			return transferEncodingChunked.HasValue && transferEncodingChunked.Value;
-		}
-		set
-		{
-			this.requestMessage.Headers.TransferEncodingChunked = value;
-		}
+		get => this.requestMessage.Headers.TransferEncodingChunked == true;
+		set => this.requestMessage.Headers.TransferEncodingChunked = value;
 	}
 #endif
 
@@ -243,10 +208,14 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 				return string.Join(",", this.requestMessage.Content.Headers.GetValues(headerName));
 			}
 
-			return this.contentHeaderValueCache.TryGetValue(headerName, out string headerValue) ? headerValue : string.Empty;
+			return this.contentHeaderValueCache.TryGetValue(headerName, out string? headerValue)
+				? headerValue
+				: string.Empty;
 		}
 
-		return this.requestMessage.Headers.Contains(headerName) ? string.Join(",", this.requestMessage.Headers.GetValues(headerName)) : string.Empty;
+		return this.requestMessage.Headers.Contains(headerName)
+			? string.Join(",", this.requestMessage.Headers.GetValues(headerName))
+			: string.Empty;
 	}
 
 	/// <summary>
@@ -273,18 +242,12 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	/// Gets the stream to be used to write the request payload.
 	/// </summary>
 	/// <returns>Stream to which the request payload needs to be written.</returns>
-	public override Stream GetStream()
-	{
-		return this.messageStream;
-	}
+	public override Stream GetStream() => this.messageStream;
 
 	/// <summary>
 	/// Abort the current request.
 	/// </summary>
-	public override void Abort()
-	{
-		this.client.CancelPendingRequests();
-	}
+	public override void Abort() => this.client.CancelPendingRequests();
 
 	/// <summary>
 	/// Begins an asynchronous request for a System.IO.Stream object to use to write data.
@@ -304,10 +267,7 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	/// </summary>
 	/// <param name="asyncResult">The pending request for a stream.</param>
 	/// <returns>A System.IO.Stream to use to write request data.</returns>
-	public override Stream EndGetRequestStream(IAsyncResult asyncResult)
-	{
-		return ((Task<Stream>)asyncResult).Result;
-	}
+	public override Stream EndGetRequestStream(IAsyncResult asyncResult) => ((Task<Stream>)asyncResult).Result;
 
 	/// <summary>
 	/// Begins an asynchronous request to an Internet resource.
@@ -315,32 +275,26 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	/// <param name="callback">The System.AsyncCallback delegate.</param>
 	/// <param name="state">The state object for this request</param>
 	/// <returns>An System.IAsyncResult that references the asynchronous request for a response.</returns>
-	public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
-	{
-		var send = CreateSendTask();
-		return send.ToApm(callback, state);
-	}
+	public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state) =>
+		CreateSendTask().ToApm(callback, state);
 
 	/// <summary>
 	/// Ends an asynchronous request to an Internet resource.
 	/// </summary>
 	/// <param name="asyncResult">The pending request for a response.</param>
 	/// <returns> A System.Net.WebResponse that contains the response from the Internet resource.</returns>
-	public override IODataResponseMessage EndGetResponse(IAsyncResult asyncResult)
-	{
-		return UnwrapAggregateException(() => new HttpClientResponseMessage(((Task<HttpResponseMessage>)asyncResult).Result, this.config));
-	}
+	public override IODataResponseMessage EndGetResponse(IAsyncResult asyncResult) =>
+		UnwrapAggregateException(() =>
+			new HttpClientResponseMessage(((Task<HttpResponseMessage>)asyncResult).Result, this.config));
 
 #if !(NETCOREAPP1_0 || NETCOREAPP2_0)
-	public override IODataResponseMessage GetResponse()
-	{
-		return UnwrapAggregateException(() =>
-			{
-				var send = CreateSendTask();
-				send.Wait();
-				return new HttpClientResponseMessage(send.Result, this.config);
-			});
-	}
+	public override IODataResponseMessage GetResponse() =>
+		UnwrapAggregateException(() =>
+		{
+			Task<HttpResponseMessage> send = CreateSendTask();
+			send.Wait();
+			return new HttpClientResponseMessage(send.Result, this.config);
+		});
 #endif
 
 	/// <summary>
@@ -354,13 +308,13 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	{
 		// Only set the message content if the stream has been written to, otherwise
 		// HttpClient will complain if it's a GET request.
-		var messageContent = this.messageStream.ToArray();
+		byte[] messageContent = this.messageStream.ToArray();
 		if (messageContent.Length > 0)
 		{
 			this.requestMessage.Content = new ByteArrayContent(messageContent);
 
 			// Apply cached "Content" header values
-			foreach (var contentHeader in this.contentHeaderValueCache)
+			foreach (KeyValuePair<string, string> contentHeader in this.contentHeaderValueCache)
 			{
 				this.requestMessage.Content.Headers.Add(contentHeader.Key, contentHeader.Value);
 			}
@@ -368,8 +322,7 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 
 		this.requestMessage.Method = new HttpMethod(this.ActualMethod);
 
-		var send = this.client.SendAsync(this.requestMessage);
-		return send;
+		return this.client.SendAsync(this.requestMessage);
 	}
 
 	private static T UnwrapAggregateException<T>(Func<T> action)
@@ -391,7 +344,7 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 
 	private static DataServiceTransportException ConvertToDataServiceWebException(WebException webException)
 	{
-		HttpWebResponseMessage errorResponseMessage = null;
+		HttpWebResponseMessage? errorResponseMessage = null;
 		if (webException.Response != null)
 		{
 			var httpResponse = (HttpWebResponse)webException.Response;
@@ -402,29 +355,32 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 	}
 }
 
-internal class HttpClientResponseMessage : HttpWebResponseMessage, IODataResponseMessage
+internal class HttpClientResponseMessage : HttpWebResponseMessage
 {
 	public HttpClientResponseMessage(HttpResponseMessage httpResponse, DataServiceClientConfigurations config)
 		: base(httpResponse.ToStringDictionary(),
 				(int)httpResponse.StatusCode,
-				() => { var task = httpResponse.Content.ReadAsStreamAsync(); task.Wait(); return task.Result; })
+				() =>
+				{
+					Task<Stream> task = httpResponse.Content.ReadAsStreamAsync();
+					task.Wait();
+					return task.Result;
+				})
 	{
 	}
 }
 
 internal static class HttpHeadersExtensions
 {
-	public static IDictionary<string, string> ToStringDictionary(this HttpHeaders headers)
-	{
-		return headers.ToDictionary((h1) => h1.Key, (h2) => string.Join(",", h2.Value));
-	}
+	public static IDictionary<string, string> ToStringDictionary(this HttpHeaders headers) =>
+		headers.ToDictionary((h1) => h1.Key, (h2) => string.Join(",", h2.Value));
 
 	public static IDictionary<string, string> ToStringDictionary(this HttpResponseMessage message)
 	{
 		if (message.Content != null)
 		{
-			var dic = message.Headers.ToStringDictionary();
-			foreach (var item in message.Content.Headers.ToStringDictionary())
+			IDictionary<string, string> dic = message.Headers.ToStringDictionary();
+			foreach (KeyValuePair<string, string> item in message.Content.Headers.ToStringDictionary())
 			{
 				dic[item.Key] = item.Value;
 			}
