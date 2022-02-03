@@ -34,11 +34,15 @@ public partial class Details : ComponentBase
 		if (this.ServiceContext is null)
 			return;
 
-		DataServiceQuerySingle<Character> query = new DataServiceQuerySingle<Character>(
-			this.ServiceContext, $"Characters/{this.Id}")
+		IQueryable<Character> query = this.ServiceContext.Characters
 			.Expand($"{nameof(Character.Features)}($expand={nameof(Feature.Effects)})")
-			.Expand(nameof(Character.Effects));
-		this.character = await query.GetValueAsync();
+			.Expand(nameof(Character.Effects))
+			.Where((Character character) => character.Id == this.Id);
+
+		if (await query.ExecuteAsync() is not QueryOperationResponse<Character> response)
+			return;
+
+		this.character = response.First();
 
 		if (this.ComputeCharacterCommand is not null && this.character is not null)
 		{
