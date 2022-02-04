@@ -1,9 +1,6 @@
 namespace BlazorApp1.Client.Pages.Characters;
 
-using System.Net.Http.Json;
-using System.Text.Json;
 using BlazorApp1.Client.Commands;
-using BlazorApp1.Client.Models;
 using BlazorApp1.Shared.Models.v1;
 
 using Blazorise.DataGrid;
@@ -25,7 +22,10 @@ public partial class Characters : ComponentBase
 		if (this.ReadDataCommand is null)
 			return;
 
-		DataServiceQuery<Character> query = this.ReadDataCommand.Execute(args, "Characters");
+		DataServiceQuery<Character> query = this.ReadDataCommand.Execute(args, "Characters")
+			// FIXME: Forced to expand here otherwise expanding in details view doesn't load model correctly.
+			.Expand($"{nameof(Character.Features)}($expand={nameof(Feature.Effects)})")
+			.Expand(nameof(Character.Effects));
 
 		if (await query.ExecuteAsync(args.CancellationToken) is not QueryOperationResponse<Character> response)
 			return;

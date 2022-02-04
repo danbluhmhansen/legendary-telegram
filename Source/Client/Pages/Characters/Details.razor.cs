@@ -42,7 +42,7 @@ public partial class Details : ComponentBase
 		if (await query.ExecuteAsync() is not QueryOperationResponse<Character> response)
 			return;
 
-		this.character = response.First();
+		this.character = response.Single();
 
 		if (this.ComputeCharacterCommand is not null && this.character is not null)
 		{
