@@ -1,7 +1,2 @@
 {
-    "editor.rulers": [ 120 ],
-    "files.insertFinalNewline": true,
-    "files.trimFinalNewlines": true,
-    "files.trimTrailingWhitespace": true,
-    "razor.disableBlazorDebugPrompt": true
 }

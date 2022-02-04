@@ -6,25 +6,35 @@
 		}
 	],
 	"settings": {
-		"razor.disableBlazorDebugPrompt": true,
 		"csharp.semanticHighlighting.enabled": true,
-		"editor.suggestSelection": "first",
 		"editor.rulers": [ 120 ],
 		"editor.semanticHighlighting.enabled": true,
+		"editor.suggestSelection": "first",
+		"editor.wordWrap": "bounded",
+		"editor.wordWrapColumn": 120,
+		"editor.wrappingIndent": "indent",
 		"files.insertFinalNewline": true,
 		"files.trimFinalNewlines": true,
 		"files.trimTrailingWhitespace": true,
 		"omnisharp.enableRoslynAnalyzers": true,
 		"omnisharp.organizeImportsOnFormat": true,
-		"vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+		"sqltools.connections": [
+			{
+				"previewLimit": 50,
+				"server": "localhost",
+				"port": 5432,
+				"driver": "PostgreSQL",
+				"name": "blazor_app_db",
+				"database": "blazor_app_db",
+				"username": "postgres",
+				"password": "password"
+			}
+		],
 		"[jsonc]": {
 			"editor.defaultFormatter": "esbenp.prettier-vscode"
 		},
 		"[json]": {
 			"editor.defaultFormatter": "esbenp.prettier-vscode"
 		},
-		"editor.wrappingIndent": "indent",
-		"editor.wordWrap": "wordWrapColumn",
-		"editor.wordWrapColumn": 120
 	}
 }
