@@ -107,26 +107,31 @@
 			"command": "dotnet",
 			"type": "process",
 			"args": [
-				"clean"
+				"clean",
+				"${workspaceFolder}"
 			],
 			"problemMatcher": "$msCompile"
 		},
 		{
 			"label": "addMigration",
 			"command": "dotnet",
-			"type": "process",
+			"type": "shell",
 			"args": [
 				"ef",
 				"migrations",
 				"add",
 				"${input:dotnetMigrationsName}",
-				"--context ${input:dotnetMigrationsContext}",
-				"--project ${input:dotnetMigrationsProject}",
-				"--startup-project ${input:dotnetMigrationsStartupProject}",
-				"--output-dir ${input:dotnetMigrationsOutputDir}"
+				"--project",
+				"${workspaceFolder}/${input:dotnetMigrationsProject}",
+				"--startup-project",
+				"${workspaceFolder}/${input:dotnetMigrationsStartupProject}",
+				"--context",
+				"${input:dotnetMigrationsContext}",
+				"--output-dir",
+				"${input:dotnetMigrationsOutputDir}"
 			],
 			"problemMatcher": "$msCompile",
-		}
+		},
 	],
 	"inputs": [
 		{
@@ -144,13 +149,13 @@
 			"id": "dotnetMigrationsProject",
 			"type": "promptString",
 			"description": "The project to use.",
-			"default": "./Source/Server/BlazorApp1.Server.csproj",
+			"default": "Source/Server/",
 		},
 		{
 			"id": "dotnetMigrationsStartupProject",
 			"type": "promptString",
 			"description": "The startup project to use.",
-			"default": "./Source/Server/BlazorApp1.Server.csproj",
+			"default": "Source/Server/",
 		},
 		{
 			"id": "dotnetMigrationsOutputDir",
