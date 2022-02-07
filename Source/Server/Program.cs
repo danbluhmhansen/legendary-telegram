@@ -1,3 +1,7 @@
+using Audit.Core;
+using Audit.EntityFramework;
+using Audit.EntityFramework.ConfigurationApi;
+
 using AutoMapper;
 
 using BlazorApp1.OData.Model;
@@ -23,8 +27,9 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(
-	(DbContextOptionsBuilder options) => options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<ApplicationDbContext>((DbContextOptionsBuilder options) => options
+	.UseNpgsql(connectionString)
+	.AddInterceptors(new AuditSaveChangesInterceptor()));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -84,6 +89,8 @@ builder.Services
 	});
 builder.Services.AddRazorPages();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddODataModel();
 
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
@@ -95,6 +102,20 @@ builder.Services.Configure<OpenIddictValidationOptions>(
 	builder.Configuration.GetSection(nameof(OpenIddictValidationOptions)));
 
 WebApplication app = builder.Build();
+
+Audit.Core.Configuration.Setup()
+	.UseEntityFramework((IEntityFrameworkProviderConfigurator config) => config
+		.UseDbContext<ApplicationDbContext>()
+		.AuditTypeMapper((Type _) => typeof(AuditLog))
+		.AuditEntityAction((AuditEvent auditEvent, EventEntry entry, AuditLog entity) =>
+		{
+			entity.AuditType = entry.EntityType.FullName;
+			entity.AuditDate = auditEvent.StartDate;
+			entity.EntityKey = Audit.Core.Configuration.JsonAdapter.Serialize(entry.PrimaryKey);
+			entity.EntityData = entry.ToJson();
+			entity.AuditUserName = auditEvent.Environment.UserName;
+		})
+		.IgnoreMatchedProperties());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

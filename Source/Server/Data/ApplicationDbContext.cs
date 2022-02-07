@@ -5,6 +5,7 @@ using BlazorApp1.Server.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using OpenIddict.EntityFrameworkCore.Models;
 
@@ -22,6 +23,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 		Set<OpenIddictEntityFrameworkCoreScope>();
 	public DbSet<OpenIddictEntityFrameworkCoreToken> OpenIddictTokens =>
 		Set<OpenIddictEntityFrameworkCoreToken>();
+
+	public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
 	public DbSet<Character> Characters => Set<Character>();
 	public DbSet<Feature> Features => Set<Feature>();
@@ -48,6 +51,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 		builder.Entity<OpenIddictEntityFrameworkCoreAuthorization>().ToTable("OpenIddictAuthorizations", "opid");
 		builder.Entity<OpenIddictEntityFrameworkCoreScope>().ToTable("OpenIddictScopes", "opid");
 		builder.Entity<OpenIddictEntityFrameworkCoreToken>().ToTable("OpenIddictTokens", "opid");
+
+		EntityTypeBuilder<AuditLog> auditLogBuilder = builder.Entity<AuditLog>();
+		auditLogBuilder.HasKey(nameof(AuditLog.AuditType), nameof(AuditLog.AuditDate));
+		auditLogBuilder
+			.HasOne((AuditLog auditLog) => auditLog.AuditUser)
+			.WithMany()
+			.HasForeignKey((AuditLog auditLog) => auditLog.AuditUserName)
+			.HasPrincipalKey((ApplicationUser user) => user.UserName);
+		auditLogBuilder.Property((AuditLog auditLog) => auditLog.EntityKey).HasColumnType("jsonb");
+		auditLogBuilder.Property((AuditLog auditLog) => auditLog.EntityData).HasColumnType("jsonb");
 
 		builder.Entity<Character>()
 			.HasMany((Character character) => character.Features)
