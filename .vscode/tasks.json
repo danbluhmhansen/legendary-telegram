@@ -110,6 +110,53 @@
 				"clean"
 			],
 			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "addMigration",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"ef",
+				"migrations",
+				"add",
+				"${input:dotnetMigrationsName}",
+				"--context ${input:dotnetMigrationsContext}",
+				"--project ${input:dotnetMigrationsProject}",
+				"--startup-project ${input:dotnetMigrationsStartupProject}",
+				"--output-dir ${input:dotnetMigrationsOutputDir}"
+			],
+			"problemMatcher": "$msCompile",
+		}
+	],
+	"inputs": [
+		{
+			"id": "dotnetMigrationsName",
+			"type": "promptString",
+			"description": "The name of the migration.",
+		},
+		{
+			"id": "dotnetMigrationsContext",
+			"type": "promptString",
+			"description": "The DbContext to use.",
+			"default": "ApplicationDbContext",
+		},
+		{
+			"id": "dotnetMigrationsProject",
+			"type": "promptString",
+			"description": "The project to use.",
+			"default": "./Source/Server/BlazorApp1.Server.csproj",
+		},
+		{
+			"id": "dotnetMigrationsStartupProject",
+			"type": "promptString",
+			"description": "The startup project to use.",
+			"default": "./Source/Server/BlazorApp1.Server.csproj",
+		},
+		{
+			"id": "dotnetMigrationsOutputDir",
+			"type": "promptString",
+			"description": "The directory to put files in. Paths are relative to the project directory. Defaults to 'Migrations'.",
+			"default": "Migrations",
 		}
 	]
 }
