@@ -17,7 +17,7 @@ namespace BlazorApp1.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "6.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -71,6 +71,7 @@ namespace BlazorApp1.Server.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
@@ -84,6 +85,30 @@ namespace BlazorApp1.Server.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", "identity");
+                });
+
+            modelBuilder.Entity("BlazorApp1.Server.Entities.AuditLog", b =>
+                {
+                    b.Property<string>("AuditType")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("AuditDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("AuditUserName")
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("EntityData")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("EntityKey")
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("AuditType", "AuditDate");
+
+                    b.HasIndex("AuditUserName");
+
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("BlazorApp1.Server.Entities.Character", b =>
@@ -504,6 +529,16 @@ namespace BlazorApp1.Server.Migrations
                     b.HasIndex("ApplicationId", "Status", "Subject", "Type");
 
                     b.ToTable("OpenIddictTokens", "opid");
+                });
+
+            modelBuilder.Entity("BlazorApp1.Server.Entities.AuditLog", b =>
+                {
+                    b.HasOne("BlazorApp1.Server.Entities.ApplicationUser", "AuditUser")
+                        .WithMany()
+                        .HasForeignKey("AuditUserName")
+                        .HasPrincipalKey("UserName");
+
+                    b.Navigation("AuditUser");
                 });
 
             modelBuilder.Entity("BlazorApp1.Server.Entities.CharacterFeature", b =>

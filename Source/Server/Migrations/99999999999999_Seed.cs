@@ -1,13 +1,13 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
 #nullable disable
 
-namespace BlazorApp1.Server.Migrations;
-
-using Microsoft.EntityFrameworkCore.Migrations;
-
-public partial class Seed : Migration
+namespace BlazorApp1.Server.Migrations
 {
-	protected override void Up(MigrationBuilder migrationBuilder)
+	public partial class Seed : Migration
 	{
+		protected override void Up(MigrationBuilder migrationBuilder)
+		{
 		migrationBuilder.InsertData(
 			"AspNetUsers",
 			new[]
@@ -35,7 +35,7 @@ public partial class Seed : Migration
 					0,
 					"cf764f15-6a4b-4cd4-a18c-b674476b7910",
 					"info@fake.com",
-					false,
+					true,
 					false,
 					null,
 					"INFO@FAKE.COM",
@@ -270,8 +270,8 @@ public partial class Seed : Migration
 			});
 	}
 
-	protected override void Down(MigrationBuilder migrationBuilder)
-	{
+		protected override void Down(MigrationBuilder migrationBuilder)
+		{
 		migrationBuilder.DeleteData("AspNetUsers", "Id", "3a6b2a7f-6376-4865-b655-f9b9787d026f", "identity");
 
 		migrationBuilder.DeleteData("OpenIddictApplications", "Id", "59d50e89-c579-4cc4-9cd1-a8db1399fe4e", "opid");
@@ -491,5 +491,6 @@ public partial class Seed : Migration
 		migrationBuilder.DeleteData("Features", "Id", new Guid("333bad4f-b10d-4a30-971b-f449e4469952"));
 
 		migrationBuilder.DeleteData("Features", "Id", new Guid("7ec8239f-4e59-4b43-89f4-fb0ddb4557ac"));
+	}
 	}
 }
