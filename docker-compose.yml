@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Source/Server/Dockerfile
+    ports:
+      - 5289:80
+      - 7289:443
