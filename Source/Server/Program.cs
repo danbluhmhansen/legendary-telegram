@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.EntityFrameworkCore;
 
+using OpenIddict.EntityFrameworkCore.Models;
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation;
@@ -105,7 +106,7 @@ WebApplication app = builder.Build();
 
 Audit.Core.Configuration.Setup()
 	.UseEntityFramework((IEntityFrameworkProviderConfigurator config) => config
-		.UseDbContext<ApplicationDbContext>()
+		.UseDbContext((AuditEventEntityFramework _) => app.Services.GetRequiredService<ApplicationDbContext>())
 		.AuditTypeMapper((Type _) => typeof(AuditLog))
 		.AuditEntityAction((AuditEvent auditEvent, EventEntry entry, AuditLog entity) =>
 		{
@@ -116,6 +117,13 @@ Audit.Core.Configuration.Setup()
 			entity.AuditUserName = auditEvent.Environment.UserName;
 		})
 		.IgnoreMatchedProperties());
+
+Audit.EntityFramework.Configuration.Setup()
+	.ForContext((IContextSettingsConfigurator<ApplicationDbContext> _) => {})
+	.UseOptOut()
+	.Ignore<OpenIddictEntityFrameworkCoreAuthorization>()
+	.Ignore<OpenIddictEntityFrameworkCoreScope>()
+	.Ignore<OpenIddictEntityFrameworkCoreToken>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

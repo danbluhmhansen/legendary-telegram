@@ -13,7 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
 	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-	public ApplicationDbContext() { }
+	protected ApplicationDbContext() { }
 
 	public DbSet<OpenIddictEntityFrameworkCoreApplication> OpenIddictApplications =>
 		Set<OpenIddictEntityFrameworkCoreApplication>();
