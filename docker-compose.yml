@@ -1,6 +1,13 @@
 version: '3.8'
 
 services:
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: blazor_app_db
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_pw
   server:
     build:
       context: .
@@ -8,3 +15,5 @@ services:
     ports:
       - 5289:80
       - 7289:443
+    depends_on:
+      - database

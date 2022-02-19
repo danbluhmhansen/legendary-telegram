@@ -26,8 +26,8 @@
 				"driver": "PostgreSQL",
 				"name": "blazor_app_db",
 				"database": "blazor_app_db",
-				"username": "postgres",
-				"password": "password"
+				"username": "my_user",
+				"password": "my_pw"
 			}
 		],
 		"[jsonc]": {
