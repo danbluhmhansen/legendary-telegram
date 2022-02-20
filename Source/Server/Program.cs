@@ -30,7 +30,8 @@ builder.Services.AddCors();
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>((DbContextOptionsBuilder options) => options
 	.UseNpgsql(connectionString)
-	.AddInterceptors(new AuditSaveChangesInterceptor()));
+	// .AddInterceptors(new AuditSaveChangesInterceptor())
+	);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
