@@ -9,18 +9,18 @@ using Microsoft.AspNetCore.Components;
 
 public partial class Effects : ComponentBase
 {
-	[Parameter] public Feature? Feature { get; init; }
+    [Parameter] public Feature? Feature { get; init; }
 
-	[Inject] private ODataServiceContext? ServiceContext { get; init; }
-	[Inject] private ILogger<Effects>? Logger { get; init; }
+    [Inject] private ODataServiceContext? ServiceContext { get; init; }
+    [Inject] private ILogger<Effects>? Logger { get; init; }
 
-	private async Task OnRowRemoving(CancellableRowChange<Effect> args)
-	{
-		if (this.ServiceContext is null || args.Item is null)
-			return;
+    private async Task OnRowRemoving(CancellableRowChange<Effect> args)
+    {
+        if (this.ServiceContext is null || args.Item is null)
+            return;
 
-		this.ServiceContext.AttachTo("Features", args.Item);
-		this.ServiceContext.DeleteObject(args.Item);
-		await this.ServiceContext.SaveChangesAsync();
-	}
+        this.ServiceContext.AttachTo("Features", args.Item);
+        this.ServiceContext.DeleteObject(args.Item);
+        await this.ServiceContext.SaveChangesAsync();
+    }
 }

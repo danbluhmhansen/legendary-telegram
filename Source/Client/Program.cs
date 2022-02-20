@@ -23,33 +23,33 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services
-	.AddBlazorise()
-	.AddBulmaProviders()
-	.AddFontAwesomeIcons();
+    .AddBlazorise()
+    .AddBulmaProviders()
+    .AddFontAwesomeIcons();
 
 builder.Services.AddScoped<CustomAddressAuthorizationMessageHandler>();
 
 builder.Services
-	.AddHttpClient(apiClientName,
-		(IServiceProvider serviceProvider, HttpClient client) =>
-			client.BaseAddress = serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route)
-	.AddHttpMessageHandler<CustomAddressAuthorizationMessageHandler>();
+    .AddHttpClient(apiClientName,
+        (IServiceProvider serviceProvider, HttpClient client) =>
+            client.BaseAddress = serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route)
+    .AddHttpMessageHandler<CustomAddressAuthorizationMessageHandler>();
 
 // Supply HttpClient instances that include access tokens when making requests to the server project
 builder.Services.AddScoped((IServiceProvider serviceProvider) =>
-	serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(apiClientName));
+    serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(apiClientName));
 
 builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProviderOptions> options) =>
 {
-	builder.Configuration
-		.GetSection("RemoteAuthentication")
-		.GetSection(nameof(options.AuthenticationPaths))
-		.Bind(options.AuthenticationPaths);
+    builder.Configuration
+        .GetSection("RemoteAuthentication")
+        .GetSection(nameof(options.AuthenticationPaths))
+        .Bind(options.AuthenticationPaths);
 
-	builder.Configuration
-		.GetSection("RemoteAuthentication")
-		.GetSection(nameof(options.ProviderOptions))
-		.Bind(options.ProviderOptions);
+    builder.Configuration
+        .GetSection("RemoteAuthentication")
+        .GetSection(nameof(options.ProviderOptions))
+        .Bind(options.ProviderOptions);
 });
 
 builder.Services.AddLogging();

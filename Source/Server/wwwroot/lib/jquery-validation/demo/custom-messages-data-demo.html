@@ -11,14 +11,14 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-	$("#commentForm").validate();
-	$("#commentForm2").validate({
-		messages: {
-			email: {
-				required: 'Enter this!'
-			}
-		}
-	});
+    $("#commentForm").validate();
+    $("#commentForm2").validate({
+        messages: {
+            email: {
+                required: 'Enter this!'
+            }
+        }
+    });
 
 });
 </script>
@@ -40,32 +40,32 @@ form input.submit { margin-left: 253px; }
 
 <!-- Custom rules and messages via data- attributes -->
 <form class="cmxform" id="commentForm" method="post" action="">
-	<fieldset>
-		<legend>Please enter your email address</legend>
-		<p>
+    <fieldset>
+        <legend>Please enter your email address</legend>
+        <p>
 
-			<label for="cemail">E-Mail *</label>
-			<input id="cemail" name="email" data-rule-required="true" data-rule-email="true" data-msg-required="Please enter your email address" data-msg-email="Please enter a valid email address" />
-		</p>
-		<p>
-			<input class="submit" type="submit" value="Submit"/>
-		</p>
-	</fieldset>
+            <label for="cemail">E-Mail *</label>
+            <input id="cemail" name="email" data-rule-required="true" data-rule-email="true" data-msg-required="Please enter your email address" data-msg-email="Please enter a valid email address" />
+        </p>
+        <p>
+            <input class="submit" type="submit" value="Submit"/>
+        </p>
+    </fieldset>
 </form>
 
 <!-- Custom message for "required" in metadata is overridden by a validate option -->
 <form class="cmxform" id="commentForm2" method="post" action="">
-	<fieldset>
-		<legend>Please enter your email address</legend>
-		<p>
+    <fieldset>
+        <legend>Please enter your email address</legend>
+        <p>
 
-			<label for="cemail">E-Mail *</label>
-			<input id="cemail" name="email" data-rule-required="true" data-rule-email="true" data-msg-email="Please enter a valid email address" />
-		</p>
-		<p>
-			<input class="submit" type="submit" value="Submit"/>
-		</p>
-	</fieldset>
+            <label for="cemail">E-Mail *</label>
+            <input id="cemail" name="email" data-rule-required="true" data-rule-email="true" data-msg-email="Please enter a valid email address" />
+        </p>
+        <p>
+            <input class="submit" type="submit" value="Submit"/>
+        </p>
+    </fieldset>
 </form>
 
 <a href="index.html">Back to main page</a>

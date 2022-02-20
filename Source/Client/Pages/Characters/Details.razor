@@ -4,116 +4,116 @@
 @using BlazorApp1.Shared.Models.v1
 
 <Row Flex=Flex.AlignItems.Center>
-	<Column><Heading Size=HeadingSize.Is1>@character?.Name</Heading></Column>
+    <Column><Heading Size=HeadingSize.Is1>@character?.Name</Heading></Column>
 </Row>
 <Row>
-	<Iterator Items=jsonProperties>
-		<Column TextAlignment=TextAlignment.Center>
-			<Text>@context.Item.Name</Text>
-		</Column>
-	</Iterator>
+    <Iterator Items=jsonProperties>
+        <Column TextAlignment=TextAlignment.Center>
+            <Text>@context.Item.Name</Text>
+        </Column>
+    </Iterator>
 </Row>
 <Row>
-	<Iterator Items=jsonProperties>
-		<Column TextAlignment=TextAlignment.Center>
-			@switch (context.Item.Value.ValueKind)
-			{
-				case JsonValueKind.String:
-					<Text>@context.Item.Value.GetString()</Text>
-					break;
-				case JsonValueKind.Number:
-					<Text>@context.Item.Value.GetInt32()</Text>
-					break;
-			}
-		</Column>
-	</Iterator>
+    <Iterator Items=jsonProperties>
+        <Column TextAlignment=TextAlignment.Center>
+            @switch (context.Item.Value.ValueKind)
+            {
+                case JsonValueKind.String:
+                    <Text>@context.Item.Value.GetString()</Text>
+                    break;
+                case JsonValueKind.Number:
+                    <Text>@context.Item.Value.GetInt32()</Text>
+                    break;
+            }
+        </Column>
+    </Iterator>
 </Row>
 
 <Row Flex=Flex.AlignItems.Center>
-	<Column><Heading Size=HeadingSize.Is2>Effects</Heading></Column>
+    <Column><Heading Size=HeadingSize.Is2>Effects</Heading></Column>
 </Row>
 <DataGrid
-	TItem=CoreEffect
-	Data=character?.Effects
-	CommandMode=DataGridCommandMode.ButtonRow
-	EditMode=DataGridEditMode.Form
-	NewItemCreator=NewEffectCreator
-	RowInserted=OnEffectInserted
-	RowUpdated=OnEffectUpdated
-	RowRemoving=OnEffectRemoving
-	Editable
-	ShowPager
-	Responsive>
-	<DataGridColumns>
-		<DataGridColumn TItem=CoreEffect Field=@nameof(CoreEffect.Path) Caption=Path Editable />
-		<DataGridColumn TItem=CoreEffect Field=@nameof(CoreEffect.Rule) Caption=Rule Editable />
-	</DataGridColumns>
-	<ButtonRowTemplate>
-		<Buttons>
-			<Button Color=Color.Success Clicked=context.NewCommand.Clicked>
-				@context.NewCommand.LocalizationString
-			</Button>
-			<Button Color=Color.Warning Clicked=context.EditCommand.Clicked>
-				@context.EditCommand.LocalizationString
-			</Button>
-			<Button Color=Color.Danger Clicked=context.DeleteCommand.Clicked>
-				@context.DeleteCommand.LocalizationString
-			</Button>
-		</Buttons>
-	</ButtonRowTemplate>
-	<EmptyTemplate>No core effects...</EmptyTemplate>
-	<LoadingTemplate><Progress><ProgressBar Animated /></Progress></LoadingTemplate>
+    TItem=CoreEffect
+    Data=character?.Effects
+    CommandMode=DataGridCommandMode.ButtonRow
+    EditMode=DataGridEditMode.Form
+    NewItemCreator=NewEffectCreator
+    RowInserted=OnEffectInserted
+    RowUpdated=OnEffectUpdated
+    RowRemoving=OnEffectRemoving
+    Editable
+    ShowPager
+    Responsive>
+    <DataGridColumns>
+        <DataGridColumn TItem=CoreEffect Field=@nameof(CoreEffect.Path) Caption=Path Editable />
+        <DataGridColumn TItem=CoreEffect Field=@nameof(CoreEffect.Rule) Caption=Rule Editable />
+    </DataGridColumns>
+    <ButtonRowTemplate>
+        <Buttons>
+            <Button Color=Color.Success Clicked=context.NewCommand.Clicked>
+                @context.NewCommand.LocalizationString
+            </Button>
+            <Button Color=Color.Warning Clicked=context.EditCommand.Clicked>
+                @context.EditCommand.LocalizationString
+            </Button>
+            <Button Color=Color.Danger Clicked=context.DeleteCommand.Clicked>
+                @context.DeleteCommand.LocalizationString
+            </Button>
+        </Buttons>
+    </ButtonRowTemplate>
+    <EmptyTemplate>No core effects...</EmptyTemplate>
+    <LoadingTemplate><Progress><ProgressBar Animated /></Progress></LoadingTemplate>
 </DataGrid>
 
 <Row Flex=Flex.AlignItems.Center>
-	<Column><Heading Size=HeadingSize.Is2>Features</Heading></Column>
+    <Column><Heading Size=HeadingSize.Is2>Features</Heading></Column>
 </Row>
 <DataGrid
-	TItem=Feature
-	Data=character?.Features
-	SelectionMode=DataGridSelectionMode.Multiple
-	EditMode=DataGridEditMode.Popup
-	CommandMode=DataGridCommandMode.ButtonRow
-	SelectedRows=selectedFeatures
-	RowInserting=OnFeatureInserting
-	RowRemoving=OnFeatureRemoving
-	Editable
-	ShowPager
-	Responsive>
-	<DataGridColumns>
-		<DataGridMultiSelectColumn TItem=Feature Width=30px />
-		<DataGridColumn TItem=Feature Field=@nameof(Feature.Name) Editable PopupFieldColumnSize=ColumnSize.IsFull>
-			<EditTemplate>
-				<DataGrid
-					TItem=Feature
-					ReadData=OnReadFeatures
-					Data=features
-					TotalItems=featuresCount
-					SelectionMode=DataGridSelectionMode.Multiple
-					SelectedRows=selectedFeatures
-					ShowPager
-					Responsive>
-					<DataGridColumns>
-						<DataGridMultiSelectColumn TItem=Feature Width=30px />
-						<DataGridColumn TItem=Feature Field=@nameof(Feature.Name) Caption=Name />
-					</DataGridColumns>
-					<EmptyTemplate>...</EmptyTemplate>
-					<LoadingTemplate><Progress><ProgressBar Animated /></Progress></LoadingTemplate>
-				</DataGrid>
-			</EditTemplate>
-		</DataGridColumn>
-	</DataGridColumns>
-	<ButtonRowTemplate>
-		<Buttons>
-			<Button Color=Color.Primary Clicked=context.NewCommand.Clicked>
-				@context.NewCommand.LocalizationString
-			</Button>
-			<Button Color=Color.Secondary Clicked=context.DeleteCommand.Clicked>
-				@context.DeleteCommand.LocalizationString
-			</Button>
-		</Buttons>
-	</ButtonRowTemplate>
-	<EmptyTemplate>No features...</EmptyTemplate>
-	<LoadingTemplate><Progress><ProgressBar Animated /></Progress></LoadingTemplate>
-	<PopupTitleTemplate>Features</PopupTitleTemplate>
+    TItem=Feature
+    Data=character?.Features
+    SelectionMode=DataGridSelectionMode.Multiple
+    EditMode=DataGridEditMode.Popup
+    CommandMode=DataGridCommandMode.ButtonRow
+    SelectedRows=selectedFeatures
+    RowInserting=OnFeatureInserting
+    RowRemoving=OnFeatureRemoving
+    Editable
+    ShowPager
+    Responsive>
+    <DataGridColumns>
+        <DataGridMultiSelectColumn TItem=Feature Width=30px />
+        <DataGridColumn TItem=Feature Field=@nameof(Feature.Name) Editable PopupFieldColumnSize=ColumnSize.IsFull>
+            <EditTemplate>
+                <DataGrid
+                    TItem=Feature
+                    ReadData=OnReadFeatures
+                    Data=features
+                    TotalItems=featuresCount
+                    SelectionMode=DataGridSelectionMode.Multiple
+                    SelectedRows=selectedFeatures
+                    ShowPager
+                    Responsive>
+                    <DataGridColumns>
+                        <DataGridMultiSelectColumn TItem=Feature Width=30px />
+                        <DataGridColumn TItem=Feature Field=@nameof(Feature.Name) Caption=Name />
+                    </DataGridColumns>
+                    <EmptyTemplate>...</EmptyTemplate>
+                    <LoadingTemplate><Progress><ProgressBar Animated /></Progress></LoadingTemplate>
+                </DataGrid>
+            </EditTemplate>
+        </DataGridColumn>
+    </DataGridColumns>
+    <ButtonRowTemplate>
+        <Buttons>
+            <Button Color=Color.Primary Clicked=context.NewCommand.Clicked>
+                @context.NewCommand.LocalizationString
+            </Button>
+            <Button Color=Color.Secondary Clicked=context.DeleteCommand.Clicked>
+                @context.DeleteCommand.LocalizationString
+            </Button>
+        </Buttons>
+    </ButtonRowTemplate>
+    <EmptyTemplate>No features...</EmptyTemplate>
+    <LoadingTemplate><Progress><ProgressBar Animated /></Progress></LoadingTemplate>
+    <PopupTitleTemplate>Features</PopupTitleTemplate>
 </DataGrid>

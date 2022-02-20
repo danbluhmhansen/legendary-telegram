@@ -20,7 +20,7 @@ Include jQuery and the plugin on a page. Then select a form to validate and call
 
 ```html
 <form>
-	<input required>
+    <input required>
 </form>
 <script src="jquery.js"></script>
 <script src="jquery.validation.js"></script>

@@ -4,6 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-	public static IServiceCollection AddODataModel(this IServiceCollection services) =>
-		services.AddSingleton<IODataModelProvider, ODataModelProvider>();
+    public static IServiceCollection AddODataModel(this IServiceCollection services) =>
+        services.AddSingleton<IODataModelProvider, ODataModelProvider>();
 }

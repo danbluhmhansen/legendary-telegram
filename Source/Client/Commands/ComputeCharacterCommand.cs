@@ -11,54 +11,54 @@ using Json.Pointer;
 
 public class ComputeCharacterCommand
 {
-	private readonly ILogger<ComputeCharacterCommand> logger;
+    private readonly ILogger<ComputeCharacterCommand> logger;
 
-	public ComputeCharacterCommand(ILogger<ComputeCharacterCommand> logger)
-	{
-		this.logger = logger;
-	}
+    public ComputeCharacterCommand(ILogger<ComputeCharacterCommand> logger)
+    {
+        this.logger = logger;
+    }
 
-	public JsonElement Execute(Character input)
-	{
-		JsonElement json = JsonDocument.Parse(new JsonObject
-		{
-			{ "Strength", 8 },
-			{ "Dexterity", 8 },
-			{ "Constitution", 8 },
-			{ "Intelligence", 8 },
-			{ "Wisdom", 8 },
-			{ "Charisma", 8 },
-			{ "Defences", new JsonObject { { "Armour", 10 }, } },
-		}.ToJsonString()).RootElement;
+    public JsonElement Execute(Character input)
+    {
+        JsonElement json = JsonDocument.Parse(new JsonObject
+        {
+            { "Strength", 8 },
+            { "Dexterity", 8 },
+            { "Constitution", 8 },
+            { "Intelligence", 8 },
+            { "Wisdom", 8 },
+            { "Charisma", 8 },
+            { "Defences", new JsonObject { { "Armour", 10 }, } },
+        }.ToJsonString()).RootElement;
 
-		foreach (CoreEffect effect in input.Effects.Where(effect => !string.IsNullOrWhiteSpace(effect.Rule)))
-		{
-			Rule? rule = JsonSerializer.Deserialize<Rule>(effect.Rule!);
+        foreach (CoreEffect effect in input.Effects.Where(effect => !string.IsNullOrWhiteSpace(effect.Rule)))
+        {
+            Rule? rule = JsonSerializer.Deserialize<Rule>(effect.Rule!);
 
-			if (rule is null || string.IsNullOrWhiteSpace(effect.Path))
-				continue;
+            if (rule is null || string.IsNullOrWhiteSpace(effect.Path))
+                continue;
 
-			PatchResult patchResult = new JsonPatch(PatchOperation.Add(
-					JsonPointer.Parse(effect.Path), rule.Apply(json)))
-				.Apply(json);
-			json = patchResult.Result;
-		}
+            PatchResult patchResult = new JsonPatch(PatchOperation.Add(
+                    JsonPointer.Parse(effect.Path), rule.Apply(json)))
+                .Apply(json);
+            json = patchResult.Result;
+        }
 
-		foreach (Effect effect in input.Features
-			.SelectMany(feature => feature.Effects)
-			.Where(effect => !string.IsNullOrWhiteSpace(effect.Rule)))
-		{
-			Rule? rule = JsonSerializer.Deserialize<Rule>(effect.Rule!);
+        foreach (Effect effect in input.Features
+            .SelectMany(feature => feature.Effects)
+            .Where(effect => !string.IsNullOrWhiteSpace(effect.Rule)))
+        {
+            Rule? rule = JsonSerializer.Deserialize<Rule>(effect.Rule!);
 
-			if (rule is null || string.IsNullOrWhiteSpace(effect.Path))
-				continue;
+            if (rule is null || string.IsNullOrWhiteSpace(effect.Path))
+                continue;
 
-			PatchResult patchResult = new JsonPatch(PatchOperation.Add(
-					JsonPointer.Parse(effect.Path), rule.Apply(json)))
-				.Apply(json);
-			json = patchResult.Result;
-		}
+            PatchResult patchResult = new JsonPatch(PatchOperation.Add(
+                    JsonPointer.Parse(effect.Path), rule.Apply(json)))
+                .Apply(json);
+            json = patchResult.Result;
+        }
 
-		return json;
-	}
+        return json;
+    }
 }
