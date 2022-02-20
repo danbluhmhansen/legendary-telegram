@@ -56,9 +56,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         auditLogBuilder.HasKey(nameof(AuditLog.AuditType), nameof(AuditLog.AuditDate));
         auditLogBuilder
             .HasOne((AuditLog auditLog) => auditLog.AuditUser)
-            .WithMany()
-            .HasForeignKey((AuditLog auditLog) => auditLog.AuditUserName)
-            .HasPrincipalKey((ApplicationUser user) => user.UserName);
+            .WithMany();
         auditLogBuilder.Property((AuditLog auditLog) => auditLog.EntityKey).HasColumnType("jsonb");
         auditLogBuilder.Property((AuditLog auditLog) => auditLog.EntityData).HasColumnType("jsonb");
 

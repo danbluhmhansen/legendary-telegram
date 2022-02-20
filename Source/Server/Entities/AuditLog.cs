@@ -8,6 +8,6 @@ public record AuditLog
     public string? EntityKey { get; set; }
     public string? EntityData { get; set; }
 
-    public string? AuditUserName { get; set; }
+    public string? AuditUserId { get; set; }
     public virtual ApplicationUser? AuditUser { get; set; }
 }

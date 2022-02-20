@@ -37,7 +37,7 @@ namespace BlazorApp1.Server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -55,7 +55,6 @@ namespace BlazorApp1.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                    table.UniqueConstraint("AK_AspNetUsers_UserName", x => x.UserName);
                 });
 
             migrationBuilder.CreateTable(
@@ -251,17 +250,17 @@ namespace BlazorApp1.Server.Migrations
                     AuditDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EntityKey = table.Column<string>(type: "jsonb", nullable: true),
                     EntityData = table.Column<string>(type: "jsonb", nullable: true),
-                    AuditUserName = table.Column<string>(type: "character varying(256)", nullable: true)
+                    AuditUserId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AuditLogs", x => new { x.AuditType, x.AuditDate });
                     table.ForeignKey(
-                        name: "FK_AuditLogs_AspNetUsers_AuditUserName",
-                        column: x => x.AuditUserName,
+                        name: "FK_AuditLogs_AspNetUsers_AuditUserId",
+                        column: x => x.AuditUserId,
                         principalSchema: "identity",
                         principalTable: "AspNetUsers",
-                        principalColumn: "UserName");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -436,9 +435,9 @@ namespace BlazorApp1.Server.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AuditLogs_AuditUserName",
+                name: "IX_AuditLogs_AuditUserId",
                 table: "AuditLogs",
-                column: "AuditUserName");
+                column: "AuditUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CharacterFeatures_FeatureId",

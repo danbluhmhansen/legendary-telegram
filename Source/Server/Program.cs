@@ -30,7 +30,7 @@ builder.Services.AddCors();
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>((DbContextOptionsBuilder options) => options
     .UseNpgsql(connectionString)
-    // .AddInterceptors(new AuditSaveChangesInterceptor())
+    .AddInterceptors(new AuditSaveChangesInterceptor())
     );
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -102,9 +102,20 @@ builder.Services.Configure<OpenIddictValidationOptions>(
 
 WebApplication app = builder.Build();
 
+IServiceScope serviceScope = app.Services.CreateScope();
+
+Audit.EntityFramework.Configuration.Setup()
+    .ForContext((IContextSettingsConfigurator<ApplicationDbContext> _) => {})
+    .UseOptOut()
+    .Ignore<AuditLog>()
+    .Ignore<OpenIddictEntityFrameworkCoreAuthorization>()
+    .Ignore<OpenIddictEntityFrameworkCoreScope>()
+    .Ignore<OpenIddictEntityFrameworkCoreToken>();
+
 Audit.Core.Configuration.Setup()
     .UseEntityFramework((IEntityFrameworkProviderConfigurator config) => config
-        .UseDbContext((AuditEventEntityFramework _) => app.Services.GetRequiredService<ApplicationDbContext>())
+        .UseDbContext((AuditEventEntityFramework _) =>
+            serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
         .AuditTypeMapper((Type _) => typeof(AuditLog))
         .AuditEntityAction((AuditEvent auditEvent, EventEntry entry, AuditLog entity) =>
         {
@@ -112,16 +123,18 @@ Audit.Core.Configuration.Setup()
             entity.AuditDate = auditEvent.StartDate;
             entity.EntityKey = Audit.Core.Configuration.JsonAdapter.Serialize(entry.PrimaryKey);
             entity.EntityData = entry.ToJson();
-            entity.AuditUserName = auditEvent.Environment.UserName;
+
+            // FIXME: HttpContext is null here.
+            IHttpContextAccessor httpContextAccessor = serviceScope.ServiceProvider
+                .GetRequiredService<IHttpContextAccessor>();
+            if (httpContextAccessor.HttpContext is not null)
+            {
+                UserManager<ApplicationUser> userManager = serviceScope.ServiceProvider
+                    .GetRequiredService<UserManager<ApplicationUser>>();
+                entity.AuditUserId = userManager.GetUserId(httpContextAccessor.HttpContext.User);
+            }
         })
         .IgnoreMatchedProperties());
-
-Audit.EntityFramework.Configuration.Setup()
-    .ForContext((IContextSettingsConfigurator<ApplicationDbContext> _) => {})
-    .UseOptOut()
-    .Ignore<OpenIddictEntityFrameworkCoreAuthorization>()
-    .Ignore<OpenIddictEntityFrameworkCoreScope>()
-    .Ignore<OpenIddictEntityFrameworkCoreToken>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

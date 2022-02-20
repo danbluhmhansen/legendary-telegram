@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlazorApp1.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220207194309_Init")]
+    [Migration("20220220210559_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,7 +73,6 @@ namespace BlazorApp1.Server.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
@@ -97,8 +96,8 @@ namespace BlazorApp1.Server.Migrations
                     b.Property<DateTime>("AuditDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("AuditUserName")
-                        .HasColumnType("character varying(256)");
+                    b.Property<string>("AuditUserId")
+                        .HasColumnType("text");
 
                     b.Property<string>("EntityData")
                         .HasColumnType("jsonb");
@@ -108,7 +107,7 @@ namespace BlazorApp1.Server.Migrations
 
                     b.HasKey("AuditType", "AuditDate");
 
-                    b.HasIndex("AuditUserName");
+                    b.HasIndex("AuditUserId");
 
                     b.ToTable("AuditLogs");
                 });
@@ -537,8 +536,7 @@ namespace BlazorApp1.Server.Migrations
                 {
                     b.HasOne("BlazorApp1.Server.Entities.ApplicationUser", "AuditUser")
                         .WithMany()
-                        .HasForeignKey("AuditUserName")
-                        .HasPrincipalKey("UserName");
+                        .HasForeignKey("AuditUserId");
 
                     b.Navigation("AuditUser");
                 });
