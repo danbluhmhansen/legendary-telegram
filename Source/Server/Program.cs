@@ -29,66 +29,66 @@ builder.Services.AddCors();
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>((DbContextOptionsBuilder options) => options
-	.UseNpgsql(connectionString)
-	// .AddInterceptors(new AuditSaveChangesInterceptor())
-	);
+    .UseNpgsql(connectionString)
+    // .AddInterceptors(new AuditSaveChangesInterceptor())
+    );
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-	.AddEntityFrameworkStores<ApplicationDbContext>()
-	.AddDefaultTokenProviders();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddQuartz((IServiceCollectionQuartzConfigurator options) =>
 {
-	options.UseMicrosoftDependencyInjectionJobFactory();
-	options.UseSimpleTypeLoader();
-	options.UseInMemoryStore();
+    options.UseMicrosoftDependencyInjectionJobFactory();
+    options.UseSimpleTypeLoader();
+    options.UseInMemoryStore();
 });
 
 builder.Services.AddOpenIddict((OpenIddictBuilder openIddictBuilder) =>
 {
-	openIddictBuilder.AddCore((OpenIddictCoreBuilder openIddictCoreBuilder) =>
-	{
-		openIddictCoreBuilder
-			.UseEntityFrameworkCore()
-			.UseDbContext<ApplicationDbContext>();
+    openIddictBuilder.AddCore((OpenIddictCoreBuilder openIddictCoreBuilder) =>
+    {
+        openIddictCoreBuilder
+            .UseEntityFrameworkCore()
+            .UseDbContext<ApplicationDbContext>();
 
-		openIddictCoreBuilder.UseQuartz();
-	});
+        openIddictCoreBuilder.UseQuartz();
+    });
 
-	openIddictBuilder.AddServer()
-		.AddDevelopmentEncryptionCertificate()
-		.AddDevelopmentSigningCertificate()
-		.UseAspNetCore();
+    openIddictBuilder.AddServer()
+        .AddDevelopmentEncryptionCertificate()
+        .AddDevelopmentSigningCertificate()
+        .UseAspNetCore();
 
-	openIddictBuilder.AddValidation((OpenIddictValidationBuilder options) =>
-	{
-		options.UseLocalServer();
-		options.UseAspNetCore();
-	});
+    openIddictBuilder.AddValidation((OpenIddictValidationBuilder options) =>
+    {
+        options.UseLocalServer();
+        options.UseAspNetCore();
+    });
 });
 
 builder.Services.AddAutoMapper((IMapperConfigurationExpression expression) =>
 {
-	expression.CreateMap<BlazorApp1.Server.Entities.Character, BlazorApp1.Shared.Models.v1.Character>().ReverseMap();
-	expression.CreateMap<BlazorApp1.Server.Entities.Feature, BlazorApp1.Shared.Models.v1.Feature>().ReverseMap();
-	expression.CreateMap<BlazorApp1.Server.Entities.CoreEffect, BlazorApp1.Shared.Models.v1.CoreEffect>().ReverseMap();
-	expression.CreateMap<BlazorApp1.Server.Entities.Effect, BlazorApp1.Shared.Models.v1.Effect>().ReverseMap();
-	expression.CreateMap<BlazorApp1.Server.Entities.CharacterFeature, BlazorApp1.Shared.Models.v1.CharacterFeature>()
-		.ReverseMap();
+    expression.CreateMap<BlazorApp1.Server.Entities.Character, BlazorApp1.Shared.Models.v1.Character>().ReverseMap();
+    expression.CreateMap<BlazorApp1.Server.Entities.Feature, BlazorApp1.Shared.Models.v1.Feature>().ReverseMap();
+    expression.CreateMap<BlazorApp1.Server.Entities.CoreEffect, BlazorApp1.Shared.Models.v1.CoreEffect>().ReverseMap();
+    expression.CreateMap<BlazorApp1.Server.Entities.Effect, BlazorApp1.Shared.Models.v1.Effect>().ReverseMap();
+    expression.CreateMap<BlazorApp1.Server.Entities.CharacterFeature, BlazorApp1.Shared.Models.v1.CharacterFeature>()
+        .ReverseMap();
 });
 
 builder.Services
-	.AddControllersWithViews()
-	.AddOData((ODataOptions options, IServiceProvider serviceProvider) =>
-	{
-		IODataModelProvider odataModelProvider = serviceProvider.GetRequiredService<IODataModelProvider>();
-		options.AddRouteComponents("v1", odataModelProvider.GetEdmModel("1"), (IServiceCollection services) =>
-		{
-			services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler());
-			services.AddSingleton<ODataResourceSerializer, CustomODataResourceSerializer>();
-		});
-	});
+    .AddControllersWithViews()
+    .AddOData((ODataOptions options, IServiceProvider serviceProvider) =>
+    {
+        IODataModelProvider odataModelProvider = serviceProvider.GetRequiredService<IODataModelProvider>();
+        options.AddRouteComponents("v1", odataModelProvider.GetEdmModel("1"), (IServiceCollection services) =>
+        {
+            services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler());
+            services.AddSingleton<ODataResourceSerializer, CustomODataResourceSerializer>();
+        });
+    });
 builder.Services.AddRazorPages();
 
 builder.Services.AddHttpContextAccessor();
@@ -99,50 +99,50 @@ builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nam
 builder.Services.Configure<ODataOptions>(builder.Configuration.GetSection(nameof(ODataOptions)));
 builder.Services.Configure<OpenIddictServerOptions>(builder.Configuration.GetSection(nameof(OpenIddictServerOptions)));
 builder.Services.Configure<OpenIddictServerAspNetCoreOptions>(
-	builder.Configuration.GetSection(nameof(OpenIddictServerAspNetCoreOptions)));
+    builder.Configuration.GetSection(nameof(OpenIddictServerAspNetCoreOptions)));
 builder.Services.Configure<OpenIddictValidationOptions>(
-	builder.Configuration.GetSection(nameof(OpenIddictValidationOptions)));
+    builder.Configuration.GetSection(nameof(OpenIddictValidationOptions)));
 
 WebApplication app = builder.Build();
 
 Audit.Core.Configuration.Setup()
-	.UseEntityFramework((IEntityFrameworkProviderConfigurator config) => config
-		.UseDbContext((AuditEventEntityFramework _) => app.Services.GetRequiredService<ApplicationDbContext>())
-		.AuditTypeMapper((Type _) => typeof(AuditLog))
-		.AuditEntityAction((AuditEvent auditEvent, EventEntry entry, AuditLog entity) =>
-		{
-			entity.AuditType = entry.EntityType.FullName;
-			entity.AuditDate = auditEvent.StartDate;
-			entity.EntityKey = Audit.Core.Configuration.JsonAdapter.Serialize(entry.PrimaryKey);
-			entity.EntityData = entry.ToJson();
-			entity.AuditUserName = auditEvent.Environment.UserName;
-		})
-		.IgnoreMatchedProperties());
+    .UseEntityFramework((IEntityFrameworkProviderConfigurator config) => config
+        .UseDbContext((AuditEventEntityFramework _) => app.Services.GetRequiredService<ApplicationDbContext>())
+        .AuditTypeMapper((Type _) => typeof(AuditLog))
+        .AuditEntityAction((AuditEvent auditEvent, EventEntry entry, AuditLog entity) =>
+        {
+            entity.AuditType = entry.EntityType.FullName;
+            entity.AuditDate = auditEvent.StartDate;
+            entity.EntityKey = Audit.Core.Configuration.JsonAdapter.Serialize(entry.PrimaryKey);
+            entity.EntityData = entry.ToJson();
+            entity.AuditUserName = auditEvent.Environment.UserName;
+        })
+        .IgnoreMatchedProperties());
 
 Audit.EntityFramework.Configuration.Setup()
-	.ForContext((IContextSettingsConfigurator<ApplicationDbContext> _) => {})
-	.UseOptOut()
-	.Ignore<OpenIddictEntityFrameworkCoreAuthorization>()
-	.Ignore<OpenIddictEntityFrameworkCoreScope>()
-	.Ignore<OpenIddictEntityFrameworkCoreToken>();
+    .ForContext((IContextSettingsConfigurator<ApplicationDbContext> _) => {})
+    .UseOptOut()
+    .Ignore<OpenIddictEntityFrameworkCoreAuthorization>()
+    .Ignore<OpenIddictEntityFrameworkCoreScope>()
+    .Ignore<OpenIddictEntityFrameworkCoreToken>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-	app.UseMigrationsEndPoint();
-	app.UseWebAssemblyDebugging();
+    app.UseMigrationsEndPoint();
+    app.UseWebAssemblyDebugging();
 
-	app.UseCors((CorsPolicyBuilder corsPolicyBuilder) =>
-		corsPolicyBuilder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+    app.UseCors((CorsPolicyBuilder corsPolicyBuilder) =>
+        corsPolicyBuilder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
 
-	app.UseODataRouteDebug();
+    app.UseODataRouteDebug();
 }
 else
 {
-	app.UseExceptionHandler("/Error");
-	// The default HSTS value is 30 days.
-	// You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days.
+    // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -162,6 +162,6 @@ app.MapRazorPages();
 app.MapControllers();
 
 app.UseEndpoints((IEndpointRouteBuilder options) =>
-	options.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
+    options.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
 
 app.Run();

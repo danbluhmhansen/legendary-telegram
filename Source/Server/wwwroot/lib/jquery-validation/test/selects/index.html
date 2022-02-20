@@ -13,32 +13,32 @@
 <script type="text/javascript">
 
 $.fn.options = function(selector) {
-	return this.each(function() {
-		function container(select) {
-			if (select.next().is(".option-container")) {
-				return $(select).next();
-			}
-			return $('<select class="option-container" />').append(select.children()).insertAfter(select).hide();
-		}
-		var container = container($(this));
-		$(this).empty().append(container.children(selector).clone());
-	});
+    return this.each(function() {
+        function container(select) {
+            if (select.next().is(".option-container")) {
+                return $(select).next();
+            }
+            return $('<select class="option-container" />').append(select.children()).insertAfter(select).hide();
+        }
+        var container = container($(this));
+        $(this).empty().append(container.children(selector).clone());
+    });
 }
 
 $(document).ready(function(){
 
-	$("#State").hide()
+    $("#State").hide()
 
-	$("#Country").change(function() {
-		var selected = this.options[this.selectedIndex].value;
-		if (selected == "US") {
-			$("#State").show().options(".state");
-		} else if (selected == "CA") {
-			$("#State").show().options(".province");
-		} else {
-			$("#State").hide();
-		}
-	}).change();
+    $("#Country").change(function() {
+        var selected = this.options[this.selectedIndex].value;
+        if (selected == "US") {
+            $("#State").show().options(".state");
+        } else if (selected == "CA") {
+            $("#State").show().options(".province");
+        } else {
+            $("#State").hide();
+        }
+    }).change();
 
 
 });

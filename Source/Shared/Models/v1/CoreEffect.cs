@@ -5,10 +5,10 @@ using Microsoft.OData.Client;
 [Key(nameof(Id))]
 public record CoreEffect
 {
-	public Guid Id { get; set; }
-	public string? Path { get; set; }
-	public string? Rule { get; set; }
+    public Guid Id { get; set; }
+    public string? Path { get; set; }
+    public string? Rule { get; set; }
 
-	public Guid CharacterId { get; set; }
-	public Character? Character { get; set; }
+    public Guid CharacterId { get; set; }
+    public Character? Character { get; set; }
 }

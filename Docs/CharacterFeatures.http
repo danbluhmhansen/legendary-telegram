@@ -2,8 +2,8 @@ PUT https://localhost:7289/v1/CharacterFeatures(CharacterId=02c07b82-1b85-8d01-1
 Content-Type: application/json
 
 {
-	"CharacterId": "02c07b82-1b85-8d01-17a3-ad6059be2a1c",
-	"FeatureId": "7ec8239f-4e59-4b43-89f4-fb0ddb4557ac"
+    "CharacterId": "02c07b82-1b85-8d01-17a3-ad6059be2a1c",
+    "FeatureId": "7ec8239f-4e59-4b43-89f4-fb0ddb4557ac"
 }
 
 ###
@@ -12,6 +12,6 @@ DELETE https://localhost:7289/v1/CharacterFeatures
 Content-Type: application/json
 
 {
-	"CharacterId": "02c07b82-1b85-8d01-17a3-ad6059be2a1c",
-	"FeatureId": "7ec8239f-4e59-4b43-89f4-fb0ddb4557ac"
+    "CharacterId": "02c07b82-1b85-8d01-17a3-ad6059be2a1c",
+    "FeatureId": "7ec8239f-4e59-4b43-89f4-fb0ddb4557ac"
 }
