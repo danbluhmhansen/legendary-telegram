@@ -262,7 +262,7 @@ JsonDocument document = JsonDocument.Parse(@"
     ""Charisma"": 8
 }");
 
-ValidationResults? result = schema?.Validate(document.RootElement, new ValidationOptions
+_ = schema?.Validate(document.RootElement, new ValidationOptions
 {
     OutputFormat = OutputFormat.Verbose,
 });

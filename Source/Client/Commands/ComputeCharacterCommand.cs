@@ -11,13 +11,6 @@ using Json.Pointer;
 
 public class ComputeCharacterCommand
 {
-    private readonly ILogger<ComputeCharacterCommand> logger;
-
-    public ComputeCharacterCommand(ILogger<ComputeCharacterCommand> logger)
-    {
-        this.logger = logger;
-    }
-
     public JsonElement Execute(Character input)
     {
         JsonElement json = JsonDocument.Parse(new JsonObject

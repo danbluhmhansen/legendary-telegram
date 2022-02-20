@@ -12,7 +12,6 @@ public partial class Effects : ComponentBase
     [Parameter] public Feature? Feature { get; init; }
 
     [Inject] private ODataServiceContext? ServiceContext { get; init; }
-    [Inject] private ILogger<Effects>? Logger { get; init; }
 
     private async Task OnRowRemoving(CancellableRowChange<Effect> args)
     {

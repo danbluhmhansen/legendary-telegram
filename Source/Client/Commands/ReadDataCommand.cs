@@ -14,11 +14,9 @@ using Microsoft.OData.Client;
 public class ReadDataCommand
 {
     private readonly ODataServiceContext context;
-    private readonly ILogger<ReadDataCommand> logger;
 
-    public ReadDataCommand(ODataServiceContext context, ILogger<ReadDataCommand> logger)
+    public ReadDataCommand(ODataServiceContext context)
     {
-        this.logger = logger;
         this.context = context;
     }
 

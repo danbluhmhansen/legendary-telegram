@@ -4,5 +4,37 @@
             "path": ".",
             "name": "Solution",
         }
-    ]
+    ],
+    "settings": {
+        "csharp.semanticHighlighting.enabled": true,
+        "cSpell.words": [
+            "appsettings",
+            "Blazor",
+            "Blazorise",
+            "Bulma",
+            "HSTS",
+            "Npgsql",
+            "odata",
+            "Oidc",
+            "omnisharp",
+            "opid"
+        ],
+        "editor.rulers": [ 120 ],
+        "editor.semanticHighlighting.enabled": true,
+        "editor.wordWrap": "bounded",
+        "editor.wordWrapColumn": 120,
+        "editor.wrappingIndent": "indent",
+        "explorer.experimental.fileNesting.enabled": true,
+        "explorer.experimental.fileNesting.patterns": {
+            "*.razor": "$(capture).razor.cs",
+            "appsettings.json": "appsettings.*.json"
+        },
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true,
+        "files.trimTrailingWhitespace": true,
+        "gitlens.currentLine.scrollable": false,
+        "gitlens.hovers.currentLine.over": "line",
+        "omnisharp.enableRoslynAnalyzers": true,
+        "omnisharp.organizeImportsOnFormat": true,
+    }
 }

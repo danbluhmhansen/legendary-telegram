@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Options;
 
-const string apiClientName = "BlazorApp1.ServerAPI";
+const string ApiClientName = "BlazorApp1.ServerAPI";
 
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -30,14 +30,14 @@ builder.Services
 builder.Services.AddScoped<CustomAddressAuthorizationMessageHandler>();
 
 builder.Services
-    .AddHttpClient(apiClientName,
+    .AddHttpClient(ApiClientName,
         (IServiceProvider serviceProvider, HttpClient client) =>
             client.BaseAddress = serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value.Route)
     .AddHttpMessageHandler<CustomAddressAuthorizationMessageHandler>();
 
 // Supply HttpClient instances that include access tokens when making requests to the server project
 builder.Services.AddScoped((IServiceProvider serviceProvider) =>
-    serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(apiClientName));
+    serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(ApiClientName));
 
 builder.Services.AddOidcAuthentication((RemoteAuthenticationOptions<OidcProviderOptions> options) =>
 {

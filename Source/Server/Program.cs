@@ -84,10 +84,7 @@ builder.Services
     {
         IODataModelProvider odataModelProvider = serviceProvider.GetRequiredService<IODataModelProvider>();
         options.AddRouteComponents("v1", odataModelProvider.GetEdmModel("1"), (IServiceCollection services) =>
-        {
-            services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler());
-            services.AddSingleton<ODataResourceSerializer, CustomODataResourceSerializer>();
-        });
+            services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler()));
     });
 builder.Services.AddRazorPages();
 

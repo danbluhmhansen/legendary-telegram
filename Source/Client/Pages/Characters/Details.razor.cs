@@ -20,7 +20,6 @@ public partial class Details : ComponentBase
     [Inject] private ReadDataCommand? ReadDataCommand { get; init; }
     [Inject] private ComputeCharacterCommand? ComputeCharacterCommand { get; init; }
     [Inject] private ODataServiceContext? ServiceContext { get; init; }
-    [Inject] private ILogger<Details>? Logger { get; init; }
 
     private Character? character;
     private ICollection<JsonProperty> jsonProperties = new List<JsonProperty>();

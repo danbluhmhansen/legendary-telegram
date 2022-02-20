@@ -12,7 +12,7 @@ public class ErrorController : Controller
     {
         // If the error was not caused by an invalid
         // OIDC request, display a generic error page.
-        OpenIddict.Abstractions.OpenIddictResponse? response = HttpContext.GetOpenIddictServerResponse();
+        OpenIddict.Abstractions.OpenIddictResponse? response = this.HttpContext.GetOpenIddictServerResponse();
         if (response is null)
             return View(new ErrorViewModel());
 

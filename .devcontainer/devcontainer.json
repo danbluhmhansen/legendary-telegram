@@ -6,26 +6,7 @@
     "service": "app",
     "workspaceFolder": "/workspace",
     // Set *default* container specific settings.json values on container create.
-    "settings": {
-        "csharp.semanticHighlighting.enabled": true,
-        "editor.rulers": [ 120 ],
-        "editor.semanticHighlighting.enabled": true,
-        "editor.wordWrap": "bounded",
-        "editor.wordWrapColumn": 120,
-        "editor.wrappingIndent": "indent",
-        "explorer.experimental.fileNesting.enabled": true,
-        "explorer.experimental.fileNesting.patterns": {
-            "*.razor": "$(capture).razor.cs",
-            "appsettings.json": "appsettings.*.json"
-        },
-        "files.insertFinalNewline": true,
-        "files.trimFinalNewlines": true,
-        "files.trimTrailingWhitespace": true,
-        "gitlens.currentLine.scrollable": false,
-        "gitlens.hovers.currentLine.over": "line",
-        "omnisharp.enableRoslynAnalyzers": true,
-        "omnisharp.organizeImportsOnFormat": true,
-    },
+    "settings": {},
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [
         "christian-kohler.path-intellisense",

@@ -19,8 +19,7 @@ public class ODataServiceContext : DataServiceContext
     public ODataServiceContext(
         HttpClient httpClient,
         IODataModelProvider odataModelProvider,
-        IOptions<ServerOptions> serverOptions,
-        ILogger<ODataServiceContext> logger) : base(new Uri(serverOptions.Value.Route + "v1"))
+        IOptions<ServerOptions> serverOptions) : base(new Uri(serverOptions.Value.Route + "v1"))
     {
         this.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;
         this.SaveChangesDefaultOptions = SaveChangesOptions.BatchWithSingleChangeset | SaveChangesOptions.UseJsonBatch;
@@ -28,14 +27,13 @@ public class ODataServiceContext : DataServiceContext
         this.Format.UseJson(odataModelProvider.GetEdmModel("1"));
 
         this.Configurations.RequestPipeline.OnMessageCreating = (DataServiceClientRequestMessageArgs args) =>
-            new HttpClientRequestMessage(httpClient, args, this.Configurations);
+            new HttpClientRequestMessage(httpClient, args);
 
         this.Characters = base.CreateQuery<Character>("Characters");
         this.Features = base.CreateQuery<Feature>("Features");
         this.CoreEffects = base.CreateQuery<CoreEffect>("CoreEffects");
         this.Effects = base.CreateQuery<Effect>("Effects");
         this.CharacterFeatures = base.CreateQuery<CharacterFeature>("CharacterFeatures");
-        this.logger = logger;
     }
 
     public DataServiceQuery<Character> Characters { get; }
@@ -44,8 +42,6 @@ public class ODataServiceContext : DataServiceContext
     public DataServiceQuery<Effect> Effects { get; }
 
     public DataServiceQuery<CharacterFeature> CharacterFeatures { get; }
-
-    private readonly ILogger<ODataServiceContext> logger;
 }
 
 /// <summary>
@@ -76,7 +72,6 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
     private readonly HttpClient client;
     private readonly MemoryStream messageStream;
     private readonly Dictionary<string, string> contentHeaderValueCache;
-    private readonly DataServiceClientConfigurations config;
 
     /// <summary>
     /// Constructor for HttpClientRequestMessage.
@@ -86,8 +81,7 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
     /// <param name="config">The config</param>
     public HttpClientRequestMessage(
         HttpClient client,
-        DataServiceClientRequestMessageArgs args,
-        DataServiceClientConfigurations config)
+        DataServiceClientRequestMessageArgs args)
         : base(args.ActualMethod)
     {
         this.requestMessage = new HttpRequestMessage();
@@ -104,7 +98,6 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 
         this.Url = args.RequestUri;
         this.Method = args.Method;
-        this.config = config;
 
         // link http and odata properties to share state between odata and http handlers
         /*
@@ -157,12 +150,12 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
     public override ICredentials? Credentials
     {
         get => this.requestMessage.Options.TryGetValue(
-                new HttpRequestOptionsKey<ICredentials>(typeof(ICredentials).FullName),
+                new HttpRequestOptionsKey<ICredentials>(typeof(ICredentials).FullName!),
                 out ICredentials? credentials)
                 ? credentials
                 : null;
         set => this.requestMessage.Options.Set(
-            new HttpRequestOptionsKey<ICredentials?>(typeof(ICredentials).FullName),
+            new HttpRequestOptionsKey<ICredentials?>(typeof(ICredentials).FullName!),
             value);
     }
 
@@ -285,7 +278,7 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
     /// <returns> A System.Net.WebResponse that contains the response from the Internet resource.</returns>
     public override IODataResponseMessage EndGetResponse(IAsyncResult asyncResult) =>
         UnwrapAggregateException(() =>
-            new HttpClientResponseMessage(((Task<HttpResponseMessage>)asyncResult).Result, this.config));
+            new HttpClientResponseMessage(((Task<HttpResponseMessage>)asyncResult).Result));
 
 #if !(NETCOREAPP1_0 || NETCOREAPP2_0)
     public override IODataResponseMessage GetResponse() =>
@@ -293,7 +286,7 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
         {
             Task<HttpResponseMessage> send = CreateSendTask();
             send.Wait();
-            return new HttpClientResponseMessage(send.Result, this.config);
+            return new HttpClientResponseMessage(send.Result);
         });
 #endif
 
@@ -357,7 +350,7 @@ internal class HttpClientRequestMessage : DataServiceClientRequestMessage, IDisp
 
 internal class HttpClientResponseMessage : HttpWebResponseMessage
 {
-    public HttpClientResponseMessage(HttpResponseMessage httpResponse, DataServiceClientConfigurations config)
+    public HttpClientResponseMessage(HttpResponseMessage httpResponse)
         : base(httpResponse.ToStringDictionary(),
                 (int)httpResponse.StatusCode,
                 () =>

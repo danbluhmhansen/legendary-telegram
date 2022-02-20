@@ -12,7 +12,6 @@ public partial class Characters : ComponentBase
 {
     [Inject] private ReadDataCommand? ReadDataCommand { get; init; }
     [Inject] private NavigationManager? Navigation { get; init; }
-    [Inject] private ILogger<Characters>? Logger { get; init; }
 
     private ICollection<Character> data = new List<Character>();
     private int? count;

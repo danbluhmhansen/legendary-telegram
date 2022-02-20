@@ -15,8 +15,6 @@ public partial class JsonLogicEdit : BaseInputComponent<JsonObject>
     [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
-    [Inject] private ILogger<JsonLogicEdit>? Logger { get; init; }
-
     protected override JsonObject InternalValue { get; set; } = new();
 
     private KeyValuePair<string, JsonNode?> selected;

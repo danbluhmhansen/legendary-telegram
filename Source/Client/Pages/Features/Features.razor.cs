@@ -13,7 +13,6 @@ public partial class Features : ComponentBase
 {
     [Inject] private ReadDataCommand? ReadDataCommand { get; init; }
     [Inject] private ODataServiceContext? ServiceContext { get; init; }
-    [Inject] private ILogger<Features>? Logger { get; init; }
 
     private ICollection<Feature> data = new List<Feature>();
     private int? count;
