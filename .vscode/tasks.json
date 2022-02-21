@@ -38,6 +38,22 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "buildSolution",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
             "label": "publishServer",
             "command": "dotnet",
             "type": "process",
@@ -110,7 +126,7 @@
                 "clean",
                 "${workspaceFolder}"
             ],
-            "problemMatcher": "$msCompile",
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "dropDatabase",
@@ -123,9 +139,9 @@
                 "--project",
                 "${workspaceFolder}/${input:dotnetEntityFrameworkProject}",
                 "--startup-project",
-                "${workspaceFolder}/${input:dotnetEntityFrameworkStartupProject}",
+                "${workspaceFolder}/${input:dotnetEntityFrameworkStartupProject}"
             ],
-            "problemMatcher": "$msCompile",
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "updateDatabase",
@@ -135,15 +151,12 @@
                 "ef",
                 "database",
                 "update",
-                // "${input:dotnetDatabaseMigration}",
                 "--project",
                 "${workspaceFolder}/${input:dotnetEntityFrameworkProject}",
                 "--startup-project",
-                "${workspaceFolder}/${input:dotnetEntityFrameworkStartupProject}",
-                // "--connection",
-                // "${input:dotnetDatabaseConnectionString}",
+                "${workspaceFolder}/${input:dotnetEntityFrameworkStartupProject}"
             ],
-            "problemMatcher": "$msCompile",
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "addMigration",
@@ -161,9 +174,9 @@
                 "--context",
                 "${input:dotnetEntityFrameworkContext}",
                 "--output-dir",
-                "${input:dotnetMigrationsOutputDir}",
+                "${input:dotnetMigrationsOutputDir}"
             ],
-            "problemMatcher": "$msCompile",
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "removeMigration",
@@ -178,10 +191,10 @@
                 "--startup-project",
                 "${workspaceFolder}/${input:dotnetEntityFrameworkStartupProject}",
                 "--context",
-                "${input:dotnetEntityFrameworkContext}",
+                "${input:dotnetEntityFrameworkContext}"
             ],
-            "problemMatcher": "$msCompile",
-        },
+            "problemMatcher": "$msCompile"
+        }
     ],
     "inputs": [
         {
