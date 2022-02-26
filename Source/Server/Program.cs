@@ -1,6 +1,7 @@
 using Audit.Core;
 using Audit.EntityFramework;
 using Audit.EntityFramework.ConfigurationApi;
+using Audit.EntityFramework.Providers;
 
 using AutoMapper;
 
@@ -13,10 +14,8 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
-using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.EntityFrameworkCore;
 
-using OpenIddict.EntityFrameworkCore.Models;
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation;
@@ -28,9 +27,10 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>((DbContextOptionsBuilder options) => options
-    .UseNpgsql(connectionString)
-    .AddInterceptors(new AuditSaveChangesInterceptor())
+builder.Services.AddDbContext<ApplicationDbContext>(
+    (IServiceProvider serviceProvider, DbContextOptionsBuilder options) => options
+        .UseNpgsql(connectionString)
+        .AddInterceptors(serviceProvider.GetRequiredService<CustomAuditSaveChangesInterceptor>())
     );
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -92,30 +92,19 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddODataModel();
 
-builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
-builder.Services.Configure<ODataOptions>(builder.Configuration.GetSection(nameof(ODataOptions)));
-builder.Services.Configure<OpenIddictServerOptions>(builder.Configuration.GetSection(nameof(OpenIddictServerOptions)));
-builder.Services.Configure<OpenIddictServerAspNetCoreOptions>(
-    builder.Configuration.GetSection(nameof(OpenIddictServerAspNetCoreOptions)));
-builder.Services.Configure<OpenIddictValidationOptions>(
-    builder.Configuration.GetSection(nameof(OpenIddictValidationOptions)));
+// TODO: Implement.
+// Audit.EntityFramework.Configuration.Setup()
+//     .ForContext((IContextSettingsConfigurator<ApplicationDbContext> _) => {})
+//     .UseOptOut()
+//     .Ignore<AuditLog>()
+//     .Ignore<OpenIddictEntityFrameworkCoreAuthorization>()
+//     .Ignore<OpenIddictEntityFrameworkCoreScope>()
+//     .Ignore<OpenIddictEntityFrameworkCoreToken>();
 
-WebApplication app = builder.Build();
-
-IServiceScope serviceScope = app.Services.CreateScope();
-
-Audit.EntityFramework.Configuration.Setup()
-    .ForContext((IContextSettingsConfigurator<ApplicationDbContext> _) => {})
-    .UseOptOut()
-    .Ignore<AuditLog>()
-    .Ignore<OpenIddictEntityFrameworkCoreAuthorization>()
-    .Ignore<OpenIddictEntityFrameworkCoreScope>()
-    .Ignore<OpenIddictEntityFrameworkCoreToken>();
-
-Audit.Core.Configuration.Setup()
-    .UseEntityFramework((IEntityFrameworkProviderConfigurator config) => config
-        .UseDbContext((AuditEventEntityFramework _) =>
-            serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
+builder.Services.AddScoped<IAuditScopeFactory>(_ => new AuditScopeFactory());
+builder.Services.AddScoped<AuditDataProvider>((IServiceProvider serviceProvider) => new EntityFrameworkDataProvider(
+    (IEntityFrameworkProviderConfigurator config) => config
+        .UseDbContext((AuditEventEntityFramework _) => serviceProvider.GetRequiredService<ApplicationDbContext>())
         .AuditTypeMapper((Type _) => typeof(AuditLog))
         .AuditEntityAction((AuditEvent auditEvent, EventEntry entry, AuditLog entity) =>
         {
@@ -125,16 +114,39 @@ Audit.Core.Configuration.Setup()
             entity.EntityData = entry.ToJson();
 
             // FIXME: HttpContext is null here.
-            IHttpContextAccessor httpContextAccessor = serviceScope.ServiceProvider
-                .GetRequiredService<IHttpContextAccessor>();
+            IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
             if (httpContextAccessor.HttpContext is not null)
             {
-                UserManager<ApplicationUser> userManager = serviceScope.ServiceProvider
+                UserManager<ApplicationUser> userManager = serviceProvider
                     .GetRequiredService<UserManager<ApplicationUser>>();
                 entity.AuditUserId = userManager.GetUserId(httpContextAccessor.HttpContext.User);
             }
         })
-        .IgnoreMatchedProperties());
+        .IgnoreMatchedProperties()));
+builder.Services.AddScoped<IAuditDbContext>((IServiceProvider serviceProvider) =>
+{
+    DefaultAuditContext context = new(serviceProvider.GetRequiredService<ApplicationDbContext>());
+    context.AuditScopeFactory = serviceProvider.GetRequiredService<IAuditScopeFactory>();
+    context.AuditDataProvider = serviceProvider.GetRequiredService<AuditDataProvider>();
+    return context;
+});
+builder.Services.AddScoped((IServiceProvider serviceProvider) =>
+{
+    DbContextHelper helper = new();
+    helper.SetConfig(serviceProvider.GetRequiredService<IAuditDbContext>());
+    return helper;
+});
+builder.Services.AddScoped<CustomAuditSaveChangesInterceptor>();
+
+builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
+builder.Services.Configure<ODataOptions>(builder.Configuration.GetSection(nameof(ODataOptions)));
+builder.Services.Configure<OpenIddictServerOptions>(builder.Configuration.GetSection(nameof(OpenIddictServerOptions)));
+builder.Services.Configure<OpenIddictServerAspNetCoreOptions>(
+    builder.Configuration.GetSection(nameof(OpenIddictServerAspNetCoreOptions)));
+builder.Services.Configure<OpenIddictValidationOptions>(
+    builder.Configuration.GetSection(nameof(OpenIddictValidationOptions)));
+
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
