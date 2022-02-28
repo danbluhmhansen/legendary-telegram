@@ -1,12 +1,6 @@
-using Audit.Core;
-using Audit.EntityFramework;
-using Audit.EntityFramework.ConfigurationApi;
-using Audit.EntityFramework.Providers;
-
 using AutoMapper;
 
 using BlazorApp1.OData.Model;
-using BlazorApp1.Server;
 using BlazorApp1.Server.Data;
 using BlazorApp1.Server.Entities;
 
@@ -28,10 +22,8 @@ builder.Services.AddCors();
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(
-    (IServiceProvider serviceProvider, DbContextOptionsBuilder options) => options
-        .UseNpgsql(connectionString)
-        .AddInterceptors(serviceProvider.GetRequiredService<CustomAuditSaveChangesInterceptor>())
-    );
+    (DbContextOptionsBuilder options) => options
+        .UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -91,52 +83,6 @@ builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddODataModel();
-
-// TODO: Implement.
-// Audit.EntityFramework.Configuration.Setup()
-//     .ForContext((IContextSettingsConfigurator<ApplicationDbContext> _) => {})
-//     .UseOptOut()
-//     .Ignore<AuditLog>()
-//     .Ignore<OpenIddictEntityFrameworkCoreAuthorization>()
-//     .Ignore<OpenIddictEntityFrameworkCoreScope>()
-//     .Ignore<OpenIddictEntityFrameworkCoreToken>();
-
-builder.Services.AddScoped<IAuditScopeFactory>(_ => new AuditScopeFactory());
-builder.Services.AddScoped<AuditDataProvider>((IServiceProvider serviceProvider) => new EntityFrameworkDataProvider(
-    (IEntityFrameworkProviderConfigurator config) => config
-        .UseDbContext((AuditEventEntityFramework _) => serviceProvider.GetRequiredService<ApplicationDbContext>())
-        .AuditTypeMapper((Type _) => typeof(AuditLog))
-        .AuditEntityAction((AuditEvent auditEvent, EventEntry entry, AuditLog entity) =>
-        {
-            entity.AuditType = entry.EntityType.FullName;
-            entity.AuditDate = auditEvent.StartDate;
-            entity.EntityKey = Audit.Core.Configuration.JsonAdapter.Serialize(entry.PrimaryKey);
-            entity.EntityData = entry.ToJson();
-
-            // FIXME: HttpContext is null here.
-            IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
-            if (httpContextAccessor.HttpContext is not null)
-            {
-                UserManager<ApplicationUser> userManager = serviceProvider
-                    .GetRequiredService<UserManager<ApplicationUser>>();
-                entity.AuditUserId = userManager.GetUserId(httpContextAccessor.HttpContext.User);
-            }
-        })
-        .IgnoreMatchedProperties()));
-builder.Services.AddScoped<IAuditDbContext>((IServiceProvider serviceProvider) =>
-{
-    DefaultAuditContext context = new(serviceProvider.GetRequiredService<ApplicationDbContext>());
-    context.AuditScopeFactory = serviceProvider.GetRequiredService<IAuditScopeFactory>();
-    context.AuditDataProvider = serviceProvider.GetRequiredService<AuditDataProvider>();
-    return context;
-});
-builder.Services.AddScoped((IServiceProvider serviceProvider) =>
-{
-    DbContextHelper helper = new();
-    helper.SetConfig(serviceProvider.GetRequiredService<IAuditDbContext>());
-    return helper;
-});
-builder.Services.AddScoped<CustomAuditSaveChangesInterceptor>();
 
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
 builder.Services.Configure<ODataOptions>(builder.Configuration.GetSection(nameof(ODataOptions)));
