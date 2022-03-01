@@ -4,6 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>preview</LangVersion>
         <UserSecretsId>BlazorApp1.Server-9E9545DF-1FEB-4DB3-B11B-33B4292E2382</UserSecretsId>
     </PropertyGroup>
 
@@ -35,6 +36,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="StrongInject.Extensions.DependencyInjection.AspNetCore" Version="1.4.3" />
     </ItemGroup>
 
 </Project>
