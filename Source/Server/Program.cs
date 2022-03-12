@@ -1,6 +1,7 @@
 using AutoMapper;
 
 using BlazorApp1.OData.Model;
+using BlazorApp1.Server;
 using BlazorApp1.Server.Data;
 using BlazorApp1.Server.Entities;
 
@@ -83,6 +84,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddODataModel();
+
+builder.Services.AddSingleton<DateTimeProvider>();
 
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
 builder.Services.Configure<ODataOptions>(builder.Configuration.GetSection(nameof(ODataOptions)));
