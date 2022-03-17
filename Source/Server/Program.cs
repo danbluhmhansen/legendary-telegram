@@ -1,6 +1,7 @@
 using AutoMapper;
 
 using BlazorApp1.OData.Model;
+using BlazorApp1.Server;
 using BlazorApp1.Server.Data;
 using BlazorApp1.Server.Entities;
 
@@ -8,6 +9,8 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Batch;
+using Microsoft.AspNetCore.OData.Formatter.Deserialization;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 using OpenIddict.Server;
@@ -76,8 +79,13 @@ builder.Services
     {
         IODataModelProvider odataModelProvider = serviceProvider.GetRequiredService<IODataModelProvider>();
         options.AddRouteComponents("v1", odataModelProvider.GetEdmModel("1"), (IServiceCollection services) =>
-            services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler()));
+        {
+            services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler());
+            services.AddSingleton<ODataResourceSerializer, JsonODataResourceSerializer>();
+            services.AddSingleton<ODataResourceDeserializer, JsonODataResourceDeserializer>();
+        });
     });
+
 builder.Services.AddRazorPages();
 
 builder.Services.AddHttpContextAccessor();

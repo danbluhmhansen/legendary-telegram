@@ -24,7 +24,7 @@ public class ComputeCharacterCommand
             { "Defences", new JsonObject { { "Armour", 10 }, } },
         }.ToJsonString()).RootElement;
 
-        foreach (CoreEffect effect in input.Effects.Where(effect => !string.IsNullOrWhiteSpace(effect.Rule)))
+        foreach (CoreEffect effect in input.Effects.Where(effect => effect.Rule is not null))
         {
             Rule? rule = JsonSerializer.Deserialize<Rule>(effect.Rule!);
 
@@ -39,7 +39,7 @@ public class ComputeCharacterCommand
 
         foreach (Effect effect in input.Features
             .SelectMany(feature => feature.Effects)
-            .Where(effect => !string.IsNullOrWhiteSpace(effect.Rule)))
+            .Where(effect => effect.Rule is not null))
         {
             Rule? rule = JsonSerializer.Deserialize<Rule>(effect.Rule!);
 
