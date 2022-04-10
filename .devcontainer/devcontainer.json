@@ -8,6 +8,15 @@
 
     // Set *default* container specific settings.json values on container create.
     "settings": {
+        "[csharp]": {
+            "editor.defaultFormatter": "ms-dotnettools.csharp"
+        },
+        "[json]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
         "terminal.integrated.defaultProfile.linux": "fish"
     },
 
