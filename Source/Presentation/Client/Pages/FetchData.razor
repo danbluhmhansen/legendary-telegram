@@ -1,10 +1,7 @@
 ﻿@namespace LegendaryTelegram.Presentation.Client.Pages
 
 @page "/fetchdata"
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using LegendaryTelegram.Domain
-@attribute [Authorize]
 @inject HttpClient Http
 
 <PageTitle>Weather forecast</PageTitle>
@@ -47,13 +44,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
-        }
-        catch (AccessTokenNotAvailableException exception)
-        {
-            exception.Redirect();
-        }
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
     }
 }

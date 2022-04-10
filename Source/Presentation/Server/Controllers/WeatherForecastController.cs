@@ -4,7 +4,6 @@ using LegendaryTelegram.Domain;
 
 namespace LegendaryTelegram.Presentation.Server.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
