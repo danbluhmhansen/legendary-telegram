@@ -4,6 +4,10 @@ root = true
 [*]
 indent_style = space
 
+# JSON files
+[*.{json,jsonc}]
+indent_size = 4
+
 # Xml files
 [*.xml]
 indent_size = 2
