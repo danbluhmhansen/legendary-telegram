@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/legendary-telegram.sln",
+                "${workspaceFolder}/LegendaryTelegram.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -47,7 +47,7 @@
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/legendary-telegram.sln",
+                "${workspaceFolder}/LegendaryTelegram.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -59,7 +59,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/legendary-telegram.sln",
+                "${workspaceFolder}/LegendaryTelegram.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
