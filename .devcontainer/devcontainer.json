@@ -1,35 +1,22 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.217.4/containers/dotnet-postgres
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.231.5/containers/dotnet-postgres
 {
     "name": "C# (.NET) and PostgreSQL (Community)",
     "dockerComposeFile": "docker-compose.yml",
     "service": "app",
     "workspaceFolder": "/workspace",
+
     // Set *default* container specific settings.json values on container create.
     "settings": {
-        "terminal.integrated.defaultProfile.linux": "pwsh"
+        "terminal.integrated.defaultProfile.linux": "fish"
     },
+
     // Add the IDs of extensions you want installed when the container is created.
-    "extensions": [
-        "christian-kohler.path-intellisense",
-        "eamodio.gitlens",
-        "EditorConfig.EditorConfig",
-        "Gruntfuggly.todo-tree",
-        "hbenl.vscode-test-explorer",
-        "humao.rest-client",
-        "ms-dotnettools.csharp",
-        "ms-dotnettools.vscode-dotnet-runtime",
-        "pflannery.vscode-versionlens",
-        "streetsidesoftware.code-spell-checker",
-    ],
+    "extensions": ["ms-dotnettools.csharp"],
+
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
-    "forwardPorts": [
-        5289,
-        5290,
-        5432,
-        7289,
-        7290
-    ],
+    // "forwardPorts": [5000, 5001],
+
     // [Optional] To reuse of your local HTTPS dev cert:
     //
     // 1. Export it locally using this command:
@@ -40,7 +27,7 @@
     //
     // 2. Uncomment these 'remoteEnv' lines:
     //    "remoteEnv": {
-    //        "ASPNETCORE_Kestrel__Certificates__Default__Password": "SecurePwdGoesHere",
+    // 	      "ASPNETCORE_Kestrel__Certificates__Default__Password": "SecurePwdGoesHere",
     //        "ASPNETCORE_Kestrel__Certificates__Default__Path": "/home/vscode/.aspnet/https/aspnetapp.pfx",
     //    },
     //
@@ -48,11 +35,13 @@
     //      1. Start the container
     //      2. Drag ~/.aspnet/https/aspnetapp.pfx into the root of the file explorer
     //      3. Open a terminal in VS Code and run "mkdir -p /home/vscode/.aspnet/https && mv aspnetapp.pfx /home/vscode/.aspnet/https"
+
     // Use 'postCreateCommand' to run commands after the container is created.
-    "postCreateCommand": "dotnet dev-certs https && dotnet tool install --global dotnet-ef && dotnet restore",
+    "postCreateCommand": "dotnet dev-certs https && dotnet restore",
+
     // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
     "remoteUser": "vscode",
-    "remoteEnv": {
-        "PATH": "${containerEnv:PATH}:/home/vscode/.dotnet/tools",
+    "features": {
+        "fish": "latest"
     }
 }

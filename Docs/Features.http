@@ -1,9 +1,0 @@
-GET https://localhost:7289/v1/Features?$expand=Effects
-
-###
-
-GET https://localhost:7289/v1/Features/333bad4f-b10d-4a30-971b-f449e4469952?$expand=Effects
-
-###
-
-GET https://localhost:7289/v1/Features?$filter=Characters/all(c:c/Id ne 02c07b82-1b85-8d01-17a3-ad6059be2a1c)
