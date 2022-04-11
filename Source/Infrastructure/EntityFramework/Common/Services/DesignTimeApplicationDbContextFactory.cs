@@ -1,7 +1,5 @@
 namespace LegendaryTelegram.Infrastructure.EntityFramework.Common.Services;
 
-using System.CommandLine;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 

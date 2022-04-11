@@ -1,8 +1,6 @@
 using LegendaryTelegram.Presentation.Server;
 using LegendaryTelegram.Presentation.Server.Controllers;
 
-using Microsoft.EntityFrameworkCore;
-
 using StrongInject.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
