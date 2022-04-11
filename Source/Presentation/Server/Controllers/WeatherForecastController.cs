@@ -1,33 +1,23 @@
-using Microsoft.AspNetCore.Mvc;
-using LegendaryTelegram.Domain;
-
 namespace LegendaryTelegram.Presentation.Server.Controllers;
+
+using LegendaryTelegram.Application.Common.Services;
+using LegendaryTelegram.Application.WeatherForecasts.Models;
+
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
+    public WeatherForecastController(QueryEntities queryEntities, ILogger<WeatherForecastController> logger)
     {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
-    private readonly ILogger<WeatherForecastController> _logger;
-
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
-    {
-        _logger = logger;
+        this.queryEntities = queryEntities;
+        this.logger = logger;
     }
+
+    private readonly QueryEntities queryEntities;
+    private readonly ILogger<WeatherForecastController> logger;
 
     [HttpGet]
-    public IEnumerable<WeatherForecast> Get()
-    {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateTime.Now.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
-    }
+    public IQueryable<WeatherForecast> Get() => this.queryEntities.Execute<WeatherForecast, Domain.WeatherForecast>();
 }
