@@ -17,22 +17,22 @@
         "[jsonc]": {
             "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
-        "terminal.integrated.defaultProfile.linux": "fish"
     },
 
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [
-        "christian-kohler.path-intellisense",
-        "eamodio.gitlens",
-        "EditorConfig.EditorConfig",
-        "esbenp.prettier-vscode",
-        "ms-dotnettools.csharp",
-        "pflannery.vscode-versionlens",
-        "richie5um2.vscode-sort-json",
-        "streetsidesoftware.code-spell-checker",
-        "Tyriar.sort-lines",
-        "rangav.vscode-thunder-client"
-    ],
+		"christian-kohler.path-intellisense",
+		"eamodio.gitlens",
+		"EditorConfig.EditorConfig",
+		"esbenp.prettier-vscode",
+		"ms-dotnettools.csharp",
+		"pflannery.vscode-versionlens",
+		"richie5um2.vscode-sort-json",
+		"streetsidesoftware.code-spell-checker",
+		"Tyriar.sort-lines",
+		"rangav.vscode-thunder-client",
+		"GitHub.copilot"
+	],
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [5000, 5001],
@@ -61,7 +61,5 @@
 
     // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
     "remoteUser": "vscode",
-    "features": {
-        "fish": "latest"
-    }
+    "features": {}
 }
