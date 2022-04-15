@@ -1,7 +1,7 @@
+namespace LegendaryTelegram.Server.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using LegendaryTelegram.Shared;
-
-namespace LegendaryTelegram.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -12,11 +12,11 @@ public class WeatherForecastController : ControllerBase
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     };
 
-    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly ILogger<WeatherForecastController> logger;
 
     public WeatherForecastController(ILogger<WeatherForecastController> logger)
     {
-        _logger = logger;
+        this.logger = logger;
     }
 
     [HttpGet]
