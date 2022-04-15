@@ -17,6 +17,11 @@
         "[jsonc]": {
             "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
+        "omnisharp.enableDecompilationSupport": true,
+        "omnisharp.enableImportCompletion": true,
+        "omnisharp.enableRoslynAnalyzers": true,
+        "omnisharp.organizeImportsOnFormat": true,
+        "omnisharp.useModernNet": true
     },
 
     // Add the IDs of extensions you want installed when the container is created.

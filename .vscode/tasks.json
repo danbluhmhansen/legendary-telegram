@@ -23,7 +23,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Source/Presentation/Client/Client.csproj",
+                "${workspaceFolder}/Client/LegendaryTelegram.Client.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -35,7 +35,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Source/Presentation/Server/Server.csproj",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -84,7 +84,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Source/Presentation/Client/Client.csproj"
+                "${workspaceFolder}/Client/LegendaryTelegram.Client.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -96,7 +96,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Source/Presentation/Server/Server.csproj"
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
