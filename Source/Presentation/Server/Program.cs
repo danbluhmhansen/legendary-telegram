@@ -1,13 +1,7 @@
-using LegendaryTelegram.Presentation.Server;
-using LegendaryTelegram.Presentation.Server.Controllers;
-
-using StrongInject.Extensions.DependencyInjection;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers().AddControllersAsServices();
-builder.Services.ReplaceWithTransientServiceUsingContainer<Container, WeatherForecastController>();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 

@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\Domain.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\StrongInject\Infrastructure.StrongInject.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Mapster\Infrastructure.Mapster.csproj" />
     <ProjectReference Include="..\..\Infrastructure\EntityFramework\Infrastructure.EntityFramework.csproj" />
   </ItemGroup>
