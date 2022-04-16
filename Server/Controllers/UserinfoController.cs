@@ -1,4 +1,4 @@
-namespace Velusia.Server.Controllers;
+﻿namespace LegendaryTelegram.Server.Controllers;
 
 using LegendaryTelegram.Server.Models;
 
@@ -12,8 +12,7 @@ using OpenIddict.Server.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-[ApiExplorerSettings(IgnoreApi = true)]
-public class UserinfoController : ControllerBase
+public class UserinfoController : Controller
 {
     private readonly UserManager<ApplicationUser> userManager;
 
@@ -22,23 +21,22 @@ public class UserinfoController : ControllerBase
         this.userManager = userManager;
     }
 
-    //
-    // GET: /api/userinfo
     [Authorize(AuthenticationSchemes = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)]
-    [HttpGet("~/connect/userinfo"), HttpPost("~/connect/userinfo"), Produces("application/json")]
+    [HttpGet("~/connect/userinfo"), HttpPost("~/connect/userinfo")]
+    [IgnoreAntiforgeryToken, Produces("application/json")]
     public async Task<IActionResult> Userinfo()
     {
         var user = await this.userManager.GetUserAsync(this.User);
-        if (user == null)
+        if (user is null)
         {
             return Challenge(
-                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                new AuthenticationProperties(new Dictionary<string, string?>
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidToken,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                         "The specified access token is bound to an account that no longer exists."
                 }),
-                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
         var claims = new Dictionary<string, object>(StringComparer.Ordinal)
