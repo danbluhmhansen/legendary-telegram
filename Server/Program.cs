@@ -1,9 +1,12 @@
+using Blazorise;
+using Blazorise.Bulma;
+using Blazorise.Icons.FontAwesome;
+
 using LegendaryTelegram.Server.Data;
 using LegendaryTelegram.Server.Models;
 using LegendaryTelegram.Server.Services;
 
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
 using OpenIddict.Server;
@@ -37,12 +40,13 @@ builder.Services.AddOpenIddict()
         options.UseAspNetCore();
     });
 
-builder.Services.AddMvc();
+builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services
+    .AddBlazorise(options => options.Immediate = true)
+    .AddBulmaProviders()
+    .AddFontAwesomeIcons();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddHostedService<SeedWorker>();
@@ -57,12 +61,7 @@ builder.Services.Configure<OpenIddictValidationOptions>(
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days.
@@ -75,7 +74,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseStaticFiles();
+
+app.UseRouting();
+
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

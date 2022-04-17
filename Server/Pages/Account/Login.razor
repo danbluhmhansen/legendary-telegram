@@ -1,0 +1,7 @@
+@page "/Account/Login"
+
+<Heading Size="HeadingSize.Is1">Login</Heading>
+
+<Field><TextEdit Placeholder="Username" /></Field>
+<Field><TextEdit Role="TextRole.Password" Placeholder="Password" /></Field>
+<Button Color="Color.Primary" Clicked="@(async () => await SignInAsync())">Login</Button>
