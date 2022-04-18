@@ -2,6 +2,7 @@
 
 <Heading Size="HeadingSize.Is1">Login</Heading>
 
-<Field><TextEdit Placeholder="Username" /></Field>
-<Field><TextEdit Role="TextRole.Password" Placeholder="Password" /></Field>
-<Button Color="Color.Primary" Clicked="@(async () => await SignInAsync())">Login</Button>
+<Field><TextEdit Placeholder="Username" @bind-Text="@username" /></Field>
+<Field><TextEdit Role="TextRole.Password" Placeholder="Password" @bind-Text="@password" /></Field>
+<Field><Check @bind-Checked="@rememberMe">Remember me</Check></Field>
+<Button Color="Color.Primary" Clicked="@SignInAsync">Login</Button>

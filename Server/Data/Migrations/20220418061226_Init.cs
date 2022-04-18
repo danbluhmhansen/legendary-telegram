@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace LegendaryTelegram.Server.Migrations
+namespace LegendaryTelegram.Server.Data.Migrations
 {
     public partial class Init : Migration
     {

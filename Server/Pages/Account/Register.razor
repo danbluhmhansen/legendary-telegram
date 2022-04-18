@@ -1,0 +1,27 @@
+@page "/Account/Register"
+
+<Heading Size="HeadingSize.Is1">Register</Heading>
+<Field><TextEdit Placeholder="Username" @bind-Text="@username" /></Field>
+<Field>
+    <Validations ValidateOnLoad="false">
+        <Validation UsePattern>
+            <TextEdit Pattern=".{8}" Placeholder="Password" Role="TextRole.Password" @bind-Text="@password">
+                <Feedback>
+                    <ValidationError>Password must be at least 8 characters.</ValidationError>
+                </Feedback>
+            </TextEdit>
+        </Validation>
+    </Validations>
+</Field>
+<Field>
+    <Validations ValidateOnLoad="false">
+        <Validation Validator="@ConfirmPasswordValidator">
+            <TextEdit Placeholder="Confirm password" Role="TextRole.Password" @bind-Text="@confirmPassword">
+                <Feedback>
+                    <ValidationError>Passwords must match.</ValidationError>
+                </Feedback>
+            </TextEdit>
+        </Validation>
+    </Validations>
+</Field>
+<Button Color="Color.Primary" Clicked="@RegisterAsync">Register</Button>

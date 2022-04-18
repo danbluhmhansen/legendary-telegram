@@ -17,6 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddLogging();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
     .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
     .UseOpenIddict());
@@ -40,6 +42,7 @@ builder.Services.AddOpenIddict()
         options.UseAspNetCore();
     });
 
+builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 

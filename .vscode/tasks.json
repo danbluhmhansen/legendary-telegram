@@ -99,6 +99,81 @@
                 "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "dropDatabase",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "database",
+                "drop",
+                "--project",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "--startup-project",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "--force"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "updateDatabase",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "database",
+                "update",
+                "--project",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "--startup-project",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "addMigration",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "migrations",
+                "add",
+                "${input:efMigrationName}",
+                "--project",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "--startup-project",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "--context",
+                "ApplicationDbContext",
+                "--output-dir",
+                "Data/Migrations"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "removeMigration",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "migrations",
+                "remove",
+                "--project",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "--startup-project",
+                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "--context",
+                "ApplicationDbContext"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "efMigrationName",
+            "type": "promptString",
+            "description": "The name of the migration."
         }
     ]
 }

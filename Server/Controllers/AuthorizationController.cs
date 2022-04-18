@@ -2,20 +2,21 @@
 
 using System.Security.Claims;
 
+using LegendaryTelegram.Server.Attributes;
+using LegendaryTelegram.Server.Extensions;
+using LegendaryTelegram.Server.Models;
+
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
-using LegendaryTelegram.Server.Models;
-using LegendaryTelegram.Server.Extensions;
-using LegendaryTelegram.Server.Attributes;
-using LegendaryTelegram.Server.Models.Authorization;
 
 public class AuthorizationController : Controller
 {
@@ -179,11 +180,7 @@ public class AuthorizationController : Controller
 
             // In every other case, render the consent form.
             default:
-                return View(new AuthorizeViewModel
-                {
-                    ApplicationName = await this.applicationManager.GetLocalizedDisplayNameAsync(application),
-                    Scope = request.Scope
-                });
+                return LocalRedirect($"/Authorization/Authorize?applicationName={await this.applicationManager.GetLocalizedDisplayNameAsync(application)}&scope={request.Scope}");
         }
     }
 
@@ -213,7 +210,8 @@ public class AuthorizationController : Controller
         // Note: the same check is already made in the other action but is repeated
         // here to ensure a malicious user can't abuse this POST-only endpoint and
         // force it to return a valid response without the external authorization.
-        if (!authorizations.Any() && await this.applicationManager.HasConsentTypeAsync(application, ConsentTypes.External))
+        if (!authorizations.Any()
+            && await this.applicationManager.HasConsentTypeAsync(application, ConsentTypes.External))
         {
             return Forbid(
                 new AuthenticationProperties(new Dictionary<string, string?>
@@ -275,33 +273,30 @@ public class AuthorizationController : Controller
         // If the user code was not specified in the query string (e.g as part of the verification_uri_complete),
         // render a form to ask the user to enter the user code manually (non-digit chars are automatically ignored).
         if (string.IsNullOrEmpty(request.UserCode))
-        {
-            return View(new VerifyViewModel());
-        }
+            return LocalRedirect("/Authorization/Verify");
 
         // Retrieve the claims principal associated with the user code.
         var result = await this.HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         if (result.Succeeded)
         {
             // Retrieve the application details from the database using the client_id stored in the principal.
-            var application = await this.applicationManager.FindByClientIdAsync(result.Principal.GetClaim(Claims.ClientId)) ??
-                throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
+            var application = await this.applicationManager.FindByClientIdAsync(
+                result.Principal.GetClaim(Claims.ClientId))
+                    ?? throw new InvalidOperationException(
+                        "Details concerning the calling client application cannot be found.");
 
             // Render a form asking the user to confirm the authorization demand.
-            return View(new VerifyViewModel
-            {
-                ApplicationName = await this.applicationManager.GetLocalizedDisplayNameAsync(application),
-                Scope = string.Join(" ", result.Principal.GetScopes()),
-                UserCode = request.UserCode
-            });
+            return LocalRedirect($"/Authorization/Verify?applicationName={await this.applicationManager.GetLocalizedDisplayNameAsync(application)}&scope={string.Join(" ", result.Principal.GetScopes())}&userCode={request.UserCode}");
         }
 
         // Redisplay the form when the user code is not valid.
-        return View(new VerifyViewModel
-        {
-            Error = Errors.InvalidToken,
-            ErrorDescription = "The specified user code is not valid. Please make sure you typed it correctly."
-        });
+        return LocalRedirect("/Authorization/Verify");
+        // TODO:
+        // return View(new VerifyViewModel
+        // {
+        //     Error = Errors.InvalidToken,
+        //     ErrorDescription = "The specified user code is not valid. Please make sure you typed it correctly."
+        // });
     }
 
     [Authorize, FormValueRequired("submit.Accept")]
@@ -340,11 +335,13 @@ public class AuthorizationController : Controller
         }
 
         // Redisplay the form when the user code is not valid.
-        return View(new VerifyViewModel
-        {
-            Error = Errors.InvalidToken,
-            ErrorDescription = "The specified user code is not valid. Please make sure you typed it correctly."
-        });
+        return LocalRedirect("/Authorization/Verify");
+        // TODO:
+        // return View(new VerifyViewModel
+        // {
+        //     Error = Errors.InvalidToken,
+        //     ErrorDescription = "The specified user code is not valid. Please make sure you typed it correctly."
+        // });
     }
 
     [Authorize, FormValueRequired("submit.Deny")]
@@ -406,20 +403,22 @@ public class AuthorizationController : Controller
                     new AuthenticationProperties(new Dictionary<string, string?>
                     {
                         [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The username/password couple is invalid."
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            "The username/password couple is invalid."
                     }),
                     OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }
 
             // Validate the username/password parameters and ensure the account is not locked out.
-            var result = await this.signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+            var result = await this.signInManager.CheckPasswordSignInAsync(user, request.Password, true);
             if (!result.Succeeded)
             {
                 return Forbid(
                     new AuthenticationProperties(new Dictionary<string, string?>
                     {
                         [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The username/password couple is invalid."
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            "The username/password couple is invalid."
                     }),
                     OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }
@@ -441,10 +440,13 @@ public class AuthorizationController : Controller
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
-        else if (request.IsAuthorizationCodeGrantType() || request.IsDeviceCodeGrantType() || request.IsRefreshTokenGrantType())
+        else if (request.IsAuthorizationCodeGrantType()
+            || request.IsDeviceCodeGrantType()
+            || request.IsRefreshTokenGrantType())
         {
             // Retrieve the claims principal stored in the authorization code/device code/refresh token.
-            var principal = (await this.HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
+            var principal = (await this.HttpContext
+                .AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
 
             // Retrieve the user profile corresponding to the authorization code/refresh token.
             // Note: if you want to automatically invalidate the authorization code/refresh token
@@ -457,7 +459,8 @@ public class AuthorizationController : Controller
                     new AuthenticationProperties(new Dictionary<string, string?>
                     {
                         [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The token is no longer valid."
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            "The token is no longer valid."
                     }),
                     OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }
@@ -469,7 +472,8 @@ public class AuthorizationController : Controller
                     new AuthenticationProperties(new Dictionary<string, string?>
                     {
                         [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in."
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            "The user is no longer allowed to sign in."
                     }),
                     OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }
