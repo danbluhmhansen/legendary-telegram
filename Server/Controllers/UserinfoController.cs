@@ -12,7 +12,8 @@ using OpenIddict.Server.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-public class UserinfoController : Controller
+[ApiExplorerSettings(IgnoreApi = true)]
+public class UserinfoController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> userManager;
 

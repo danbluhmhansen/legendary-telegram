@@ -8,6 +8,7 @@ using LegendaryTelegram.Server.Services;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
@@ -46,6 +47,30 @@ builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("openid", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.OpenIdConnect,
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Scheme = "Bearer",
+        OpenIdConnectUrl = new Uri("/.well-known/openid-configuration"),
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "openid" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 builder.Services
     .AddBlazorise(options => options.Immediate = true)
     .AddBulmaProviders()
@@ -71,16 +96,27 @@ if (!app.Environment.IsDevelopment())
     // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+else
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.OAuthClientId("sample-client");
+        options.OAuthClientSecret("3e52ce50-5ac2-4885-94d8-2c8a6c1c902a");
+        options.OAuthUsePkce();
+    });
+}
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

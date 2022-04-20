@@ -18,7 +18,8 @@ using OpenIddict.Server.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-public class AuthorizationController : Controller
+[ApiExplorerSettings(IgnoreApi = true)]
+public class AuthorizationController : ControllerBase
 {
     private readonly IOpenIddictApplicationManager applicationManager;
     private readonly IOpenIddictAuthorizationManager authorizationManager;
@@ -362,7 +363,7 @@ public class AuthorizationController : Controller
     // flows like the authorization code flow or the implicit flow.
 
     [HttpGet("~/connect/logout")]
-    public IActionResult Logout() => View();
+    public IActionResult Logout() => LocalRedirect("/Account/Logout");
 
     [ActionName(nameof(Logout)), HttpPost("~/connect/logout"), ValidateAntiForgeryToken]
     public async Task<IActionResult> LogoutPost()

@@ -29,6 +29,7 @@ public class SeedWorker : IHostedService
             await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
             {
                 ClientId = "sample-client",
+                ClientSecret = "3e52ce50-5ac2-4885-94d8-2c8a6c1c902a",
                 ConsentType = ConsentTypes.Explicit,
                 DisplayName = "Sample Client Application",
                 Permissions =
@@ -43,10 +44,10 @@ public class SeedWorker : IHostedService
                     Permissions.Scopes.Profile,
                     Permissions.Scopes.Roles
                 },
-                PostLogoutRedirectUris = { new Uri("https://localhost:44300/signout-oidc") },
-                RedirectUris = { new Uri("https://localhost:44300/signin-oidc") },
+                PostLogoutRedirectUris = { new Uri("https://localhost:7169/") },
+                RedirectUris = { new Uri("https://localhost:7169/") },
                 Requirements = { Requirements.Features.ProofKeyForCodeExchange },
-                Type = ClientTypes.Public,
+                Type = ClientTypes.Confidential,
             }, cancellationToken);
         }
     }
