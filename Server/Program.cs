@@ -14,6 +14,8 @@ using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation;
 
+using Swashbuckle.AspNetCore.Filters;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -51,24 +53,19 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("openid", new OpenApiSecurityScheme
+    OpenApiSecurityScheme securityScheme = new()
     {
         Type = SecuritySchemeType.OpenIdConnect,
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Scheme = "Bearer",
-        OpenIdConnectUrl = new Uri("/.well-known/openid-configuration"),
-    });
+        OpenIdConnectUrl = new Uri("/.well-known/openid-configuration", UriKind.Relative),
+    };
+    options.AddSecurityDefinition("openid", securityScheme);
+
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "openid" }
-            },
-            Array.Empty<string>()
-        }
+        [securityScheme] = Array.Empty<string>(),
     });
+
+    options.OperationFilter<SecurityRequirementsOperationFilter>(true, "openid");
 });
 
 builder.Services

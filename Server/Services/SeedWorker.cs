@@ -45,7 +45,7 @@ public class SeedWorker : IHostedService
                     Permissions.Scopes.Roles
                 },
                 PostLogoutRedirectUris = { new Uri("https://localhost:7169/") },
-                RedirectUris = { new Uri("https://localhost:7169/") },
+                RedirectUris = { new Uri("https://localhost:7169/"), new Uri("https://localhost:7169/swagger/oauth2-redirect.html") },
                 Requirements = { Requirements.Features.ProofKeyForCodeExchange },
                 Type = ClientTypes.Confidential,
             }, cancellationToken);
