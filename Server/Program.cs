@@ -84,6 +84,7 @@ if (!app.Environment.IsDevelopment())
 }
 else
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
@@ -97,11 +98,14 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
+app.UseStatusCodePagesWithReExecute("/error");
+
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapDefaultControllerRoute();
 
 app.Run();
