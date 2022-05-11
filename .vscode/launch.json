@@ -6,7 +6,7 @@
             "type": "blazorwasm",
             "request": "launch",
             "preLaunchTask": "buildClient",
-            "cwd": "${workspaceFolder}/Client",
+            "cwd": "${workspaceFolder}/Source/Client",
             "browser": "edge",
             "url": "https://localhost:7085"
         },
@@ -15,9 +15,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "buildServer",
-            "program": "${workspaceFolder}/Server/bin/Debug/net6.0/LegendaryTelegram.Server.dll",
+            "program": "${workspaceFolder}/Source/Server/bin/Debug/net6.0/LegendaryTelegram.Server.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/Server",
+            "cwd": "${workspaceFolder}/Source/Server",
             "stopAtEntry": false,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"

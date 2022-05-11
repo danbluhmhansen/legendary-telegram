@@ -23,7 +23,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Client/LegendaryTelegram.Client.csproj",
+                "${workspaceFolder}/Source/Client/LegendaryTelegram.Client.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -35,7 +35,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -84,7 +84,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Client/LegendaryTelegram.Client.csproj"
+                "${workspaceFolder}/Source/Client/LegendaryTelegram.Client.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -96,7 +96,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj"
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -109,9 +109,9 @@
                 "database",
                 "drop",
                 "--project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
                 "--startup-project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
                 "--force"
             ],
             "problemMatcher": "$msCompile"
@@ -125,9 +125,9 @@
                 "database",
                 "update",
                 "--project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
                 "--startup-project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
             ],
             "problemMatcher": "$msCompile"
         },
@@ -141,9 +141,9 @@
                 "add",
                 "${input:efMigrationName}",
                 "--project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
                 "--startup-project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
                 "--context",
                 "ApplicationDbContext",
                 "--output-dir",
@@ -160,9 +160,9 @@
                 "migrations",
                 "remove",
                 "--project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
                 "--startup-project",
-                "${workspaceFolder}/Server/LegendaryTelegram.Server.csproj",
+                "${workspaceFolder}/Source/Server/LegendaryTelegram.Server.csproj",
                 "--context",
                 "ApplicationDbContext"
             ],
