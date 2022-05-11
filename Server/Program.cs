@@ -1,7 +1,3 @@
-using Blazorise;
-using Blazorise.Bulma;
-using Blazorise.Icons.FontAwesome;
-
 using LegendaryTelegram.Server.Data;
 using LegendaryTelegram.Server.Models;
 using LegendaryTelegram.Server.Services;
@@ -45,9 +41,7 @@ builder.Services.AddOpenIddict()
         options.UseAspNetCore();
     });
 
-builder.Services.AddControllers();
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+builder.Services.AddControllersWithViews();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -67,11 +61,6 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<SecurityRequirementsOperationFilter>(true, "openid");
 });
-
-builder.Services
-    .AddBlazorise(options => options.Immediate = true)
-    .AddBulmaProviders()
-    .AddFontAwesomeIcons();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddHostedService<SeedWorker>();
@@ -114,7 +103,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
 
 app.Run();
