@@ -9,6 +9,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace LegendaryTelegram.Server.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 public class UserinfoController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;

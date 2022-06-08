@@ -10,6 +10,7 @@ using LegendaryTelegram.Server.ViewModels.Shared;
 
 namespace LegendaryTelegram.Server;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ErrorController : Controller
 {
     [HttpGet, HttpPost, Route("~/error")]

@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using LegendaryTelegram.Server.Models;
-using LegendaryTelegram.Server.Services;
 using LegendaryTelegram.Server.ViewModels.Account;
 using LegendaryTelegram.Server.Data;
 
 namespace LegendaryTelegram.Server.Controllers;
 
 [Authorize]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;

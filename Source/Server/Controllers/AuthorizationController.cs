@@ -20,6 +20,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace LegendaryTelegram.Server;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 public class AuthorizationController : Controller
 {
     private readonly IOpenIddictApplicationManager _applicationManager;

@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using LegendaryTelegram.Server.Models;
-using LegendaryTelegram.Server.Services;
 using LegendaryTelegram.Server.ViewModels.Manage;
 
 namespace LegendaryTelegram.Server.Controllers;
 
 [Authorize]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ManageController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
