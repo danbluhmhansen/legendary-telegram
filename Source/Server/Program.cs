@@ -1,4 +1,5 @@
 using LegendaryTelegram.Server.Data;
+using LegendaryTelegram.Server.Interfaces;
 using LegendaryTelegram.Server.Models;
 using LegendaryTelegram.Server.Services;
 
@@ -61,6 +62,8 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<SecurityRequirementsOperationFilter>(true, "openid");
 });
+
+builder.Services.AddSingleton<IODataModelProvider, ODataModelProvider>();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddHostedService<SeedWorker>();
