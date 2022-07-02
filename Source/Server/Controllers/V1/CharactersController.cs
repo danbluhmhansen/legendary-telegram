@@ -1,12 +1,17 @@
+using Asp.Versioning;
+
 using LegendaryTelegram.Server.Data;
 using LegendaryTelegram.Server.Models;
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
 namespace LegendaryTelegram.Server.Controllers.V1;
 
-[Route("api/[controller]")]
-public class CharactersController : ControllerBase
+[ApiVersion(1.0)]
+public class CharactersController : ODataController
 {
   public CharactersController(ApplicationDbContext dbContext)
   {
@@ -16,10 +21,14 @@ public class CharactersController : ControllerBase
   private readonly ApplicationDbContext dbContext;
 
     [HttpGet]
-    public async Task<IActionResult> Get() => Ok(await this.dbContext.Characters.ToListAsync());
+    [EnableQuery]
+    public IQueryable<Character> Get() => this.dbContext.Characters;
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get([FromRoute] Guid id) => Ok(await this.dbContext.Characters.FindAsync(id));
+    [HttpGet]
+    public async Task<IActionResult> Get(Guid id, ODataQueryOptions<Character> options)
+    {
+      return Ok(await ((IQueryable<Character>)options.ApplyTo(this.dbContext.Characters)).FirstOrDefaultAsync());
+    }
 
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Character character)

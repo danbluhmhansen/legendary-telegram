@@ -1,9 +1,10 @@
 using LegendaryTelegram.Server.Data;
-using LegendaryTelegram.Server.Interfaces;
+using LegendaryTelegram.Server.Helpers;
 using LegendaryTelegram.Server.Models;
 using LegendaryTelegram.Server.Services;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -42,10 +43,30 @@ builder.Services.AddOpenIddict()
         options.UseAspNetCore();
     });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddOData(options =>
+    {
+        options.EnableQueryFeatures();
+        options.RouteOptions.EnableKeyInParenthesis = false;
+        options.RouteOptions.EnableNonParenthesisForEmptyParameterFunction = true;
+        options.RouteOptions.EnablePropertyNameCaseInsensitive = true;
+        options.RouteOptions.EnableQualifiedOperationCall = false;
+        options.RouteOptions.EnableUnqualifiedOperationCall = true;
+    });
+
+builder.Services
+    .AddApiVersioning(options =>
+    {
+        options.ReportApiVersions = true;
+    })
+    .AddOData(options => options.AddRouteComponents("api"))
+    .AddODataApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     OpenApiSecurityScheme securityScheme = new()
@@ -61,9 +82,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     options.OperationFilter<SecurityRequirementsOperationFilter>(true, "openid");
+    options.OperationFilter<SwaggerDefaultValues>();
 });
-
-builder.Services.AddSingleton<IODataModelProvider, ODataModelProvider>();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddHostedService<SeedWorker>();
@@ -94,7 +114,16 @@ else
         options.OAuthClientId("sample-client");
         options.OAuthClientSecret("3e52ce50-5ac2-4885-94d8-2c8a6c1c902a");
         options.OAuthUsePkce();
+
+        // build a swagger endpoint for each discovered API version
+        foreach (var description in app.DescribeApiVersions())
+        {
+            var url = $"/swagger/{description.GroupName}/swagger.json";
+            var name = description.GroupName.ToUpperInvariant();
+            options.SwaggerEndpoint(url, name);
+        }
     });
+    app.UseODataRouteDebug();
 }
 
 app.UseHttpsRedirection();
