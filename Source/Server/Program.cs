@@ -6,6 +6,7 @@ using LegendaryTelegram.Server.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 
 using OpenIddict.Server;
@@ -13,6 +14,7 @@ using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation;
 
 using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +68,7 @@ builder.Services
         options.SubstituteApiVersionInUrl = true;
     });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerGen(options =>
 {
     OpenApiSecurityScheme securityScheme = new()
@@ -83,6 +85,10 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<SecurityRequirementsOperationFilter>(true, "openid");
     options.OperationFilter<SwaggerDefaultValues>();
+
+    var fileName = typeof(Program).Assembly.GetName().Name + ".xml";
+    var filePath = Path.Combine(AppContext.BaseDirectory, fileName);
+    options.IncludeXmlComments(filePath);
 });
 
 if (builder.Environment.IsDevelopment())
