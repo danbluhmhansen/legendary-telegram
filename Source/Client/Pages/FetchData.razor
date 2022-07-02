@@ -1,0 +1,23 @@
+@using Microsoft.AspNetCore.Components.QuickGrid
+@page "/fetchdata"
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1 class="title">Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (forecasts == null)
+{
+    <progress class="progress is-primary" max="100">Loading.</progress>
+}
+else
+{
+    <QuickGrid Items="@forecasts" Class="table">
+        <PropertyColumn Property="@(forecast => forecast.Date)" Format="yyy-MM-dd" Sortable="true" />
+        <PropertyColumn Title="C" Property="@(forecast => forecast.TemperatureC)" Sortable="true" />
+        <PropertyColumn Title="F" Property="@(forecast => forecast.TemperatureF)" Sortable="true" />
+        <PropertyColumn Property="@(forecast => forecast.Summary)" />
+    </QuickGrid>
+}
+
