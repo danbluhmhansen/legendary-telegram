@@ -57,5 +57,16 @@
   </div>
 </nav>
 
-@Body
+<CascadingValue Value="this" Name="ErrorComponent">
+  @Body
+</CascadingValue>
+
+@if (error is not null)
+{
+  <div class="notification is-danger">
+    <button class="delete" @onclick="HideError"></button>
+    <h3 class="title">@error.Title</h3>
+    @error.Message
+  </div>
+}
 
