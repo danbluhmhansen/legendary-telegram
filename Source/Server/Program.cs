@@ -71,6 +71,8 @@ builder.Services
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerGen(options =>
 {
+    options.CustomOperationIds(apiDesc => $"{apiDesc.HttpMethod} {apiDesc.RelativePath}");
+
     OpenApiSecurityScheme securityScheme = new()
     {
         Type = SecuritySchemeType.OpenIdConnect,
