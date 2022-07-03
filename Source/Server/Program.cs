@@ -1,5 +1,7 @@
+using LegendaryTelegram.Server.Commands;
 using LegendaryTelegram.Server.Data;
 using LegendaryTelegram.Server.Helpers;
+using LegendaryTelegram.Server.Interfaces;
 using LegendaryTelegram.Server.Models;
 using LegendaryTelegram.Server.Services;
 
@@ -93,6 +95,15 @@ builder.Services.AddSwaggerGen(options =>
     var filePath = Path.Combine(AppContext.BaseDirectory, fileName);
     options.IncludeXmlComments(filePath);
 });
+
+builder.Services.AddScoped<IRepository<Character>, Repository<Character>>();
+builder.Services.AddScoped<IEntityTracker, EntityTracker>();
+
+builder.Services.AddScoped<QueryEntities<Character>>();
+builder.Services.AddScoped<FindEntity<Character>>();
+builder.Services.AddScoped<AddEntity<Character>>();
+builder.Services.AddScoped<UpdateEntity<Character>>();
+builder.Services.AddScoped<RemoveEntity<Character>>();
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddHostedService<SeedWorker>();

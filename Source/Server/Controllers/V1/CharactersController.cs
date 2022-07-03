@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Asp.Versioning.OData;
-using LegendaryTelegram.Server.Data;
+
+using LegendaryTelegram.Server.Commands;
+using LegendaryTelegram.Server.Interfaces;
 using LegendaryTelegram.Server.Models;
 
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +18,28 @@ namespace LegendaryTelegram.Server.Controllers.V1;
 public class CharactersController : ODataController
 {
   /// <summary>Initialises a new instance of <see cref="CharactersController"/>.</summary>
-  public CharactersController(ApplicationDbContext dbContext)
+  public CharactersController(
+      QueryEntities<Character> queryEntities,
+      FindEntity<Character> findEntity,
+      AddEntity<Character> addEntity,
+      UpdateEntity<Character> updateEntity,
+      RemoveEntity<Character> removeEntity,
+      IEntityTracker entityTracker)
   {
-    this.dbContext = dbContext;
+    this.queryEntities = queryEntities;
+    this.findEntity = findEntity;
+    this.addEntity = addEntity;
+    this.updateEntity = updateEntity;
+    this.removeEntity = removeEntity;
+    this.entityTracker = entityTracker;
   }
 
-  private readonly ApplicationDbContext dbContext;
+  private readonly QueryEntities<Character> queryEntities;
+  private readonly FindEntity<Character> findEntity;
+  private readonly AddEntity<Character> addEntity;
+  private readonly UpdateEntity<Character> updateEntity;
+  private readonly RemoveEntity<Character> removeEntity;
+  private readonly IEntityTracker entityTracker;
 
   /**
    * <summary>Query <see cref="Character"/>s.</summary>
@@ -31,7 +49,7 @@ public class CharactersController : ODataController
    */
   [HttpGet]
   [ProducesResponseType(typeof(ODataValue<IQueryable<Character>>), Status200OK, "application/json")]
-  public IActionResult Get(ODataQueryOptions<Character> options) => Ok(options.ApplyTo(this.dbContext.Characters));
+  public IActionResult Get(ODataQueryOptions<Character> options) => Ok(options.ApplyTo(this.queryEntities));
 
   /**
    * <summary>Find a <see cref="Character"/>.</summary>
@@ -46,7 +64,7 @@ public class CharactersController : ODataController
   [ProducesResponseType(Status404NotFound)]
   public async Task<IActionResult> Get(Guid key, ODataQueryOptions<Character> options)
   {
-    Character? character = await ((IQueryable<Character>)options.ApplyTo(this.dbContext.Characters)).FirstOrDefaultAsync();
+    Character? character = await ((IQueryable<Character>)options.ApplyTo(this.queryEntities)).FirstOrDefaultAsync(entity => entity.Id == key);
     return character is not null ? Ok(character) : NotFound(new { id = key });
   }
 
@@ -60,12 +78,12 @@ public class CharactersController : ODataController
   [HttpPost]
   [ProducesResponseType(Status201Created)]
   [ProducesResponseType(Status400BadRequest)]
-  public async Task<IActionResult> Post([FromBody] Character character)
+  public async Task<IActionResult> Post([FromBody] Character character, CancellationToken cancellationToken = default)
   {
     if (!ModelState.IsValid) return BadRequest(ModelState);
 
-    this.dbContext.Add(character);
-    await this.dbContext.SaveChangesAsync();
+    await this.addEntity.ExecuteAsync(character, cancellationToken);
+    await this.entityTracker.SaveChangesAsync(cancellationToken);
     return CreatedAtAction(nameof(Get), new { id = character.Id });
   }
 
@@ -81,15 +99,18 @@ public class CharactersController : ODataController
   [ProducesResponseType(typeof(Character), Status200OK, "application/json")]
   [ProducesResponseType(Status400BadRequest)]
   [ProducesResponseType(Status404NotFound)]
-  public async Task<IActionResult> Put(Guid key, [FromBody] Character character)
+  public async Task<IActionResult> Put(
+      Guid key,
+      [FromBody] Character character,
+      CancellationToken cancellationToken = default)
   {
     character.Id = key;
 
     if (!ModelState.IsValid) return BadRequest(ModelState);
 
-    this.dbContext.Update(character);
+    await this.updateEntity.ExecuteAsync(character, cancellationToken);
 
-    try { await this.dbContext.SaveChangesAsync(); }
+    try { await this.entityTracker.SaveChangesAsync(cancellationToken); }
     catch (DbUpdateConcurrencyException) { return NotFound(new { id = key}); }
 
     return Ok(character);
@@ -103,12 +124,12 @@ public class CharactersController : ODataController
    */
   [HttpDelete]
   [ProducesResponseType(Status204NoContent)]
-  public async Task<IActionResult> Delete(Guid key)
+  public async Task<IActionResult> Delete(Guid key, CancellationToken cancellationToken = default)
   {
     Character character = new() { Id = key, };
-    this.dbContext.Remove(character);
+    await this.removeEntity.ExecuteAsync(character, cancellationToken);
 
-    try { await this.dbContext.SaveChangesAsync(); }
+    try { await this.entityTracker.SaveChangesAsync(cancellationToken); }
     catch (DbUpdateConcurrencyException) { }
 
     return NoContent();
