@@ -1,0 +1,13 @@
+@using Microsoft.AspNetCore.Components.QuickGrid
+@page "/characters"
+
+<PageTitle>Characters</PageTitle>
+
+<h1 class="title">Characters</h1>
+
+<QuickGrid ItemsProvider="@charactersProvider" Class="table">
+    <PropertyColumn Property="@(character => character.Id)" Sortable="true" />
+    <PropertyColumn Property="@(character => character.Name)" Sortable="true" />
+</QuickGrid>
+
+

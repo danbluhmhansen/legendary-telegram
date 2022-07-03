@@ -20,6 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors();
 builder.Services.AddLogging();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
@@ -132,6 +133,8 @@ else
         }
     });
     app.UseODataRouteDebug();
+    app.UseCors(corsPolicyBuilder =>
+        corsPolicyBuilder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
 }
 
 app.UseHttpsRedirection();
