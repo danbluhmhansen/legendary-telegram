@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using LegendaryTelegram.Server.Models;
+
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using LegendaryTelegram.Server.Models;
+
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
+
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace LegendaryTelegram.Server.Controllers;
@@ -12,10 +15,12 @@ namespace LegendaryTelegram.Server.Controllers;
 [Route("api")]
 public class ResourceController : Controller
 {
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly UserManager<ApplicationUser> userManager;
 
     public ResourceController(UserManager<ApplicationUser> userManager)
-        => _userManager = userManager;
+    {
+        this.userManager = userManager;
+    }
 
     [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     [HttpGet("message")]
@@ -27,27 +32,27 @@ public class ResourceController : Controller
         if (!User.HasScope("demo_api"))
         {
             return Forbid(
-                authenticationSchemes: OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
-                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                new AuthenticationProperties(new Dictionary<string, string?>
                 {
                     [OpenIddictValidationAspNetCoreConstants.Properties.Scope] = "demo_api",
                     [OpenIddictValidationAspNetCoreConstants.Properties.Error] = Errors.InsufficientScope,
                     [OpenIddictValidationAspNetCoreConstants.Properties.ErrorDescription] =
                         "The 'demo_api' scope is required to perform this action."
-                }));
+                }),
+                OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
         }
 
-        var user = await _userManager.GetUserAsync(User);
+        var user = await this.userManager.FindByIdAsync(User.GetClaim(Claims.Subject));
         if (user is null)
         {
             return Challenge(
-                authenticationSchemes: OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
-                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                new AuthenticationProperties(new Dictionary<string, string?>
                 {
                     [OpenIddictValidationAspNetCoreConstants.Properties.Error] = Errors.InvalidToken,
                     [OpenIddictValidationAspNetCoreConstants.Properties.ErrorDescription] =
                         "The specified access token is bound to an account that no longer exists."
-                }));
+                }),
+                OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
         }
 
         return Content($"{user.UserName} has been successfully authenticated.");

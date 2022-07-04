@@ -96,6 +96,9 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(filePath);
 });
 
+builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
+builder.Services.AddTransient<ISmsSender, AuthMessageSender>();
+
 builder.Services.AddScoped<IRepository<Character>, Repository<Character>>();
 builder.Services.AddScoped<IEntityTracker, EntityTracker>();
 
