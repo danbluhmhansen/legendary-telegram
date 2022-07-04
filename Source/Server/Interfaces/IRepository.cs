@@ -11,7 +11,7 @@ public interface IRepository<TEntity> : IQueryable<TEntity>
 
     TEntity Update(TEntity entity);
     ValueTask<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
-    
+
     TEntity Remove(TEntity entity);
     ValueTask<TEntity> RemoveAsync(TEntity entity, CancellationToken cancellationToken = default);
 }

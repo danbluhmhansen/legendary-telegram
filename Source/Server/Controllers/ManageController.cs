@@ -1,6 +1,6 @@
-﻿using LegendaryTelegram.Server.Models;
+﻿using LegendaryTelegram.Server.Interfaces;
+using LegendaryTelegram.Server.Models;
 using LegendaryTelegram.Server.ViewModels.Manage;
-using LegendaryTelegram.Server.Interfaces;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

@@ -104,11 +104,11 @@ public class AuthorizationController : Controller
                 {
                     return Forbid(
                          new AuthenticationProperties(new Dictionary<string, string?>
-                        {
-                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidRequest,
-                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                         {
+                             [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidRequest,
+                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                                 "The specified identity provider is not valid."
-                        }),
+                         }),
                         OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 }
 
@@ -203,7 +203,7 @@ public class AuthorizationController : Controller
 
             // At this point, no authorization was found in the database and an error must be returned
             // if the client application specified prompt=none in the authorization request.
-            case ConsentTypes.Explicit   when request.HasPrompt(Prompts.None):
+            case ConsentTypes.Explicit when request.HasPrompt(Prompts.None):
             case ConsentTypes.Systematic when request.HasPrompt(Prompts.None):
                 return Forbid(
                     new AuthenticationProperties(new Dictionary<string, string?>
@@ -215,11 +215,12 @@ public class AuthorizationController : Controller
                     OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
             // In every other case, render the consent form.
-            default: return View(new AuthorizeViewModel
-            {
-                ApplicationName = await this.applicationManager.GetLocalizedDisplayNameAsync(application),
-                Scope = request.Scope,
-            });
+            default:
+                return View(new AuthorizeViewModel
+                {
+                    ApplicationName = await this.applicationManager.GetLocalizedDisplayNameAsync(application),
+                    Scope = request.Scope,
+                });
         }
     }
 

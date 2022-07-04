@@ -4,6 +4,6 @@ namespace LegendaryTelegram.Client.Components;
 
 public interface IErrorComponent
 {
-  void ShowError(Error error);
+    void ShowError(Error error);
 }
 

@@ -7,9 +7,9 @@ public class ODataCollectionResponse<T> : IEnumerable<T>
 {
     public ODataCollectionResponse(IEnumerable<T> value, Uri context, int count = 0)
     {
-       this.items = value; 
-       this.Context = context;
-       this.Count = count;
+        this.items = value;
+        this.Context = context;
+        this.Count = count;
     }
 
     [JsonPropertyName("@odata.context")]
