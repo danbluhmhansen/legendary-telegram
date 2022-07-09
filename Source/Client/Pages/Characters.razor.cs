@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Web;
 
 using LegendaryTelegram.Client.Components;
@@ -17,7 +18,7 @@ public partial class Characters : ComponentBase
     private IErrorComponent? ErrorComponent { get; init; }
 
     [Inject] private ILogger<Characters>? Logger { get; init; }
-    [Inject] private HttpClient? HttpClient { get; init; }
+    [Inject] private IHttpClientFactory? HttpClientFactory { get; init; }
     [Inject] private ODataServiceContext? ServiceContext { get; init; }
 
     private GridItemsProvider<Character>? charactersProvider;
@@ -25,7 +26,7 @@ public partial class Characters : ComponentBase
     protected override Task OnInitializedAsync()
     {
         if (ServiceContext is null) throw new ArgumentNullException(nameof(ServiceContext));
-        if (HttpClient is null) throw new ArgumentNullException(nameof(ServiceContext));
+        if (HttpClientFactory is null) throw new ArgumentNullException(nameof(HttpClientFactory));
 
         charactersProvider = async req =>
         {
@@ -41,9 +42,10 @@ public partial class Characters : ComponentBase
                 query.Set("api-version", "1.0");
                 builder.Query = query.ToString();
 
-                var response = await HttpClient.GetFromJsonAsync<ODataCollectionResponse<Character>>(builder.Uri);
-                if (response is not null) characters = response.ToList();
-                if (response?.Count is not null) count = response.Count;
+                using var httpClient = HttpClientFactory.CreateClient("OData");
+                var response = await httpClient.GetFromJsonAsync<ODataCollectionResponse<Character>>(builder.Uri);
+                if (response is not null) characters = response.Value.ToList();
+                if (response?.Count is not null) count = response.Count.Value;
             }
             catch (Exception)
             {

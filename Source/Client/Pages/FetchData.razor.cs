@@ -12,15 +12,18 @@ public partial class FetchData : ComponentBase
     [CascadingParameter(Name = "ErrorComponent")]
     private IErrorComponent? ErrorComponent { get; init; }
 
-    [Inject] private HttpClient? HttpClient { get; init; }
+    [Inject] private IHttpClientFactory? HttpClientFactory { get; init; }
 
     private IQueryable<WeatherForecast>? forecasts;
 
     protected override async Task OnInitializedAsync()
     {
+        if (HttpClientFactory is null) throw new ArgumentNullException(nameof(HttpClientFactory));
+
         try
         {
-            forecasts = (await HttpClient!.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json"))?.AsQueryable();
+            using var httpClient = HttpClientFactory.CreateClient("Local");
+            forecasts = (await httpClient!.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json"))?.AsQueryable();
         }
         catch (Exception)
         {

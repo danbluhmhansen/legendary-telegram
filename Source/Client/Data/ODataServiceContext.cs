@@ -6,7 +6,7 @@ namespace LegendaryTelegram.Client.Data;
 
 public class ODataServiceContext : DataServiceContext
 {
-    public ODataServiceContext() : base(new Uri("https://localhost:7000/api"))
+    public ODataServiceContext(IConfiguration configuration) : base(configuration.GetValue<Uri>("ODataServiceUri"))
     {
         this.HttpRequestTransportMode = HttpRequestTransportMode.HttpClient;
 
