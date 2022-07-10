@@ -10,7 +10,6 @@ const nextConfig = {
       allowFutureImage: true,
     },
   },
-}
+};
 
-export default nextConfig
-
+export default nextConfig;
