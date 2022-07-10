@@ -21,7 +21,7 @@ export default function Layout({
         <div className='navbar-brand'>
           <Link href='https://bulma.io'>
             <a className='navbar-item'>
-              <Image src='https://bulma.io/images/bulma-logo.png' width={122} height={28} />
+              <Image src='https://bulma.io/images/bulma-logo.png' alt='Logo' width={122} height={28} />
             </a>
           </Link>
 
