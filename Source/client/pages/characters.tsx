@@ -9,6 +9,7 @@ import {
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import Layout, { siteTitle } from '../components/layout';
+import { IoCaretDown, IoCaretUp } from 'react-icons/io5';
 
 interface ODataCollectionResponse<T> {
   '@odata.context': string;
@@ -84,8 +85,8 @@ export default function Characters() {
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {{
-                            asc: ' 🔼',
-                            desc: ' 🔽',
+                            asc: (<IoCaretUp />),
+                            desc: (<IoCaretDown />),
                           }[header.column.getIsSorted() as string] ?? null}
                         </div>
                       )}
