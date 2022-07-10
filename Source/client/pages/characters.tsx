@@ -1,4 +1,11 @@
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from '@tanstack/react-table';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import Layout, { siteTitle } from '../components/layout';
@@ -30,10 +37,16 @@ const columns: ColumnDef<Character>[] = [
 export default function Characters() {
   const [characters, setCharacters] = useState<Character[]>();
   const [isLoading, setLoading] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>();
   const table = useReactTable({
-    data: characters,
+    data: characters ?? [],
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   useEffect(() => {
@@ -61,10 +74,21 @@ export default function Characters() {
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id}>
-                      {header.isPlaceholder
-                        ? undefined
-                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    <th key={header.id} colSpan={header.colSpan}>
+                      {header.isPlaceholder ? undefined : (
+                        <div
+                          {...{
+                            className: header.column.getCanSort() ? 'is-clickable select-none' : '',
+                            onClick: header.column.getToggleSortingHandler(),
+                          }}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {{
+                            asc: ' 🔼',
+                            desc: ' 🔽',
+                          }[header.column.getIsSorted() as string] ?? null}
+                        </div>
+                      )}
                     </th>
                   ))}
                 </tr>
