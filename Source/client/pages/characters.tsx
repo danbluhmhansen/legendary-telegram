@@ -31,7 +31,7 @@ export default function Characters() {
   const [characters, setCharacters] = useState<Character[]>();
   const [isLoading, setLoading] = useState(false);
   const table = useReactTable({
-    data: [],
+    data: characters,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -51,6 +51,7 @@ export default function Characters() {
       <Head><title>{siteTitle} - Characters</title></Head>
       <h1 className='title'>Characters</h1>
       {isLoading ? <progress className='progress is-primary' /> :
+      characters &&
       <table className='table'>
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
