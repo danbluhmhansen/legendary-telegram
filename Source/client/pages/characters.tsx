@@ -1,3 +1,4 @@
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import Layout, { siteTitle } from "../components/layout";
@@ -13,16 +14,34 @@ interface Character {
   name: string;
 }
 
+const columns: ColumnDef<Character>[] = [
+  {
+    accessorKey: 'id',
+    cell: info => info.getValue(),
+    footer: info => info.column.id,
+  },
+  {
+    accessorKey: 'name',
+    cell: info => info.getValue(),
+    footer: info => info.column.id,
+  },
+]
+
 export default function Characters() {
-  const [characters, setCharacters] = useState<ODataCollectionResponse<Character> | undefined>();
+  const [characters, setCharacters] = useState<Character[]>();
   const [isLoading, setLoading] = useState(false);
+  const table = useReactTable({
+    data: [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   useEffect(() => {
     setLoading(true);
     fetch('https://localhost:7000/api/characters?api-version=1.0')
       .then((res) => res.json())
       .then((data: ODataCollectionResponse<Character>) => {
-        setCharacters(data);
+        setCharacters(data.value);
         setLoading(false);
       });
   }, []);
@@ -34,16 +53,48 @@ export default function Characters() {
       {isLoading ? <progress className='progress is-primary' /> :
       <table className='table'>
         <thead>
-          <tr>
-            <th>Id</th>
-            <th>Name</th>
-          </tr>
+          {table.getHeaderGroups().map(headerGroup => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map(header => (
+              <th key={header.id}>
+                {header.isPlaceholder
+                  ? undefined
+                  : flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+              </th>
+              ))}
+            </tr>
+          ))}
         </thead>
         <tbody>
-          {characters && characters.value.map(character => {
-            return <tr><td>{character.id}</td><td>{character.name}</td></tr>
-          })}
+          {table.getRowModel().rows.map(row => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map(cell => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
+        <tfoot>
+          {table.getFooterGroups().map(footerGroup => (
+            <tr key={footerGroup.id}>
+              {footerGroup.headers.map(header => (
+                <th key={header.id}>
+                  {header.isPlaceholder
+                    ? undefined
+                    : flexRender(
+                        header.column.columnDef.footer,
+                        header.getContext()
+                      )}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </tfoot>
       </table>}
     </Layout>
   )
