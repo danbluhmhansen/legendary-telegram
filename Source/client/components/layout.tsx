@@ -43,7 +43,7 @@ export default function Layout({
           <div className='navbar-start'>
             <Link href='/'><a className='navbar-item'>Home</a></Link>
 
-            <Link href='/documentation'><a className='navbar-item'>Documentation</a></Link>
+            <Link href='/characters'><a className='navbar-item'>Characters</a></Link>
 
             <div className='navbar-item has-dropdown is-hoverable'>
               <a className='navbar-link'>More</a>
