@@ -68,6 +68,7 @@ export default function Characters() {
   const [isLoading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showPageSizePicker, setShowPageSizePicker] = useState(false);
   const [idSort, setIdSort] = useState(SortDirection.none);
   const [nameSort, setNameSort] = useState(SortDirection.none);
 
@@ -89,7 +90,8 @@ export default function Characters() {
       });
   }, [idSort, nameSort]);
 
-  let pages = Array.from(Array((count ? Math.ceil(count / pageSize) : 1) + 1).keys()).slice(1);
+  const pageCount = count ? Math.ceil(count / pageSize) : 1;
+  const pages = Array.from(Array((pageCount) + 1).keys()).slice(1);
 
   return (
     <Layout>
@@ -122,56 +124,32 @@ export default function Characters() {
                 ))}
               </tbody>
             </table>
-            <div className="columns">
-              <div className="column">
-                <div className="field has-addons">
-                  <p className="control">
-                    <button className="button" disabled={page === 1} onClick={() => setPage(1)}>
-                      First
-                    </button>
-                  </p>
-                  <p className="control">
-                    <button className="button" disabled={page === 1} onClick={() => setPage(page - 1)}>
-                      Prev
-                    </button>
-                  </p>
-                  {pages.map(p => (
-                    <p key={p} className="control">
-                      <button className="button" disabled={page === p} onClick={() => setPage(p)}>
-                        {p}
-                      </button>
-                    </p>
-                  ))}
-                  <p className="control">
-                    <button className="button" disabled={page === pages.at(-1)} onClick={() => setPage(page + 1)}>
-                      Next
-                    </button>
-                  </p>
-                  <p className="control">
-                    <button className="button" disabled={page === pages.at(-1)} onClick={() => setPage(pages.at(-1) ?? 1)}>
-                      Last
-                    </button>
-                  </p>
+            <nav className="pagination" role="navigation">
+              <a className={"pagination-previous" + (page === 1 && " is-disabled")}>Prev</a>
+              <a className={"pagination-next" + (page === pages.at(-1) && " is-disabled")}>Next</a>
+              <ul className="pagination-list">
+                {pages.map(p => (
+                  <li key={p}><a className={"pagination-link" + (page === p && " is-current")}>{p}</a></li>
+                ))}
+              </ul>
+              <div className={"dropdown" + (showPageSizePicker && " is-active")}>
+                <div className="dropdown-trigger">
+                  <button className="button" onClick={() => setShowPageSizePicker(!showPageSizePicker)}>
+                    <span>{pageSize}</span>
+                    <span className="icon is-small">
+                      <i className="ion-iconic icon-chevron-down" />
+                    </span>
+                  </button>
                 </div>
-              </div>
-              <div className="column">
-                <div className="dropdown is-active">
-                  <div className="dropdown-trigger">
-                    <button className="button">
-                      <span>5</span>
-                      <span className="icon is-small"><i className="ion-iconic icon-chevron-down" /></span>
-                    </button>
-                  </div>
-                  <div className="dropdown-menu" role="menu">
-                    <div className="dropdown-content">
-                      <a className="dropdown-item">5</a>
-                      <a className="dropdown-item">10</a>
-                      <a className="dropdown-item">25</a>
-                    </div>
+                <div className="dropdown-menu" id="dropdown-menu" role="menu">
+                  <div className="dropdown-content is-clickable" onClick={() => setShowPageSizePicker(false)}>
+                    <a className={"dropdown-item" + (pageSize === 5 && " is-active")}>5</a>
+                    <a className={"dropdown-item" + (pageSize === 10 && " is-active")}>10</a>
+                    <a className={"dropdown-item" + (pageSize === 25 && " is-active")}>25</a>
                   </div>
                 </div>
               </div>
-            </div>
+            </nav>
           </>
         )
       )}
