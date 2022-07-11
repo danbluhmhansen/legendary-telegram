@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import Layout, { siteTitle } from '../components/layout';
-import { IoCaretDown, IoCaretUp } from 'react-icons/io5';
 
 interface ODataCollectionResponse<T> {
   '@odata.context': string;
@@ -36,9 +35,9 @@ function Cycle(sort:SortDirection) {
 function SortIcon(sort:SortDirection) {
   switch (sort) {
     case SortDirection.asc:
-      return <IoCaretUp />
+      return <span className="icon"><i className="ion-iconic icon-caret-up" /></span>
     case SortDirection.desc:
-      return <IoCaretDown />
+      return <span className="icon"><i className="ion-iconic icon-caret-down" /></span>
     default:
       break;
   }
