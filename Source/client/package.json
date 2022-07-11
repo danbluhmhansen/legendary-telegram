@@ -9,7 +9,6 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "@tanstack/react-table": "^8.2.2",
         "bulma": "^0.9.4",
         "next": "12.2.2",
         "node-sass": "^7.0.1",

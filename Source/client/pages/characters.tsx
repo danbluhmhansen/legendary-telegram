@@ -1,11 +1,3 @@
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  SortingState,
-  useReactTable,
-} from '@tanstack/react-table';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import Layout, { siteTitle } from '../components/layout';
@@ -22,43 +14,67 @@ interface Character {
   name: string;
 }
 
-const columns: ColumnDef<Character>[] = [
-  {
-    accessorKey: 'id',
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  },
-  {
-    accessorKey: 'name',
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  },
-];
+enum SortDirection {
+  none,
+  asc,
+  desc,
+}
+
+function Cycle(sort:SortDirection) {
+  switch (sort) {
+    case SortDirection.none:
+      return SortDirection.asc;
+    case SortDirection.asc:
+      return SortDirection.desc;
+    case SortDirection.desc:
+      return SortDirection.none;
+    default:
+      return SortDirection.asc;
+  }
+}
+
+function SortIcon(sort:SortDirection) {
+  switch (sort) {
+    case SortDirection.asc:
+      return <IoCaretUp />
+    case SortDirection.desc:
+      return <IoCaretDown />
+    default:
+      break;
+  }
+}
+
+function ODataSort(property:string, sort:SortDirection) {
+  switch (sort) {
+    case SortDirection.asc:
+      return `&$orderby=${property} asc`;
+    case SortDirection.desc:
+      return `&$orderby=${property} desc`;
+    default:
+      return '';
+  }
+}
 
 export default function Characters() {
   const [characters, setCharacters] = useState<Character[]>();
   const [isLoading, setLoading] = useState(false);
-  const [sorting, setSorting] = useState<SortingState>();
-  const table = useReactTable({
-    data: characters ?? [],
-    columns,
-    state: {
-      sorting,
-    },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+  const [idSort, setIdSort] = useState(SortDirection.none);
+  const [nameSort, setNameSort] = useState(SortDirection.none);
 
   useEffect(() => {
+    let uri = 'https://localhost:7000/api/characters?api-version=1.0';
+
+    uri += ODataSort('Id', idSort);
+    uri += ODataSort('Name', nameSort);
+
     setLoading(true);
-    fetch('https://localhost:7000/api/characters?api-version=1.0')
+    fetch(uri)
       .then((res) => res.json())
       .then((data: ODataCollectionResponse<Character>) => {
         setCharacters(data.value);
         setLoading(false);
       });
-  }, []);
+  }, [idSort, nameSort]);
 
   return (
     <Layout>
@@ -72,51 +88,19 @@ export default function Characters() {
         characters && (
           <table className="table">
             <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? undefined : (
-                        <div
-                          {...{
-                            className: header.column.getCanSort() ? 'is-clickable select-none' : '',
-                            onClick: header.column.getToggleSortingHandler(),
-                          }}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: (<IoCaretUp />),
-                            desc: (<IoCaretDown />),
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
+              <tr>
+                <th onClick={() => setIdSort(Cycle(idSort))} className="is-clickable">Id{SortIcon(idSort)}</th>
+                <th onClick={() => setNameSort(Cycle(nameSort))} className="is-clickable">Name{SortIcon(nameSort)}</th>
+              </tr>
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                  ))}
+              {characters.map(character => (
+                <tr key={character.id}>
+                  <td>{character.id}</td>
+                  <td>{character.name}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              {table.getFooterGroups().map((footerGroup) => (
-                <tr key={footerGroup.id}>
-                  {footerGroup.headers.map((header) => (
-                    <th key={header.id}>
-                      {header.isPlaceholder
-                        ? undefined
-                        : flexRender(header.column.columnDef.footer, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </tfoot>
           </table>
         )
       )}
