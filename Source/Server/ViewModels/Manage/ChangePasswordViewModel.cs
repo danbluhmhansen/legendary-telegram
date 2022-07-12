@@ -1,6 +1,6 @@
-﻿namespace BlazorApp1.Server.ViewModels.Manage;
+﻿using System.ComponentModel.DataAnnotations;
 
-using System.ComponentModel.DataAnnotations;
+namespace LegendaryTelegram.Server.ViewModels.Manage;
 
 public class ChangePasswordViewModel
 {

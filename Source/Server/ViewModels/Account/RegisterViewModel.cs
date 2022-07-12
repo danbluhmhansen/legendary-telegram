@@ -1,6 +1,6 @@
-﻿namespace BlazorApp1.Server.ViewModels.Account;
+﻿using System.ComponentModel.DataAnnotations;
 
-using System.ComponentModel.DataAnnotations;
+namespace LegendaryTelegram.Server.ViewModels.Account;
 
 public class RegisterViewModel
 {

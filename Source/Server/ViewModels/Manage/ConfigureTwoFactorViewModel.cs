@@ -1,8 +1,6 @@
-﻿namespace BlazorApp1.Server.ViewModels.Manage;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
-using System.Collections.Generic;
-
-using Microsoft.AspNetCore.Mvc.Rendering;
+namespace LegendaryTelegram.Server.ViewModels.Manage;
 
 public class ConfigureTwoFactorViewModel
 {

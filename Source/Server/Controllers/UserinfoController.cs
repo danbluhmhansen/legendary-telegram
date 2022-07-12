@@ -1,10 +1,4 @@
-﻿namespace BlazorApp1.Server.Controllers;
-
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-using BlazorApp1.Server.Entities;
+﻿using LegendaryTelegram.Server.Models;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -16,51 +10,57 @@ using OpenIddict.Server.AspNetCore;
 
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
+namespace LegendaryTelegram.Server.Controllers;
+
+[ApiExplorerSettings(IgnoreApi = true)]
 public class UserinfoController : Controller
 {
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly UserManager<ApplicationUser> userManager;
 
-    public UserinfoController(UserManager<ApplicationUser> userManager) => _userManager = userManager;
+    public UserinfoController(UserManager<ApplicationUser> userManager)
+    {
+        this.userManager = userManager;
+    }
 
     [Authorize(AuthenticationSchemes = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)]
     [HttpGet("~/connect/userinfo"), HttpPost("~/connect/userinfo")]
     [IgnoreAntiforgeryToken, Produces("application/json")]
     public async Task<IActionResult> Userinfo()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await this.userManager.FindByIdAsync(User.GetClaim(Claims.Subject));
         if (user is null)
         {
             return Challenge(
-                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
-                properties: new AuthenticationProperties(new Dictionary<string, string>
+                new AuthenticationProperties(new Dictionary<string, string?>
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidToken,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                         "The specified access token is bound to an account that no longer exists."
-                }));
+                }),
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
         var claims = new Dictionary<string, object>(StringComparer.Ordinal)
         {
             // Note: the "sub" claim is a mandatory claim and must be included in the JSON response.
-            [Claims.Subject] = await _userManager.GetUserIdAsync(user)
+            [Claims.Subject] = await this.userManager.GetUserIdAsync(user)
         };
 
         if (User.HasScope(Scopes.Email))
         {
-            claims[Claims.Email] = await _userManager.GetEmailAsync(user);
-            claims[Claims.EmailVerified] = await _userManager.IsEmailConfirmedAsync(user);
+            claims[Claims.Email] = await this.userManager.GetEmailAsync(user);
+            claims[Claims.EmailVerified] = await this.userManager.IsEmailConfirmedAsync(user);
         }
 
         if (User.HasScope(Scopes.Phone))
         {
-            claims[Claims.PhoneNumber] = await _userManager.GetPhoneNumberAsync(user);
-            claims[Claims.PhoneNumberVerified] = await _userManager.IsPhoneNumberConfirmedAsync(user);
+            claims[Claims.PhoneNumber] = await this.userManager.GetPhoneNumberAsync(user);
+            claims[Claims.PhoneNumberVerified] = await this.userManager.IsPhoneNumberConfirmedAsync(user);
         }
 
         if (User.HasScope(Scopes.Roles))
         {
-            claims[Claims.Role] = await _userManager.GetRolesAsync(user);
+            claims[Claims.Role] = await this.userManager.GetRolesAsync(user);
         }
 
         // Note: the complete list of standard claims supported by the OpenID Connect specification
@@ -69,3 +69,4 @@ public class UserinfoController : Controller
         return Ok(claims);
     }
 }
+

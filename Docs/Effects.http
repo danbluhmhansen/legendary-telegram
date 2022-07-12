@@ -1,5 +1,0 @@
-GET https://localhost:7289/v1/Effects
-
-###
-
-GET https://localhost:7289/v1/Effects/a5e7765d-b863-4d97-8c59-f8a989f2fb2d

@@ -1,4 +1,4 @@
-﻿namespace BlazorApp1.Server.ViewModels.Manage;
+﻿namespace LegendaryTelegram.Server.ViewModels.Manage;
 
 public class RemoveLoginViewModel
 {

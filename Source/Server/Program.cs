@@ -1,135 +1,168 @@
-using AutoMapper;
+using LegendaryTelegram.Server.Commands;
+using LegendaryTelegram.Server.Data;
+using LegendaryTelegram.Server.Helpers;
+using LegendaryTelegram.Server.Interfaces;
+using LegendaryTelegram.Server.Models;
+using LegendaryTelegram.Server.Services;
 
-using BlazorApp1.OData.Model;
-using BlazorApp1.Server.Data;
-using BlazorApp1.Server.Entities;
-
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 
 using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation;
 
-using Quartz;
+using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
 
 builder.Services.AddCors();
+builder.Services.AddLogging();
 
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(
-    (DbContextOptionsBuilder options) => options
-        .UseNpgsql(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddDbContext<ApplicationDbContext>(options => options
+    .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    .UseOpenIddict());
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddQuartz((IServiceCollectionQuartzConfigurator options) =>
-{
-    options.UseMicrosoftDependencyInjectionJobFactory();
-    options.UseSimpleTypeLoader();
-    options.UseInMemoryStore();
-});
-
-builder.Services.AddOpenIddict((OpenIddictBuilder openIddictBuilder) =>
-{
-    openIddictBuilder.AddCore((OpenIddictCoreBuilder openIddictCoreBuilder) =>
+builder.Services.AddOpenIddict()
+    .AddCore(options => options.UseEntityFrameworkCore().UseDbContext<ApplicationDbContext>())
+    .AddServer(options =>
     {
-        openIddictCoreBuilder
-            .UseEntityFrameworkCore()
-            .UseDbContext<ApplicationDbContext>();
+        options.UseAspNetCore();
 
-        openIddictCoreBuilder.UseQuartz();
-    });
-
-    openIddictBuilder.AddServer()
-        .AddDevelopmentEncryptionCertificate()
-        .AddDevelopmentSigningCertificate()
-        .UseAspNetCore();
-
-    openIddictBuilder.AddValidation((OpenIddictValidationBuilder options) =>
+        if (builder.Environment.IsDevelopment())
+            options.AddDevelopmentEncryptionCertificate().AddDevelopmentSigningCertificate();
+    })
+    .AddValidation(options =>
     {
         options.UseLocalServer();
         options.UseAspNetCore();
     });
-});
 
-builder.Services.AddAutoMapper((IMapperConfigurationExpression expression) =>
-{
-    expression.CreateMap<BlazorApp1.Server.Entities.Character, BlazorApp1.Shared.Models.v1.Character>().ReverseMap();
-    expression.CreateMap<BlazorApp1.Server.Entities.Feature, BlazorApp1.Shared.Models.v1.Feature>().ReverseMap();
-    expression.CreateMap<BlazorApp1.Server.Entities.CoreEffect, BlazorApp1.Shared.Models.v1.CoreEffect>().ReverseMap();
-    expression.CreateMap<BlazorApp1.Server.Entities.Effect, BlazorApp1.Shared.Models.v1.Effect>().ReverseMap();
-    expression.CreateMap<BlazorApp1.Server.Entities.CharacterFeature, BlazorApp1.Shared.Models.v1.CharacterFeature>()
-        .ReverseMap();
-});
+builder.Services.AddControllersWithViews()
+    .AddOData(options =>
+    {
+        options.EnableQueryFeatures();
+        options.RouteOptions.EnableKeyInParenthesis = false;
+        options.RouteOptions.EnableNonParenthesisForEmptyParameterFunction = true;
+        options.RouteOptions.EnablePropertyNameCaseInsensitive = true;
+        options.RouteOptions.EnableQualifiedOperationCall = false;
+        options.RouteOptions.EnableUnqualifiedOperationCall = true;
+    });
 
 builder.Services
-    .AddControllersWithViews()
-    .AddOData((ODataOptions options, IServiceProvider serviceProvider) =>
+    .AddApiVersioning(options =>
     {
-        IODataModelProvider odataModelProvider = serviceProvider.GetRequiredService<IODataModelProvider>();
-        options.AddRouteComponents("v1", odataModelProvider.GetEdmModel("1"), (IServiceCollection services) =>
-            services.AddSingleton<ODataBatchHandler>(new DefaultODataBatchHandler()));
+        options.ReportApiVersions = true;
+    })
+    .AddOData(options => options.AddRouteComponents("api"))
+    .AddODataApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true;
     });
-builder.Services.AddRazorPages();
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomOperationIds(apiDesc => $"{apiDesc.HttpMethod} {apiDesc.RelativePath}");
 
-builder.Services.AddODataModel();
+    OpenApiSecurityScheme securityScheme = new()
+    {
+        Type = SecuritySchemeType.OpenIdConnect,
+        OpenIdConnectUrl = new Uri("/.well-known/openid-configuration", UriKind.Relative),
+    };
+    options.AddSecurityDefinition("openid", securityScheme);
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        [securityScheme] = Array.Empty<string>(),
+    });
+
+    options.OperationFilter<SecurityRequirementsOperationFilter>(true, "openid");
+    options.OperationFilter<SwaggerDefaultValues>();
+
+    var fileName = typeof(Program).Assembly.GetName().Name + ".xml";
+    var filePath = Path.Combine(AppContext.BaseDirectory, fileName);
+    options.IncludeXmlComments(filePath);
+});
+
+builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
+builder.Services.AddTransient<ISmsSender, AuthMessageSender>();
+
+builder.Services.AddScoped<IRepository<Character>, Repository<Character>>();
+builder.Services.AddScoped<IEntityTracker, EntityTracker>();
+
+builder.Services.AddScoped<QueryEntities<Character>>();
+builder.Services.AddScoped<FindEntity<Character>>();
+builder.Services.AddScoped<AddEntity<Character>>();
+builder.Services.AddScoped<UpdateEntity<Character>>();
+builder.Services.AddScoped<RemoveEntity<Character>>();
+
+if (builder.Environment.IsDevelopment())
+    builder.Services.AddHostedService<SeedWorker>();
 
 builder.Services.Configure<IdentityOptions>(builder.Configuration.GetSection(nameof(IdentityOptions)));
-builder.Services.Configure<ODataOptions>(builder.Configuration.GetSection(nameof(ODataOptions)));
 builder.Services.Configure<OpenIddictServerOptions>(builder.Configuration.GetSection(nameof(OpenIddictServerOptions)));
 builder.Services.Configure<OpenIddictServerAspNetCoreOptions>(
     builder.Configuration.GetSection(nameof(OpenIddictServerAspNetCoreOptions)));
 builder.Services.Configure<OpenIddictValidationOptions>(
     builder.Configuration.GetSection(nameof(OpenIddictValidationOptions)));
 
-WebApplication app = builder.Build();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseMigrationsEndPoint();
-    app.UseWebAssemblyDebugging();
-
-    app.UseCors((CorsPolicyBuilder corsPolicyBuilder) =>
-        corsPolicyBuilder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
-
-    app.UseODataRouteDebug();
-}
-else
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days.
     // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.OAuthClientId("sample-client");
+        options.OAuthClientSecret("3e52ce50-5ac2-4885-94d8-2c8a6c1c902a");
+        options.OAuthUsePkce();
+
+        // build a swagger endpoint for each discovered API version
+        foreach (var description in app.DescribeApiVersions())
+        {
+            var url = $"/swagger/{description.GroupName}/swagger.json";
+            var name = description.GroupName.ToUpperInvariant();
+            options.SwaggerEndpoint(url, name);
+        }
+    });
+    app.UseODataRouteDebug();
+    app.UseCors(corsPolicyBuilder =>
+        corsPolicyBuilder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+}
 
 app.UseHttpsRedirection();
 
-app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
-app.UseODataQueryRequest();
-app.UseODataBatching();
+app.UseStatusCodePagesWithReExecute("/error");
 
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRazorPages();
 app.MapControllers();
-
-app.UseEndpoints((IEndpointRouteBuilder options) =>
-    options.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}"));
+app.MapDefaultControllerRoute();
 
 app.Run();

@@ -1,18 +1,15 @@
-﻿namespace BlazorApp1.Server.Helpers;
-
-using System;
-
-using Microsoft.AspNetCore.Mvc.Abstractions;
+﻿using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
-using Microsoft.AspNetCore.Routing;
+
+namespace LegendaryTelegram.Server.Helpers;
 
 public sealed class FormValueRequiredAttribute : ActionMethodSelectorAttribute
 {
-    private readonly string name;
+    private readonly string _name;
 
     public FormValueRequiredAttribute(string name)
     {
-        this.name = name;
+        _name = name;
     }
 
     public override bool IsValidForRequest(RouteContext routeContext, ActionDescriptor action)
@@ -26,11 +23,15 @@ public sealed class FormValueRequiredAttribute : ActionMethodSelectorAttribute
         }
 
         if (string.IsNullOrEmpty(routeContext.HttpContext.Request.ContentType))
+        {
             return false;
+        }
 
         if (!routeContext.HttpContext.Request.ContentType.StartsWith("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase))
+        {
             return false;
+        }
 
-        return !string.IsNullOrEmpty(routeContext.HttpContext.Request.Form[this.name]);
+        return !string.IsNullOrEmpty(routeContext.HttpContext.Request.Form[_name]);
     }
 }

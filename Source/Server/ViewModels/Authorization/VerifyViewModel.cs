@@ -1,11 +1,11 @@
-﻿namespace BlazorApp1.Server.ViewModels.Authorization;
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 using OpenIddict.Abstractions;
+
+namespace LegendaryTelegram.Server.ViewModels.Authorization;
 
 public class VerifyViewModel
 {

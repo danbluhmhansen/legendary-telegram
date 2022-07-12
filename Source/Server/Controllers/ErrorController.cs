@@ -1,10 +1,11 @@
-﻿namespace BlazorApp1.Server.Controllers;
-
-using BlazorApp1.Server.ViewModels.Shared;
+﻿using LegendaryTelegram.Server.ViewModels.Shared;
 
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 
+namespace LegendaryTelegram.Server;
+
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ErrorController : Controller
 {
     [HttpGet, HttpPost, Route("~/error")]
@@ -12,14 +13,10 @@ public class ErrorController : Controller
     {
         // If the error was not caused by an invalid
         // OIDC request, display a generic error page.
-        OpenIddict.Abstractions.OpenIddictResponse? response = this.HttpContext.GetOpenIddictServerResponse();
-        if (response is null)
-            return View(new ErrorViewModel());
+        var response = HttpContext.GetOpenIddictServerResponse();
+        if (response is null) return View(new ErrorViewModel());
 
-        return View(new ErrorViewModel
-        {
-            Error = response.Error,
-            ErrorDescription = response.ErrorDescription
-        });
+        return View(new ErrorViewModel { Error = response.Error, ErrorDescription = response.ErrorDescription });
     }
 }
+

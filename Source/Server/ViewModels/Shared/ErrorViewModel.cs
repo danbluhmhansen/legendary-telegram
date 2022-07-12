@@ -1,12 +1,12 @@
-﻿namespace BlazorApp1.Server.ViewModels.Shared;
+﻿using System.ComponentModel.DataAnnotations;
 
-using System.ComponentModel.DataAnnotations;
+namespace LegendaryTelegram.Server.ViewModels.Shared;
 
 public class ErrorViewModel
 {
     [Display(Name = "Error")]
-    public string? Error { get; set; }
+    public string Error { get; set; }
 
     [Display(Name = "Description")]
-    public string? ErrorDescription { get; set; }
+    public string ErrorDescription { get; set; }
 }

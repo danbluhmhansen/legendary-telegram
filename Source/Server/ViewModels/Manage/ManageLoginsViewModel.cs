@@ -1,9 +1,7 @@
-﻿namespace BlazorApp1.Server.ViewModels.Manage;
-
-using System.Collections.Generic;
-
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+
+namespace LegendaryTelegram.Server.ViewModels.Manage;
 
 public class ManageLoginsViewModel
 {
