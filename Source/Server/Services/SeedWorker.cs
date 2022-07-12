@@ -2,8 +2,12 @@ namespace LegendaryTelegram.Server.Services;
 
 using System.Threading;
 using System.Threading.Tasks;
+using Bogus;
+using LegendaryTelegram.Server.Commands;
+using LegendaryTelegram.Server.Interfaces;
+using LegendaryTelegram.Server.Models;
 
-using LegendaryTelegram.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 using OpenIddict.Abstractions;
 
@@ -49,6 +53,23 @@ public class SeedWorker : IHostedService
                 Requirements = { Requirements.Features.ProofKeyForCodeExchange },
                 Type = ClientTypes.Confidential,
             }, cancellationToken);
+        }
+
+        var queryCharacters = scope.ServiceProvider.GetRequiredService<QueryEntities<Character>>();
+        if (!await queryCharacters.AnyAsync())
+        {
+            var addCharacter = scope.ServiceProvider.GetRequiredService<AddEntity<Character>>();
+            var entityTracker = scope.ServiceProvider.GetService<IEntityTracker>();
+
+           foreach (var character in new Faker<Character>()
+                .RuleFor(character => character.Name, f => f.Name.FullName())
+                .Generate(100))
+           {
+              await addCharacter.ExecuteAsync(character);
+           } 
+
+            if (entityTracker is not null)
+                await entityTracker.SaveChangesAsync();
         }
     }
 
