@@ -68,7 +68,6 @@ export default function Characters() {
   const [isLoading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [showPageSizePicker, setShowPageSizePicker] = useState(false);
   const [idSort, setIdSort] = useState(SortDirection.none);
   const [nameSort, setNameSort] = useState(SortDirection.none);
 
@@ -91,7 +90,7 @@ export default function Characters() {
   }, [idSort, nameSort]);
 
   const pageCount = count ? Math.ceil(count / pageSize) : 1;
-  const pages = Array.from(Array((pageCount) + 1).keys()).slice(1);
+  const pages = Array.from(Array(pageCount + 1).keys()).slice(1);
 
   return (
     <Layout>
@@ -125,29 +124,35 @@ export default function Characters() {
               </tbody>
             </table>
             <nav className="pagination" role="navigation">
-              <a className={"pagination-previous" + (page === 1 && " is-disabled")}>Prev</a>
-              <a className={"pagination-next" + (page === pages.at(-1) && " is-disabled")}>Next</a>
+              <button
+                className='pagination-previous'
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+              >
+                Prev
+              </button>
+              <button
+                className='pagination-next'
+                disabled={page === pages.at(-1)}
+                onClick={() => setPage(page + 1)}
+              >
+                Next
+              </button>
               <ul className="pagination-list">
-                {pages.map(p => (
-                  <li key={p}><a className={"pagination-link" + (page === p && " is-current")}>{p}</a></li>
+                {pages.map((p) => (
+                  <li key={p}>
+                    <a className={'pagination-link' + (page === p && ' is-current')} onClick={() => setPage(p)}>
+                      {p}
+                    </a>
+                  </li>
                 ))}
               </ul>
-              <div className={"dropdown" + (showPageSizePicker && " is-active")}>
-                <div className="dropdown-trigger">
-                  <button className="button" onClick={() => setShowPageSizePicker(!showPageSizePicker)}>
-                    <span>{pageSize}</span>
-                    <span className="icon is-small">
-                      <i className="ion-iconic icon-chevron-down" />
-                    </span>
-                  </button>
-                </div>
-                <div className="dropdown-menu" id="dropdown-menu" role="menu">
-                  <div className="dropdown-content is-clickable" onClick={() => setShowPageSizePicker(false)}>
-                    <a className={"dropdown-item" + (pageSize === 5 && " is-active")}>5</a>
-                    <a className={"dropdown-item" + (pageSize === 10 && " is-active")}>10</a>
-                    <a className={"dropdown-item" + (pageSize === 25 && " is-active")}>25</a>
-                  </div>
-                </div>
+              <div className='select'>
+                <select value={pageSize} onChange={event => setPageSize(+event.target.value)}>
+                  <option>5</option>
+                  <option>10</option>
+                  <option>25</option>
+                </select>
               </div>
             </nav>
           </>
