@@ -62,6 +62,13 @@ function ODataSort(property: string, sort: SortDirection) {
   }
 }
 
+function GetCurrentPages(items: number[], selected: number) {
+  if (items.length < 6) return items;
+  else if (selected < 4) return items.slice(0, 5);
+  else if (selected > items.at(-4)) return items.slice(-5);
+  else return items.slice(selected - 3, selected + 2);
+}
+
 export default function Characters() {
   const [characters, setCharacters] = useState<Character[]>();
   const [count, setCount] = useState<number | undefined>();
@@ -79,7 +86,7 @@ export default function Characters() {
     uri += ODataSort('Id', idSort);
     uri += ODataSort('Name', nameSort);
 
-    setLoading(true);
+    if (!characters) setLoading(true);
     fetch(uri)
       .then((res) => res.json())
       .then((data: ODataCollectionResponse<Character>) => {
@@ -87,10 +94,10 @@ export default function Characters() {
         setCount(data['@odata.count']);
         setLoading(false);
       });
-  }, [idSort, nameSort]);
+  }, [page, pageSize, idSort, nameSort]);
 
   const pageCount = count ? Math.ceil(count / pageSize) : 1;
-  const pages = Array.from(Array(pageCount + 1).keys()).slice(1);
+  const pages = GetCurrentPages(Array.from(Array(pageCount + 1).keys()).slice(1), page);
 
   return (
     <Layout>
@@ -124,31 +131,23 @@ export default function Characters() {
               </tbody>
             </table>
             <nav className="pagination" role="navigation">
-              <button
-                className='pagination-previous'
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
+              <button className="pagination-previous" disabled={page === 1} onClick={() => setPage(page - 1)}>
                 Prev
               </button>
-              <button
-                className='pagination-next'
-                disabled={page === pages.at(-1)}
-                onClick={() => setPage(page + 1)}
-              >
+              <button className="pagination-next" disabled={page === pages.at(-1)} onClick={() => setPage(page + 1)}>
                 Next
               </button>
               <ul className="pagination-list">
                 {pages.map((p) => (
                   <li key={p}>
-                    <a className={'pagination-link' + (page === p && ' is-current')} onClick={() => setPage(p)}>
+                    <a className={'pagination-link' + (page === p ? ' is-current' : '')} onClick={() => setPage(p)}>
                       {p}
                     </a>
                   </li>
                 ))}
               </ul>
-              <div className='select'>
-                <select value={pageSize} onChange={event => setPageSize(+event.target.value)}>
+              <div className="select">
+                <select value={pageSize} onChange={(event) => setPageSize(+event.target.value)}>
                   <option>5</option>
                   <option>10</option>
                   <option>25</option>
