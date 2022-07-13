@@ -21,7 +21,7 @@ export default function Characters() {
 
   useEffect(() => {
     const uri = queryOData(
-      'https://localhost:7000/api/characters?api-version=1.0',
+      process.env.serverUrl + 'api/characters?api-version=1.0',
       true,
       (page - 1) * pageSize,
       pageSize,

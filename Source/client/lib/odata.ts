@@ -29,8 +29,8 @@ export function queryOData(
   sort?: [prop: string, direction: SortDirection][]
 ) {
   if (count) route += '&$count=true';
-  if (skip) route += `&$skip=${skip}`;
-  if (top) route += `&$top=${top}`;
+  if (skip) route += '&$skip=' + skip;
+  if (top) route += '&$top=' + top;
 
   sort?.forEach(([prop, direction]) => (route += ODataSort(prop, direction)));
 

@@ -10,6 +10,9 @@ const nextConfig = {
       allowFutureImage: true,
     },
   },
+  env: {
+    serverUrl: 'https://localhost:7000/'
+  },
 };
 
 export default nextConfig;
