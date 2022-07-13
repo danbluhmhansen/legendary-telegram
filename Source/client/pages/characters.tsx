@@ -12,7 +12,7 @@ interface Character {
 
 export default function Characters() {
   const [characters, setCharacters] = useState<Character[]>();
-  const [count, setCount] = useState<number | undefined>();
+  const [count, setCount] = useState<number>();
   const [isLoading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -20,16 +20,10 @@ export default function Characters() {
   const [nameSort, setNameSort] = useState(SortDirection.none);
 
   useEffect(() => {
-    const uri = queryOData(
-      process.env.serverUrl + 'api/characters?api-version=1.0',
-      true,
-      (page - 1) * pageSize,
-      pageSize,
-      [
-        ['Id', idSort],
-        ['Name', nameSort],
-      ]
-    );
+    const uri = queryOData('characters', '1.0', true, (page - 1) * pageSize, pageSize, [
+      ['Id', idSort],
+      ['Name', nameSort],
+    ]);
 
     if (!characters) setLoading(true);
     fetch(uri)

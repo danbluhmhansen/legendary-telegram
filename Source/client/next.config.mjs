@@ -11,7 +11,7 @@ const nextConfig = {
     },
   },
   env: {
-    serverUrl: 'https://localhost:7000/'
+    serverUrl: 'https://localhost:7000/',
   },
 };
 

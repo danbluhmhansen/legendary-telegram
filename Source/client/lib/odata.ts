@@ -23,11 +23,14 @@ function ODataSort(property: string, sort: SortDirection) {
 
 export function queryOData(
   route: string,
+  version: string,
   count: boolean,
   skip?: number,
   top?: number,
   sort?: [prop: string, direction: SortDirection][]
 ) {
+  route = `${process.env.serverUrl}api/${route}?api-version=${version}`;
+
   if (count) route += '&$count=true';
   if (skip) route += '&$skip=' + skip;
   if (top) route += '&$top=' + top;
