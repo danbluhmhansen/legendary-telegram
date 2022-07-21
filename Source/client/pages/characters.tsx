@@ -49,8 +49,8 @@ export default function Characters() {
             <table className="table">
               <thead>
                 <tr>
-                  <SortTh sort={idSort} setSort={setIdSort} />
-                  <SortTh sort={nameSort} setSort={setNameSort} />
+                  <SortTh sort={idSort} setSort={setIdSort}>Id</SortTh>
+                  <SortTh sort={nameSort} setSort={setNameSort}>Name</SortTh>
                 </tr>
               </thead>
               <tbody>

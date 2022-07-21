@@ -34,15 +34,17 @@ function SortIcon(sort: SortDirection) {
 }
 
 export default function SortTh({
+  children,
   sort,
   setSort,
 }: {
+  children: React.ReactNode;
   sort: SortDirection;
   setSort: Dispatch<SetStateAction<SortDirection>>;
 }) {
   return (
     <th onClick={() => setSort(Cycle(sort))} className="is-clickable">
-      Id{SortIcon(sort)}
+      {children}{SortIcon(sort)}
     </th>
   );
 }
