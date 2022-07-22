@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
+import EditTd from '../components/editable-table-cell';
 import Layout, { siteTitle } from '../components/layout';
 import Pagination from '../components/pagination';
 import SortTh from '../components/sortable-table-header';
@@ -10,14 +11,17 @@ interface Character {
   name: string;
 }
 
-export default function Characters() {
-  const [characters, setCharacters] = useState<Character[]>();
-  const [count, setCount] = useState<number>();
+export default function CharactersPage() {
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [count, setCount] = useState(0);
   const [isLoading, setLoading] = useState(false);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
   const [idSort, setIdSort] = useState(SortDirection.none);
   const [nameSort, setNameSort] = useState(SortDirection.none);
+
 
   useEffect(() => {
     const uri = queryOData('characters', '1.0', true, (page - 1) * pageSize, pageSize, [
@@ -30,7 +34,7 @@ export default function Characters() {
       .then((res) => res.json())
       .then((data: ODataCollectionResponse<Character>) => {
         setCharacters(data.value);
-        setCount(data['@odata.count']);
+        setCount(data['@odata.count'] ?? 0);
         setLoading(false);
       });
   }, [page, pageSize, idSort, nameSort]);
@@ -49,15 +53,23 @@ export default function Characters() {
             <table className="table">
               <thead>
                 <tr>
-                  <SortTh sort={idSort} setSort={setIdSort}>Id</SortTh>
-                  <SortTh sort={nameSort} setSort={setNameSort}>Name</SortTh>
+                  <SortTh sort={idSort} setSort={setIdSort}>
+                    Id
+                  </SortTh>
+                  <SortTh sort={nameSort} setSort={setNameSort}>
+                    Name
+                  </SortTh>
                 </tr>
               </thead>
               <tbody>
-                {characters.map((character) => (
+                {characters?.map((character) => (
                   <tr key={character.id}>
                     <td>{character.id}</td>
-                    <td>{character.name}</td>
+                    <EditTd value={character.name} onEdit={(value) => {
+                      character.name = value;
+                      setCharacters([...characters]);
+                      console.log(characters);
+                    }} />
                   </tr>
                 ))}
               </tbody>

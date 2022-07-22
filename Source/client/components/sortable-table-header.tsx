@@ -44,7 +44,8 @@ export default function SortTh({
 }) {
   return (
     <th onClick={() => setSort(Cycle(sort))} className="is-clickable">
-      {children}{SortIcon(sort)}
+      {children}
+      {SortIcon(sort)}
     </th>
   );
 }
