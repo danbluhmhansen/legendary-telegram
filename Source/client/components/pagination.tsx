@@ -1,5 +1,3 @@
-import { Dispatch, SetStateAction } from 'react';
-
 function GetCurrentPages(items: number[], selected: number) {
   if (items.length < 6) return items;
   else if (selected < 4) return items.slice(0, 5);
@@ -16,9 +14,9 @@ export default function Pagination({
 }: {
   count?: number;
   page: number;
-  setPage: Dispatch<SetStateAction<number>>;
+  setPage: (page: number) => void;
   pageSize: number;
-  setPageSize: Dispatch<SetStateAction<number>>;
+  setPageSize: (pageSize: number) => void;
 }) {
   const pageCount = count ? Math.ceil(count / pageSize) : 1;
   const pages = GetCurrentPages(Array.from(Array(pageCount + 1).keys()).slice(1), page);
