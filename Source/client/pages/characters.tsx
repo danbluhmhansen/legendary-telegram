@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import EditTd from '../components/editable-table-cell';
 import Layout, { siteTitle } from '../components/layout';
-import Pagination from '../components/pagination';
+import Pagination, { PaginationContext } from '../components/pagination';
 import SortTh from '../components/sortable-table-header';
 import { ODataCollectionResponse, queryOData, SortDirection } from '../lib/odata';
 
@@ -13,11 +13,11 @@ interface Character {
 
 export default function CharactersPage() {
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [count, setCount] = useState(0);
   const [isLoading, setLoading] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pagination, setPagination] = useState({ count: 0, page: 1, pageSize: 10 });
+
+  const { page, pageSize } = pagination;
 
   const [idSort, setIdSort] = useState(SortDirection.none);
   const [nameSort, setNameSort] = useState(SortDirection.none);
@@ -33,7 +33,7 @@ export default function CharactersPage() {
       .then((res) => res.json())
       .then((data: ODataCollectionResponse<Character>) => {
         setCharacters(data.value);
-        setCount(data['@odata.count'] ?? 0);
+        setPagination({ ...pagination, count: data['@odata.count'] ?? 0 });
         setLoading(false);
       });
   }, [page, pageSize, idSort, nameSort]);
@@ -76,7 +76,9 @@ export default function CharactersPage() {
                 ))}
               </tbody>
             </table>
-            <Pagination count={count} page={page} setPage={setPage} pageSize={pageSize} setPageSize={setPageSize} />
+            <PaginationContext.Provider value={{ pagination, setPagination }}>
+              <Pagination />
+            </PaginationContext.Provider>
           </>
         )
       )}
