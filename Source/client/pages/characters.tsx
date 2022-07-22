@@ -22,7 +22,6 @@ export default function CharactersPage() {
   const [idSort, setIdSort] = useState(SortDirection.none);
   const [nameSort, setNameSort] = useState(SortDirection.none);
 
-
   useEffect(() => {
     const uri = queryOData('characters', '1.0', true, (page - 1) * pageSize, pageSize, [
       ['Id', idSort],
@@ -65,11 +64,14 @@ export default function CharactersPage() {
                 {characters?.map((character) => (
                   <tr key={character.id}>
                     <td>{character.id}</td>
-                    <EditTd value={character.name} onEdit={(value) => {
-                      character.name = value;
-                      setCharacters([...characters]);
-                      console.log(characters);
-                    }} />
+                    <EditTd
+                      value={character.name}
+                      onEdit={(value) => {
+                        if (typeof value !== 'string') return;
+                        character.name = value;
+                        setCharacters([...characters]);
+                      }}
+                    />
                   </tr>
                 ))}
               </tbody>
